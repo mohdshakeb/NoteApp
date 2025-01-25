@@ -8,7 +8,8 @@ export function Auth({ onLogin }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin
+          redirectTo: `${window.location.origin}/`,
+          scopes: 'email profile',
         }
       });
       if (error) throw error;
