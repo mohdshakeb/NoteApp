@@ -8,11 +8,13 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('App mounted');
     // Test Supabase connection
     testSupabaseConnection();
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -21,11 +23,14 @@ function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', _event, session);
       setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  console.log('Current render state:', { user, loading });
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;

@@ -62,13 +62,19 @@ export async function saveNote(db, userId, note) {
 export async function getNotes(db, userId) {
   try {
     // Get notes from Supabase
+    console.log('Fetching notes for user:', userId);
     const { data: supabaseNotes, error } = await supabase
       .from('notes')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase fetch error:', error);
+      throw error;
+    }
+
+    console.log('Fetched notes:', supabaseNotes);
 
     const formattedNotes = supabaseNotes.map(note => ({
       id: note.id,
@@ -78,6 +84,8 @@ export async function getNotes(db, userId) {
       createdAt: new Date(note.created_at),
       updatedAt: new Date(note.updated_at)
     }));
+
+    console.log('Formatted notes:', formattedNotes);
 
     // Update IndexedDB with Supabase data
     const tx = db.transaction('notes', 'readwrite');

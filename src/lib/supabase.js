@@ -9,11 +9,14 @@ export const supabase = createClient(supabaseUrl, supabaseKey)
 // Add this function to test the connection
 export async function testSupabaseConnection() {
   try {
+    console.log('Testing Supabase connection...');
+    console.log('Using URL:', process.env.REACT_APP_SUPABASE_URL);
     const { data, error } = await supabase.from('notes').select('count').single();
     if (error) {
       console.error('Supabase connection error:', error);
       return false;
     }
+    console.log('Connection test result:', data);
     console.log('Supabase connected successfully');
     return true;
   } catch (error) {

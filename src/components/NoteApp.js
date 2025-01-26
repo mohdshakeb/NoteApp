@@ -31,7 +31,11 @@ const NoteApp = ({ user }) => {
   // Load notes when DB is ready
   useEffect(() => {
     if (db && user) {
-      getNotes(db, user.id).then(setNotes);
+      console.log('Loading notes for user:', user.id);
+      getNotes(db, user.id).then(fetchedNotes => {
+        console.log('Loaded notes:', fetchedNotes);
+        setNotes(fetchedNotes || []);
+      });
     }
   }, [db, user]);
 
@@ -77,7 +81,8 @@ const NoteApp = ({ user }) => {
     if (currentNote.trim() && db && user) {
       const newNote = {
         content: currentNote,
-        timestamp: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         userId: user.id
       };
       
@@ -132,17 +137,17 @@ const NoteApp = ({ user }) => {
       
       {/* Notes List */}
       <ScrollArea className="mt-6 h-[500px]">
-        {notes.map((note, index) => (
+        {notes?.map((note, index) => note && (
           <div key={note.id}>
             <Card className="border-0 shadow-none">
               <div className="text-foreground">
                 {note.content}
                 <div className="text-xs text-muted-foreground mt-2">
-                  {note.timestamp.toLocaleString()}
+                  {note.createdAt ? new Date(note.createdAt).toLocaleString() : 'Just now'}
                 </div>
               </div>
             </Card>
-            {index < notes.length - 1 && (
+            {index < (notes?.length || 0) - 1 && (
               <div className="my-4 border-t border-border/40" />
             )}
           </div>
