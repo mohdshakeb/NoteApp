@@ -34,13 +34,15 @@ const NoteApp = ({ user }) => {
     }
   }, [user]);
 
-  // Load notes when DB is ready
+  // Get notes from Supabase and sync with IndexedDB
   useEffect(() => {
     if (db && user) {
-      console.log('Loading notes for user:', user.id);
       getNotes(db, user.id).then(fetchedNotes => {
-        console.log('Loaded notes:', fetchedNotes);
-        setNotes(fetchedNotes || []);
+        // Sort notes by creation date (newest first)
+        const sortedNotes = fetchedNotes.sort((a, b) => 
+          new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setNotes(sortedNotes || []);
         // Extract all tags from existing notes
         const tags = new Set();
         fetchedNotes?.forEach(note => {
@@ -94,19 +96,42 @@ const NoteApp = ({ user }) => {
     setAllTags(usedTags);
   };
 
-  // Update handleKeyDown to track cursor position
+  // Helper function for formatting dates
+  const formatDate = (date) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    date = new Date(date);
+
+    if (date >= today) {
+      return 'Today';
+    } else if (date >= yesterday) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short'
+      });
+    }
+  };
+
+  // Handle input changes
   const handleKeyDown = (e) => {
     const text = e.target.innerText;
     setCurrentNote(text);
-    setShowSaveButton(false);
-    debouncedShowSaveButton();
+    if (!showSaveButton && text.trim()) {
+      setShowSaveButton(true);
+    } else if (showSaveButton && !text.trim()) {
+      setShowSaveButton(false);
+    }
 
-    // Check for tag suggestions
+    // Get cursor position from selection
     const selection = window.getSelection();
     const range = selection.getRangeAt(0);
-    const cursorOffset = range.startOffset;
-   
-    // Get cursor position
+    
+    // Get cursor position for suggestion box
     if (range.getClientRects().length > 0) {
       const rect = range.getClientRects()[0];
       setCursorPosition({
@@ -115,13 +140,19 @@ const NoteApp = ({ user }) => {
       });
     }
 
-    const lastHash = text.lastIndexOf('#', cursorOffset);
-    if (lastHash !== -1 && lastHash < cursorOffset) {
-      const partialTag = text.substring(lastHash + 1, cursorOffset).toLowerCase();
+    // Find the word being typed
+    const currentWord = getCurrentWord(range.startContainer, range.startOffset);
+    console.log('Current word:', currentWord);
+
+    if (currentWord.startsWith('#')) {
+      const partialTag = currentWord.slice(1).toLowerCase();
+      console.log('Partial tag:', partialTag);
+
       if (partialTag) {
         const suggestions = Array.from(allTags)
           .filter(tag => tag.toLowerCase().startsWith(partialTag))
           .slice(0, 5);
+        console.log('Suggestions:', suggestions);
         setTagSuggestions(suggestions);
         setShowSuggestions(suggestions.length > 0);
       } else {
@@ -130,6 +161,25 @@ const NoteApp = ({ user }) => {
     } else {
       setShowSuggestions(false);
     }
+  };
+
+  // Helper function to get the current word being typed
+  const getCurrentWord = (node, offset) => {
+    if (node.nodeType !== Node.TEXT_NODE) return '';
+    
+    const text = node.textContent;
+    let start = offset;
+    let end = offset;
+    
+    // Find word boundaries
+    while (start > 0 && !/\s/.test(text[start - 1])) {
+      start--;
+    }
+    while (end < text.length && !/\s/.test(text[end])) {
+      end++;
+    }
+    
+    return text.slice(start, end);
   };
 
   const handleSignOut = async () => {
@@ -158,39 +208,20 @@ const NoteApp = ({ user }) => {
     setShowSaveButton(true);
   };
 
-  // Update saveNoteToDb to handle edits
+  // Update saveNoteToDb to maintain sort order
   const saveNoteToDb = async () => {
     if (currentNote.trim() && db && user) {
       const tags = extractTags(currentNote);
+      const newNote = {
+        content: currentNote,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: user.id,
+        tags
+      };
       
-      if (editingNote) {
-        // Update existing note
-        const updatedNote = {
-          ...editingNote,
-          content: currentNote,
-          tags,
-          updatedAt: new Date()
-        };
-        
-        await updateNote(db, user.id, updatedNote);
-        setNotes(prev => prev.map(note => 
-          note.id === editingNote.id ? updatedNote : note
-        ));
-        setEditingNote(null);
-      } else {
-        // Create new note
-        const newNote = {
-          content: currentNote,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          userId: user.id,
-          tags
-        };
-        
-        const id = await saveNote(db, user.id, newNote);
-        setNotes(prev => [...prev, { ...newNote, id }]);
-      }
-
+      const id = await saveNote(db, user.id, newNote);
+      setNotes(prev => [{ ...newNote, id }, ...prev]); // Add new note at the beginning
       setCurrentNote('');
       setShowSaveButton(false);
       
@@ -224,47 +255,59 @@ const NoteApp = ({ user }) => {
 
   // Handle tag suggestion selection
   const handleTagSelect = (tag) => {
-    try {
-      const selection = window.getSelection();
-      const range = selection.getRangeAt(0);
-      const text = editableRef.current.innerText;
-      const cursorPosition = range.startOffset;
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const textNode = range.startContainer;
+
+    if (textNode.nodeType === Node.TEXT_NODE) {
+      const text = textNode.textContent;
+      const offset = range.startOffset;
       
-      // Find the last # before cursor
-      const beforeCursor = text.substring(0, cursorPosition);
-      const lastHash = beforeCursor.lastIndexOf('#');
+      // Add debug logging
+      console.log('Text content:', text);
+      console.log('Current offset:', offset);
       
-      if (lastHash !== -1) {
-        // Split text and create new content
-        const beforeTag = text.substring(0, lastHash);
-        const afterTag = text.substring(cursorPosition);
-        const newText = `${beforeTag}#${tag} ${afterTag}`;
-        
-        // Update content
-        editableRef.current.innerText = newText;
-        setCurrentNote(newText);
-        
-        // Set cursor after the inserted tag
-        const textNode = editableRef.current.firstChild;
-        if (textNode) {
-          const newPosition = lastHash + tag.length + 2; // +2 for # and space
-          const newRange = document.createRange();
-          newRange.setStart(textNode, Math.min(newPosition, textNode.length));
-          newRange.collapse(true);
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-        }
+      // Find the start and end of the current tag
+      let start = offset;
+      while (start > 0 && text[start - 1] !== '#') {
+        start--;
+      }
+      let end = offset;
+      while (end < text.length && !/\s/.test(text[end])) {
+        end++;
       }
       
-      setShowSuggestions(false);
-    } catch (error) {
-      console.error('Error handling tag selection:', error);
-      // Fallback: just insert the tag at the end
-      const currentText = editableRef.current.innerText;
-      editableRef.current.innerText = `${currentText} #${tag} `;
+      console.log('Tag boundaries - start:', start, 'end:', end);
+      
+      // Replace the partial tag with the selected tag
+      const beforeTag = text.substring(0, Math.max(0, start - 1)); // -1 to include the #
+      const afterTag = text.substring(end);
+      const newText = `${beforeTag}#${tag} ${afterTag}`;
+      
+      console.log('New text:', newText);
+      
+      // Update the text node
+      textNode.textContent = newText;
+      
+      // Set cursor position after the tag
+      const newPosition = Math.min(
+        start + tag.length + 2, // +2 for # and space
+        newText.length
+      );
+      
+      console.log('New cursor position:', newPosition, 'Text length:', newText.length);
+      
+      const newRange = document.createRange();
+      newRange.setStart(textNode, newPosition);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+      
+      // Update note content
       setCurrentNote(editableRef.current.innerText);
-      setShowSuggestions(false);
     }
+    
+    setShowSuggestions(false);
   };
 
   return (
@@ -290,7 +333,7 @@ const NoteApp = ({ user }) => {
           ref={editableRef}
           contentEditable 
           onInput={handleKeyDown}
-          className="min-h-[40px] focus:outline-none text-lg [&>span]:text-primary"
+          className="min-h-[40px] focus:outline-none text-lg [&>span]:text-primary overflow-x-hidden"
           role="textbox"
           aria-label="Note input"
           data-placeholder="What are you thinking... (use # for tags)"
@@ -323,7 +366,7 @@ const NoteApp = ({ user }) => {
         )}
         
         {showSaveButton && (
-          <div className="mt-2">
+          <div className="mt-3">
             <Button onClick={saveNoteToDb}>
               Save Note
             </Button>
@@ -333,7 +376,7 @@ const NoteApp = ({ user }) => {
       
       {/* Tags filter */}
       {getRecentTags().length > 0 && (
-        <div className="flex gap-2 my-4 flex-wrap">
+        <div className="flex gap-2 mt-6 mb-4 flex-wrap">
           {getRecentTags().map(tag => (
             <Button
               key={tag}
@@ -341,18 +384,25 @@ const NoteApp = ({ user }) => {
               size="sm"
               onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
             >
-              #{tag}
+              {tag}
             </Button>
           ))}
         </div>
       )}
 
       {/* Notes List */}
-      <ScrollArea className="mt-6 h-[500px]">
+      <ScrollArea 
+        className="mt-6 h-[500px] overflow-hidden no-scrollbar" 
+        scrollHideDelay={0}
+        style={{ scrollbarWidth: 'none' }}
+      >
         {filteredNotes.map((note, index) => (
           <div key={note.id}>
             <Card className="border-0 shadow-none">
               <div className="text-foreground">
+                <div className="text-xs text-muted-foreground mb-2">
+                  {formatDate(note.createdAt)}
+                </div>
                 <div className="[&>span]:text-primary">
                   {note.content.split(' ').map((word, i) => 
                     word.startsWith('#') ? 
@@ -362,10 +412,7 @@ const NoteApp = ({ user }) => {
                       word + ' '
                   )}
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="text-xs text-muted-foreground">
-                    {note.createdAt ? new Date(note.createdAt).toLocaleString() : 'Just now'}
-                  </div>
+                <div className="flex items-center mt-2">
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEditNote(note)}

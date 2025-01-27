@@ -81,3 +81,23 @@
   cursor: text;
   display: block;
 }
+
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  -webkit-overflow-scrolling: touch;
+}
+
+.no-scrollbar > div::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar > div {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
