@@ -3,7 +3,7 @@ import { debounce } from 'lodash';
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
-import { initDB, saveNote, getNotes, syncPendingNotes } from '../lib/db';
+import { initDB, saveNote, getNotes, syncPendingNotes, deleteNote, updateNote } from '../lib/db';
 import { supabase } from '../lib/supabase';
 
 const NoteApp = ({ user }) => {
@@ -12,7 +12,13 @@ const NoteApp = ({ user }) => {
   const [currentNote, setCurrentNote] = useState('');
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [db, setDb] = useState(null);
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [allTags, setAllTags] = useState(new Set());
+  const [editingNote, setEditingNote] = useState(null);
+  const [tagSuggestions, setTagSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const editableRef = useRef(null);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 
   // Auto-focus on mount
   useEffect(() => {
@@ -35,6 +41,12 @@ const NoteApp = ({ user }) => {
       getNotes(db, user.id).then(fetchedNotes => {
         console.log('Loaded notes:', fetchedNotes);
         setNotes(fetchedNotes || []);
+        // Extract all tags from existing notes
+        const tags = new Set();
+        fetchedNotes?.forEach(note => {
+          note.tags?.forEach(tag => tags.add(tag));
+        });
+        setAllTags(tags);
       });
     }
   }, [db, user]);
@@ -66,30 +78,128 @@ const NoteApp = ({ user }) => {
     return () => window.removeEventListener('online', handleOnline);
   }, [db, user]);
 
-  // Event handlers
+  // Extract tags from text
+  const extractTags = (text) => {
+    const tagRegex = /#[\w\u0590-\u05ff]+/g;
+    // Remove duplicates and get unique tags
+    return [...new Set((text.match(tagRegex) || []).map(tag => tag.slice(1)))];
+  };
+
+  // Clean up unused tags
+  const cleanupUnusedTags = (currentNotes) => {
+    const usedTags = new Set();
+    currentNotes.forEach(note => {
+      note.tags?.forEach(tag => usedTags.add(tag));
+    });
+    setAllTags(usedTags);
+  };
+
+  // Update handleKeyDown to track cursor position
   const handleKeyDown = (e) => {
-    setCurrentNote(e.target.innerText);
+    const text = e.target.innerText;
+    setCurrentNote(text);
     setShowSaveButton(false);
     debouncedShowSaveButton();
+
+    // Check for tag suggestions
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const cursorOffset = range.startOffset;
+   
+    // Get cursor position
+    if (range.getClientRects().length > 0) {
+      const rect = range.getClientRects()[0];
+      setCursorPosition({
+        x: rect.left,
+        y: rect.top
+      });
+    }
+
+    const lastHash = text.lastIndexOf('#', cursorOffset);
+    if (lastHash !== -1 && lastHash < cursorOffset) {
+      const partialTag = text.substring(lastHash + 1, cursorOffset).toLowerCase();
+      if (partialTag) {
+        const suggestions = Array.from(allTags)
+          .filter(tag => tag.toLowerCase().startsWith(partialTag))
+          .slice(0, 5);
+        setTagSuggestions(suggestions);
+        setShowSuggestions(suggestions.length > 0);
+      } else {
+        setShowSuggestions(false);
+      }
+    } else {
+      setShowSuggestions(false);
+    }
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
 
+  // Handle note deletion
+  const handleDeleteNote = async (noteId) => {
+    try {
+      await deleteNote(db, user.id, noteId);
+      const updatedNotes = notes.filter(note => note.id !== noteId);
+      setNotes(updatedNotes);
+      // Cleanup unused tags
+      cleanupUnusedTags(updatedNotes);
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    }
+  };
+
+  // Handle note edit
+  const handleEditNote = (note) => {
+    setEditingNote(note);
+    editableRef.current.innerText = note.content;
+    editableRef.current.focus();
+    setCurrentNote(note.content);
+    setShowSaveButton(true);
+  };
+
+  // Update saveNoteToDb to handle edits
   const saveNoteToDb = async () => {
     if (currentNote.trim() && db && user) {
-      const newNote = {
-        content: currentNote,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userId: user.id
-      };
+      const tags = extractTags(currentNote);
       
-      const id = await saveNote(db, user.id, newNote);
-      setNotes(prev => [...prev, { ...newNote, id }]);
+      if (editingNote) {
+        // Update existing note
+        const updatedNote = {
+          ...editingNote,
+          content: currentNote,
+          tags,
+          updatedAt: new Date()
+        };
+        
+        await updateNote(db, user.id, updatedNote);
+        setNotes(prev => prev.map(note => 
+          note.id === editingNote.id ? updatedNote : note
+        ));
+        setEditingNote(null);
+      } else {
+        // Create new note
+        const newNote = {
+          content: currentNote,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          userId: user.id,
+          tags
+        };
+        
+        const id = await saveNote(db, user.id, newNote);
+        setNotes(prev => [...prev, { ...newNote, id }]);
+      }
+
       setCurrentNote('');
       setShowSaveButton(false);
+      
+      // Update all tags
+      setAllTags(prev => {
+        const newTags = new Set(prev);
+        tags.forEach(tag => newTags.add(tag));
+        return newTags;
+      });
       
       if (editableRef.current) {
         editableRef.current.innerText = '';
@@ -98,8 +208,68 @@ const NoteApp = ({ user }) => {
     }
   };
 
+  // Get recent tags
+  const getRecentTags = () => {
+    const tagsArray = Array.from(allTags);
+    console.log('All tags:', tagsArray);
+    const recentTags = tagsArray.slice(-5).reverse();
+    console.log('Recent tags:', recentTags);
+    return recentTags;
+  };
+
+  // Filter notes by tag
+  const filteredNotes = selectedTag
+    ? notes.filter(note => note.tags?.includes(selectedTag))
+    : notes;
+
+  // Handle tag suggestion selection
+  const handleTagSelect = (tag) => {
+    try {
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0);
+      const text = editableRef.current.innerText;
+      const cursorPosition = range.startOffset;
+      
+      // Find the last # before cursor
+      const beforeCursor = text.substring(0, cursorPosition);
+      const lastHash = beforeCursor.lastIndexOf('#');
+      
+      if (lastHash !== -1) {
+        // Split text and create new content
+        const beforeTag = text.substring(0, lastHash);
+        const afterTag = text.substring(cursorPosition);
+        const newText = `${beforeTag}#${tag} ${afterTag}`;
+        
+        // Update content
+        editableRef.current.innerText = newText;
+        setCurrentNote(newText);
+        
+        // Set cursor after the inserted tag
+        const textNode = editableRef.current.firstChild;
+        if (textNode) {
+          const newPosition = lastHash + tag.length + 2; // +2 for # and space
+          const newRange = document.createRange();
+          newRange.setStart(textNode, Math.min(newPosition, textNode.length));
+          newRange.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
+      
+      setShowSuggestions(false);
+    } catch (error) {
+      console.error('Error handling tag selection:', error);
+      // Fallback: just insert the tag at the end
+      const currentText = editableRef.current.innerText;
+      editableRef.current.innerText = `${currentText} #${tag} `;
+      setCurrentNote(editableRef.current.innerText);
+      setShowSuggestions(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-2xl">
+      {/* User info and sign out */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-4">
           <img 
@@ -109,22 +279,48 @@ const NoteApp = ({ user }) => {
           />
           <span>{user.user_metadata?.full_name}</span>
         </div>
-        <Button variant="outline" onClick={handleSignOut}>
+        <Button variant="outline" onClick={() => supabase.auth.signOut()}>
           Sign Out
         </Button>
       </div>
 
       {/* Note Input Card */}
-      <Card className="border-0 shadow-none">
+      <Card className="border-0 shadow-none relative">
         <div 
           ref={editableRef}
           contentEditable 
           onInput={handleKeyDown}
-          className="min-h-[40px] focus:outline-none text-lg"
+          className="min-h-[40px] focus:outline-none text-lg [&>span]:text-primary"
           role="textbox"
           aria-label="Note input"
-          data-placeholder="What are you thinking..."
+          data-placeholder="What are you thinking... (use # for tags)"
         />
+        
+        {/* Tag Suggestions */}
+        {showSuggestions && (
+          <div 
+            className="fixed bg-background border rounded-md shadow-lg p-0.5 z-50"
+            style={{
+              top: Math.max(cursorPosition.y - 5, 10) + 'px', // Just slightly above cursor
+              left: cursorPosition.x + 'px',
+              transform: 'translateY(-100%)', // Move up by its own height
+              maxHeight: '100px',
+              width: 'fit-content',
+              minWidth: '60px',
+              fontSize: '0.75rem'
+            }}
+          >
+            {tagSuggestions.map(tag => (
+              <button
+                key={tag}
+                onClick={() => handleTagSelect(tag)}
+                className="block w-full text-left px-1.5 py-0.5 hover:bg-accent rounded text-xs whitespace-nowrap hover:text-accent-foreground"
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
+        )}
         
         {showSaveButton && (
           <div className="mt-2">
@@ -135,19 +331,59 @@ const NoteApp = ({ user }) => {
         )}
       </Card>
       
+      {/* Tags filter */}
+      {getRecentTags().length > 0 && (
+        <div className="flex gap-2 my-4 flex-wrap">
+          {getRecentTags().map(tag => (
+            <Button
+              key={tag}
+              variant={selectedTag === tag ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+            >
+              #{tag}
+            </Button>
+          ))}
+        </div>
+      )}
+
       {/* Notes List */}
       <ScrollArea className="mt-6 h-[500px]">
-        {notes?.map((note, index) => note && (
+        {filteredNotes.map((note, index) => (
           <div key={note.id}>
             <Card className="border-0 shadow-none">
               <div className="text-foreground">
-                {note.content}
-                <div className="text-xs text-muted-foreground mt-2">
-                  {note.createdAt ? new Date(note.createdAt).toLocaleString() : 'Just now'}
+                <div className="[&>span]:text-primary">
+                  {note.content.split(' ').map((word, i) => 
+                    word.startsWith('#') ? 
+                      <span key={i} className="cursor-pointer" onClick={() => setSelectedTag(word.slice(1))}>
+                        {word}
+                      </span> : 
+                      word + ' '
+                  )}
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="text-xs text-muted-foreground">
+                    {note.createdAt ? new Date(note.createdAt).toLocaleString() : 'Just now'}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditNote(note)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteNote(note.id)}
+                      className="text-xs text-destructive hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </Card>
-            {index < (notes?.length || 0) - 1 && (
+            {index < filteredNotes.length - 1 && (
               <div className="my-4 border-t border-border/40" />
             )}
           </div>
@@ -155,6 +391,15 @@ const NoteApp = ({ user }) => {
       </ScrollArea>
     </div>
   );
+};
+
+// Add global function for tag clicking
+window.selectTag = (tag) => {
+  // Remove # from tag
+  const tagName = tag.slice(1);
+  // Find the React component instance
+  const event = new CustomEvent('selectTag', { detail: tagName });
+  window.dispatchEvent(event);
 };
 
 export default NoteApp;

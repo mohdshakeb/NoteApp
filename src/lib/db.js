@@ -24,6 +24,7 @@ export async function saveNote(db, userId, note) {
       .insert([{
         content: note.content,
         user_id: userId,
+        tags: note.tags,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }])
@@ -81,6 +82,7 @@ export async function getNotes(db, userId) {
       content: note.content,
       userId: note.user_id,
       syncStatus: 'synced',
+      tags: note.tags || [],
       createdAt: new Date(note.created_at),
       updatedAt: new Date(note.updated_at)
     }));
@@ -129,5 +131,57 @@ export async function syncPendingNotes(db, userId) {
     } catch (error) {
       console.error('Error syncing note:', error);
     }
+  }
+}
+
+// Delete note from both Supabase and IndexedDB
+export async function deleteNote(db, userId, noteId) {
+  try {
+    // Delete from Supabase
+    const { error } = await supabase
+      .from('notes')
+      .delete()
+      .eq('id', noteId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    // Delete from IndexedDB
+    await db.delete('notes', noteId);
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    throw error;
+  }
+}
+
+// Update note in both Supabase and IndexedDB
+export async function updateNote(db, userId, note) {
+  try {
+    // Update in Supabase
+    const { error } = await supabase
+      .from('notes')
+      .update({
+        content: note.content,
+        tags: note.tags,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', note.id)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    // Update in IndexedDB
+    await db.put('notes', {
+      ...note,
+      syncStatus: 'synced',
+      updatedAt: new Date()
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error updating note:', error);
+    throw error;
   }
 } 
