@@ -5,8 +5,11 @@ import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { initDB, saveNote, getNotes, syncPendingNotes, deleteNote, updateNote } from '../lib/db';
 import { supabase } from '../lib/supabase';
+import { useTheme } from "./ThemeProvider";
+import { Moon, Sun } from "lucide-react";
 
 const NoteApp = ({ user }) => {
+  const { theme, setTheme } = useTheme();
   // State management
   const [notes, setNotes] = useState([]);
   const [currentNote, setCurrentNote] = useState('');
@@ -37,6 +40,13 @@ const NoteApp = ({ user }) => {
   // Get notes from Supabase and sync with IndexedDB
   useEffect(() => {
     if (db && user) {
+      if (user.isGuest) {
+        // Load notes from localStorage for guest users
+        const guestNotes = JSON.parse(localStorage.getItem('guestNotes') || '[]');
+        setNotes(guestNotes);
+        return;
+      }
+      
       getNotes(db, user.id).then(fetchedNotes => {
         // Sort notes by creation date (newest first)
         const sortedNotes = fetchedNotes.sort((a, b) => 
@@ -183,6 +193,12 @@ const NoteApp = ({ user }) => {
   };
 
   const handleSignOut = async () => {
+    if (user.isGuest) {
+      localStorage.removeItem('guestUser');
+      localStorage.removeItem('guestNotes');
+      window.location.reload();
+      return;
+    }
     await supabase.auth.signOut();
   };
 
@@ -220,8 +236,18 @@ const NoteApp = ({ user }) => {
         tags
       };
       
-      const id = await saveNote(db, user.id, newNote);
-      setNotes(prev => [{ ...newNote, id }, ...prev]); // Add new note at the beginning
+      if (user.isGuest) {
+        // Save to localStorage for guest users
+        const guestNotes = JSON.parse(localStorage.getItem('guestNotes') || '[]');
+        const noteWithId = { ...newNote, id: Date.now() };
+        guestNotes.unshift(noteWithId);
+        localStorage.setItem('guestNotes', JSON.stringify(guestNotes));
+        setNotes([noteWithId, ...notes]);
+      } else {
+        const id = await saveNote(db, user.id, newNote);
+        setNotes(prev => [{ ...newNote, id }, ...prev]);
+      }
+      
       setCurrentNote('');
       setShowSaveButton(false);
       
@@ -310,132 +336,189 @@ const NoteApp = ({ user }) => {
     setShowSuggestions(false);
   };
 
-  return (
-    <div className="container mx-auto p-6 max-w-2xl">
-      {/* User info and sign out */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <img 
-            src={user.user_metadata?.avatar_url} 
-            alt={user.user_metadata?.full_name}
-            className="w-8 h-8 rounded-full"
-          />
-          <span>{user.user_metadata?.full_name}</span>
-        </div>
-        <Button variant="outline" onClick={() => supabase.auth.signOut()}>
-          Sign Out
-        </Button>
-      </div>
-
-      {/* Note Input Card */}
-      <Card className="border-0 shadow-none relative">
-        <div 
-          ref={editableRef}
-          contentEditable 
-          onInput={handleKeyDown}
-          className="min-h-[40px] focus:outline-none text-lg [&>span]:text-primary overflow-x-hidden"
-          role="textbox"
-          aria-label="Note input"
-          data-placeholder="What are you thinking... (use # for tags)"
+  const UserAvatar = ({ user }) => {
+    if (user.user_metadata.avatar_url) {
+      return (
+        <img 
+          src={user.user_metadata.avatar_url} 
+          alt={user.user_metadata.full_name}
+          className="w-8 h-8 rounded-full"
         />
-        
-        {/* Tag Suggestions */}
-        {showSuggestions && (
+      );
+    }
+    
+    return (
+      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-medium">
+        {user.user_metadata.initials}
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+      <div className="container mx-auto p-8 max-w-2xl bg-background rounded-lg shadow-sm">
+        {/* User info and sign out */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <UserAvatar user={user} />
+            <div className="flex flex-col">
+              <span className="font-medium">{user.user_metadata?.full_name}</span>
+              <span className="text-xs text-muted-foreground">
+                {notes.length} note{notes.length !== 1 ? 's' : ''} saved
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="h-8 w-8"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </Button>
+            <Button variant="outline" onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          </div>
+        </div>
+
+        {/* Note Input Card */}
+        <Card className="border-0 shadow-none relative mb-8 pb-16">
           <div 
-            className="fixed bg-background border rounded-md shadow-lg p-0.5 z-50"
-            style={{
-              top: Math.max(cursorPosition.y - 5, 10) + 'px', // Just slightly above cursor
-              left: cursorPosition.x + 'px',
-              transform: 'translateY(-100%)', // Move up by its own height
-              maxHeight: '100px',
-              width: 'fit-content',
-              minWidth: '60px',
-              fontSize: '0.75rem'
-            }}
-          >
-            {tagSuggestions.map(tag => (
-              <button
+            ref={editableRef}
+            contentEditable 
+            onInput={handleKeyDown}
+            className="min-h-[40px] focus:outline-none text-lg overflow-x-hidden"
+            role="textbox"
+            aria-label="Note input"
+            data-placeholder="What are you thinking... (use # for tags)"
+          />
+          
+          {/* Tag Suggestions */}
+          {showSuggestions && (
+            <div 
+              className="fixed bg-background border rounded-md shadow-lg p-0.5 z-50"
+              style={{
+                top: Math.max(cursorPosition.y - 5, 10) + 'px',
+                left: cursorPosition.x + 'px',
+                transform: 'translateY(-100%)',
+                maxHeight: '100px',
+                width: 'fit-content',
+                minWidth: '60px',
+                fontSize: '0.75rem'
+              }}
+            >
+              {tagSuggestions.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => handleTagSelect(tag)}
+                  className="block w-full text-left px-1.5 py-0.5 hover:bg-accent rounded text-xs whitespace-nowrap hover:text-accent-foreground"
+                >
+                  #{tag}
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {showSaveButton && (
+            <div className="absolute bottom-0 left-0">
+              <Button onClick={saveNoteToDb}>
+                Save Note
+              </Button>
+            </div>
+          )}
+        </Card>
+        
+        {/* Tags filter */}
+        {getRecentTags().length > 0 && (
+          <div className="flex gap-2 mb-6 flex-wrap">
+            {getRecentTags().map(tag => (
+              <Button
                 key={tag}
-                onClick={() => handleTagSelect(tag)}
-                className="block w-full text-left px-1.5 py-0.5 hover:bg-accent rounded text-xs whitespace-nowrap hover:text-accent-foreground"
+                variant={selectedTag === tag ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
               >
-                #{tag}
-              </button>
+                {tag}
+              </Button>
             ))}
           </div>
         )}
-        
-        {showSaveButton && (
-          <div className="mt-3">
-            <Button onClick={saveNoteToDb}>
-              Save Note
-            </Button>
-          </div>
-        )}
-      </Card>
-      
-      {/* Tags filter */}
-      {getRecentTags().length > 0 && (
-        <div className="flex gap-2 mt-6 mb-4 flex-wrap">
-          {getRecentTags().map(tag => (
-            <Button
-              key={tag}
-              variant={selectedTag === tag ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-            >
-              {tag}
-            </Button>
-          ))}
-        </div>
-      )}
 
-      {/* Notes List */}
-      <ScrollArea 
-        className="mt-6 h-[500px] overflow-hidden no-scrollbar" 
-        scrollHideDelay={0}
-        style={{ scrollbarWidth: 'none' }}
-      >
-        {filteredNotes.map((note, index) => (
-          <div key={note.id}>
-            <Card className="border-0 shadow-none">
-              <div className="text-foreground">
-                <div className="text-xs text-muted-foreground mb-2">
-                  {formatDate(note.createdAt)}
-                </div>
-                <div className="[&>span]:text-primary">
-                  {note.content.split(' ').map((word, i) => 
-                    word.startsWith('#') ? 
-                      <span key={i} className="cursor-pointer" onClick={() => setSelectedTag(word.slice(1))}>
-                        {word}
-                      </span> : 
-                      word + ' '
-                  )}
-                </div>
-                <div className="flex items-center mt-2">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEditNote(note)}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteNote(note.id)}
-                      className="text-xs text-destructive hover:underline"
-                    >
-                      Delete
-                    </button>
+        {/* Notes List */}
+        <ScrollArea 
+          className="h-[500px] overflow-hidden no-scrollbar"
+          scrollHideDelay={0}
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {filteredNotes.map((note, index) => (
+            <div key={note.id}>
+              <Card className="border-0 shadow-none">
+                <div className="text-foreground">
+                  <div className="text-xs text-muted-foreground mb-2">
+                    {formatDate(note.createdAt)}
+                  </div>
+                  <div>
+                    {note.content.split(' ').map((word, i) => 
+                      word.startsWith('#') ? (
+                        <span 
+                          key={i} 
+                          className="cursor-pointer text-muted-foreground hover:text-primary border-b border-dashed border-muted-foreground mx-1" 
+                          onClick={() => setSelectedTag(word.slice(1))}
+                        >
+                          {word.slice(1)}
+                        </span>
+                      ) : (
+                        word + ' '
+                      )
+                    )}
+                  </div>
+                  <div className="flex items-center mt-2">
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => handleEditNote(note)}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="text-xs text-destructive hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-            {index < filteredNotes.length - 1 && (
-              <div className="my-4 border-t border-border/40" />
-            )}
+              </Card>
+              {index < filteredNotes.length - 1 && (
+                <div className="my-4 border-t border-border/40" />
+              )}
+            </div>
+          ))}
+        </ScrollArea>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-auto border-t bg-background flex justify-center">
+        <div className="w-full max-w-2xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 5H21V19H3V5Z" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 9L12 13L17 9" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="font-semibold">Notes</span>
           </div>
-        ))}
-      </ScrollArea>
+          <div className="text-sm text-muted-foreground">
+            Made with ❤️
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
