@@ -6,7 +6,9 @@ import { ScrollArea } from "./ui/scroll-area";
 import { initDB, saveNote, getNotes, syncPendingNotes, deleteNote, updateNote } from '../lib/db';
 import { supabase } from '../lib/supabase';
 import { useTheme } from "./ThemeProvider";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, ChevronRight, ChevronLeft, Search, LogOut } from "lucide-react";
+import BottomSheet from './BottomSheet';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuSeparator } from "./ui/dropdown";
 
 const NoteApp = ({ user }) => {
   const { theme, setTheme } = useTheme();
@@ -22,6 +24,8 @@ const NoteApp = ({ user }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const editableRef = useRef(null);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Auto-focus on mount
   useEffect(() => {
@@ -131,6 +135,12 @@ const NoteApp = ({ user }) => {
   const handleKeyDown = (e) => {
     const text = e.target.innerText;
     setCurrentNote(text);
+    // Show/hide placeholder based on content
+    if (!text.trim()) {
+      e.target.removeAttribute('data-content');
+    } else {
+      e.target.setAttribute('data-content', 'true');
+    }
     if (!showSaveButton && text.trim()) {
       setShowSaveButton(true);
     } else if (showSaveButton && !text.trim()) {
@@ -237,7 +247,6 @@ const NoteApp = ({ user }) => {
       };
       
       if (user.isGuest) {
-        // Save to localStorage for guest users
         const guestNotes = JSON.parse(localStorage.getItem('guestNotes') || '[]');
         const noteWithId = { ...newNote, id: Date.now() };
         guestNotes.unshift(noteWithId);
@@ -250,6 +259,14 @@ const NoteApp = ({ user }) => {
       
       setCurrentNote('');
       setShowSaveButton(false);
+      // Open right panel after saving
+      if (!showSidebar) {
+        setShowSidebar(true);
+      }
+      // Reset input placeholder
+      if (editableRef.current) {
+        editableRef.current.removeAttribute('data-content');
+      }
       
       // Update all tags
       setAllTags(prev => {
@@ -274,10 +291,11 @@ const NoteApp = ({ user }) => {
     return recentTags;
   };
 
-  // Filter notes by tag
-  const filteredNotes = selectedTag
-    ? notes.filter(note => note.tags?.includes(selectedTag))
-    : notes;
+  const filteredNotes = notes.filter(note => {
+    const matchesSearch = note.content.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTag = !selectedTag || (note.tags && note.tags.includes(selectedTag));
+    return matchesSearch && matchesTag;
+  });
 
   // Handle tag suggestion selection
   const handleTagSelect = (tag) => {
@@ -356,157 +374,212 @@ const NoteApp = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-      <div className="container mx-auto p-8 max-w-2xl bg-background rounded-lg shadow-sm">
-        {/* User info and sign out */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <UserAvatar user={user} />
-            <div className="flex flex-col">
-              <span className="font-medium">{user.user_metadata?.full_name}</span>
-              <span className="text-xs text-muted-foreground">
-                {notes.length} note{notes.length !== 1 ? 's' : ''} saved
-              </span>
+      {/* Full-width Header */}
+      <div className="w-full bg-background border-b">
+        <div className="max-w-[1600px] mx-auto px-8 py-4">
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 5H21V19H3V5Z" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 9L12 13L17 9" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="font-semibold">Notes</span>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-8 w-8"
-            >
-              {theme === 'dark' ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
-            </Button>
-            <Button variant="outline" onClick={handleSignOut}>
-              Sign Out
-            </Button>
-          </div>
-        </div>
-
-        {/* Note Input Card */}
-        <Card className="border-0 shadow-none relative mb-8 pb-16">
-          <div 
-            ref={editableRef}
-            contentEditable 
-            onInput={handleKeyDown}
-            className="min-h-[40px] focus:outline-none text-lg overflow-x-hidden"
-            role="textbox"
-            aria-label="Note input"
-            data-placeholder="What are you thinking... (use # for tags)"
-          />
-          
-          {/* Tag Suggestions */}
-          {showSuggestions && (
-            <div 
-              className="fixed bg-background border rounded-md shadow-lg p-0.5 z-50"
-              style={{
-                top: Math.max(cursorPosition.y - 5, 10) + 'px',
-                left: cursorPosition.x + 'px',
-                transform: 'translateY(-100%)',
-                maxHeight: '100px',
-                width: 'fit-content',
-                minWidth: '60px',
-                fontSize: '0.75rem'
-              }}
-            >
-              {tagSuggestions.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => handleTagSelect(tag)}
-                  className="block w-full text-left px-1.5 py-0.5 hover:bg-accent rounded text-xs whitespace-nowrap hover:text-accent-foreground"
-                >
-                  #{tag}
-                </button>
-              ))}
-            </div>
-          )}
-          
-          {showSaveButton && (
-            <div className="absolute bottom-0 left-0">
-              <Button onClick={saveNoteToDb}>
-                Save Note
-              </Button>
-            </div>
-          )}
-        </Card>
-        
-        {/* Tags filter */}
-        {getRecentTags().length > 0 && (
-          <div className="flex gap-2 mb-6 flex-wrap">
-            {getRecentTags().map(tag => (
+            <div className="flex items-center gap-2">
               <Button
-                key={tag}
-                variant={selectedTag === tag ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="h-8 w-8"
               >
-                {tag}
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-            ))}
-          </div>
-        )}
-
-        {/* Notes List */}
-        <ScrollArea 
-          className="h-[500px] overflow-hidden no-scrollbar"
-          scrollHideDelay={0}
-          style={{ scrollbarWidth: 'none' }}
-        >
-          {filteredNotes.map((note, index) => (
-            <div key={note.id}>
-              <Card className="border-0 shadow-none">
-                <div className="text-foreground">
-                  <div className="text-xs text-muted-foreground mb-2">
-                    {formatDate(note.createdAt)}
-                  </div>
-                  <div>
-                    {note.content.split(' ').map((word, i) => 
-                      word.startsWith('#') ? (
-                        <span 
-                          key={i} 
-                          className="cursor-pointer text-muted-foreground hover:text-primary border-b border-dashed border-muted-foreground mx-1" 
-                          onClick={() => setSelectedTag(word.slice(1))}
-                        >
-                          {word.slice(1)}
-                        </span>
-                      ) : (
-                        word + ' '
-                      )
-                    )}
-                  </div>
-                  <div className="flex items-center mt-2">
-                    <div className="flex gap-4">
-                      <button
-                        onClick={() => handleEditNote(note)}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteNote(note.id)}
-                        className="text-xs text-destructive hover:underline"
-                      >
-                        Delete
-                      </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="focus:outline-none">
+                  <UserAvatar user={user} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <div className="font-medium">{user.user_metadata?.full_name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {notes.length} note{notes.length !== 1 ? 's' : ''} saved
                     </div>
                   </div>
-                </div>
-              </Card>
-              {index < filteredNotes.length - 1 && (
-                <div className="my-4 border-t border-border/40" />
-              )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          ))}
-        </ScrollArea>
+          </div>
+        </div>
       </div>
 
+      <div className="flex flex-col sm:flex-row h-[calc(100vh-128px)]">
+        {/* Main Content */}
+        <div className="flex-1 bg-background p-4 sm:p-8 flex items-center justify-center">
+          {/* Note Input */}
+          <Card className="border-0 shadow-none relative w-full max-w-[580px] flex flex-col aspect-square sm:aspect-auto">
+            <div 
+              ref={editableRef}
+              contentEditable 
+              onInput={handleKeyDown}
+              className="min-h-[24px] max-h-fit focus:outline-none text-lg overflow-x-hidden text-center empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50"
+              role="textbox"
+              aria-label="Note input"
+              data-placeholder="What are you thinking... (use # for tags)"
+            />
+            
+            {/* Tag Suggestions */}
+            {showSuggestions && (
+              <div 
+                className="fixed bg-background border rounded-md shadow-lg p-0.5 z-50"
+                style={{
+                  top: cursorPosition.y,
+                  left: cursorPosition.x,
+                  transform: 'translateY(-100%)',
+                  maxHeight: '100px',
+                  width: 'fit-content',
+                  minWidth: '60px',
+                  fontSize: '0.75rem'
+                }}
+              >
+                {tagSuggestions.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => handleTagSelect(tag)}
+                    className="block w-full text-left px-1.5 py-0.5 hover:bg-accent rounded text-xs whitespace-nowrap"
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {showSaveButton && (
+              <div className="mt-6 flex justify-center">
+                <Button onClick={saveNoteToDb}>
+                  Save Note
+                </Button>
+              </div>
+            )}
+          </Card>
+        </div>
+
+        {/* Desktop Sidebar */}
+        <div className={`hidden sm:block border-l relative transition-all duration-300 bg-background ${showSidebar ? 'w-[400px]' : 'w-0'}`}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute -left-4 top-8 h-8 w-8 rounded-full bg-background shadow-md border"
+            onClick={() => setShowSidebar(!showSidebar)}
+          >
+            {showSidebar ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+
+          {showSidebar && (
+            <div className="flex flex-col h-full">
+              {/* Tags filter */}
+              {getRecentTags().length > 0 && (
+                <div className="p-4 bg-background/50">
+                  <div className="flex gap-2 flex-wrap">
+                    {getRecentTags().map(tag => (
+                      <Button
+                        key={tag}
+                        variant={selectedTag === tag ? "default" : "secondary"}
+                        size="sm"
+                        onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                      >
+                        {tag}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Notes List */}
+              <div className="flex-1 overflow-auto">
+                <div className="px-6 py-4 space-y-4">
+                  {filteredNotes.map((note, index) => (
+                    <>
+                      <Card key={note.id} className="border-0 shadow-none bg-background/50">
+                        <div className="text-foreground">
+                          <div className="text-[12px] text-muted-foreground mb-1">
+                            {formatDate(note.createdAt)}
+                          </div>
+                          <div className="text-[12px]">
+                            {note.content.split(' ').map((word, i) => 
+                              word.startsWith('#') ? (
+                                <span 
+                                  key={i} 
+                                  className="cursor-pointer text-muted-foreground hover:text-primary border-b border-dashed border-muted-foreground mx-1" 
+                                  onClick={() => setSelectedTag(word.slice(1))}
+                                >
+                                  {word.slice(1)}
+                                </span>
+                              ) : (
+                                word + ' '
+                              )
+                            )}
+                          </div>
+                          <div className="flex items-center mt-2">
+                            <div className="flex gap-4">
+                              <button
+                                onClick={() => handleEditNote(note)}
+                                className="text-xs text-primary hover:underline"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteNote(note.id)}
+                                className="text-xs text-destructive hover:underline"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                      {index < filteredNotes.length - 1 && (
+                        <div className="border-t border-border/50 my-4 opacity-100" />
+                      )}
+                    </>
+                  ))}
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="p-4 border-t bg-background">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Search notes..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 text-sm rounded-md border border-input bg-background"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Bottom Sheet */}
+      <BottomSheet
+        notes={filteredNotes}
+        onDeleteNote={handleDeleteNote}
+        onEditNote={handleEditNote}
+        formatDate={formatDate}
+        setSelectedTag={setSelectedTag}
+      />
+
       {/* Footer */}
-      <div className="mt-auto border-t bg-background flex justify-center">
-        <div className="w-full max-w-2xl p-4 flex items-center justify-between">
+      <div className="hidden sm:flex border-t bg-background">
+        <div className="w-full max-w-[1600px] mx-auto px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M3 5H21V19H3V5Z" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -514,8 +587,16 @@ const NoteApp = ({ user }) => {
             </svg>
             <span className="font-semibold">Notes</span>
           </div>
-          <div className="text-sm text-muted-foreground">
-            Made with ❤️
+          <div className="text-sm text-muted-foreground hover:text-foreground">
+            Designed and developed by{' '}
+            <a 
+              href="https://www.shakeb.in" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline underline-offset-4"
+            >
+              Shakeb
+            </a>
           </div>
         </div>
       </div>
