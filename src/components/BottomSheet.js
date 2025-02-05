@@ -1,92 +1,65 @@
-import { useState, useEffect, useRef } from 'react';
-import { Search, X } from 'lucide-react';
+import { useRef } from 'react';
+import { Search, X, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Button } from './ui/button';
+import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
-const BottomSheet = ({ notes, onDeleteNote, onEditNote, formatDate, setSelectedTag }) => {
+const BottomSheet = ({ 
+  notes, 
+  onDeleteNote, 
+  onEditNote, 
+  formatDate, 
+  selectedTag, 
+  setSelectedTag,
+  expandedMobile,
+  setExpandedMobile,
+  searchQuery,
+  setSearchQuery
+}) => {
   const sheetRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [currentHeight, setCurrentHeight] = useState(45); // Start just below header
-  const [searchQuery, setSearchQuery] = useState('');
-  const isFullyOpen = currentHeight >= 90;
 
-  const toggleSheet = () => {
-    if (currentHeight === 45) {
-      setCurrentHeight(92);
-    } else if (currentHeight === 92) {
-      setCurrentHeight(45);
-    }
-  };
-
-  const handleTouchStart = (e) => {
-    // Prevent toggle when dragging the handle
-    e.stopPropagation();
-    setIsDragging(true);
-    setStartY(e.touches[0].clientY);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!isDragging) return;
+  const filteredNotes = notes.filter(note => {
+    const matchesSearch = 
+      note.content.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTag = 
+      !selectedTag || 
+      note.content
+        .split(' ')
+        .filter(word => word.startsWith('#'))
+        .map(tag => tag.slice(1))
+        .includes(selectedTag);
     
-    const deltaY = startY - e.touches[0].clientY;
-    const screenHeight = window.innerHeight;
-    const newHeight = (currentHeight * screenHeight + deltaY) / screenHeight * 100;
-    
-    // Allow full range of motion
-    setCurrentHeight(Math.min(Math.max(newHeight, 0), 95));
-    setStartY(e.touches[0].clientY);
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    // Snap to preset positions
-    if (currentHeight < 25) {
-      setCurrentHeight(0); // Close the sheet completely
-    } else if (currentHeight < 65) {
-      setCurrentHeight(45); // Snap to just below header
-    } else {
-      setCurrentHeight(92); // Full height minus header
-    }
-  };
-
-  const filteredNotes = notes.filter(note => 
-    note.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    return matchesSearch && matchesTag;
+  });
 
   return (
     <div 
       ref={sheetRef}
-      className={`fixed bottom-0 left-0 right-0 bg-muted shadow-lg transition-all duration-300 ease-in-out sm:hidden ${
-        currentHeight === 0 ? 'translate-y-full' : ''
-      }`}
-      style={{ 
-        height: `${currentHeight}vh`,
-        transform: currentHeight === 0 ? 'translateY(100%)' : 'translateY(0)',
-      }}
-      onClick={toggleSheet}
+      className={`
+        fixed bottom-0 left-0 right-0 
+        bg-background shadow-lg 
+        transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+        border-t
+        ${expandedMobile ? 'h-[calc(100vh-64px)]' : 'h-[55vh]'}
+      `}
     >
-      {/* Background Overlay */}
-      <div 
-        className={`fixed inset-0 bg-background transition-opacity duration-300 ${
-          currentHeight > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`} 
-        style={{ zIndex: -1 }}
-      />
-
-      {/* Drag Handle */}
-      <div 
-        className="absolute top-0 left-0 right-0 h-12 bg-background flex justify-center items-center cursor-grab"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+      {/* Collapse Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setExpandedMobile(!expandedMobile)}
+        className="absolute left-1/2 -top-4 -translate-x-1/2 h-8 w-8 rounded-full bg-background border"
       >
-        <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
-      </div>
+        {expandedMobile ? (
+          <ChevronDownIcon className="h-4 w-4" />
+        ) : (
+          <ChevronUpIcon className="h-4 w-4" />
+        )}
+      </Button>
 
-      {/* Notes Container */}
-      <div className="h-full pt-12 pb-16 overflow-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="h-full flex flex-col">
         {/* Tags Filter */}
         {notes.length > 0 && (
-          <div className="px-4 mb-4">
+          <div className="px-4 pt-6 pb-3 bg-background/50">
             <div className="flex gap-2 flex-wrap">
               {Array.from(new Set(notes.flatMap(note => 
                 note.content.split(' ')
@@ -95,69 +68,71 @@ const BottomSheet = ({ notes, onDeleteNote, onEditNote, formatDate, setSelectedT
               ))).map(tag => (
                 <button
                   key={tag}
-                  onClick={() => setSelectedTag(tag)}
-                  className="px-3 py-1 text-xs rounded bg-muted border-input hover:bg-accent"
+                  onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                  className={`px-3 py-1 text-xs rounded border ${
+                    selectedTag === tag 
+                    ? 'bg-primary text-primary-foreground border-primary' 
+                    : 'bg-muted border-input hover:bg-accent'
+                  }`}
                 >
                   {tag}
+                  {selectedTag === tag && (
+                    <XCircle className="h-3 w-3 ml-1" />
+                  )}
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        <div className="p-4 space-y-4">
-          {filteredNotes.map((note, index) => (
-            <>
+        {/* Notes List */}
+        <div className="flex-1 overflow-auto min-h-0">
+          <div className="divide-y">
+            {filteredNotes.map((note, index) => (
               <div key={note.id}>
-                <div className="text-[12px] text-muted-foreground mb-2">
-                  {formatDate(note.createdAt)}
-                </div>
-                <div className="text-[14px]">
-                  {note.content.split(' ').map((word, i) => 
-                    word.startsWith('#') ? (
-                      <span 
-                        key={i} 
-                        className="cursor-pointer text-muted-foreground hover:text-primary border-b border-dashed border-muted-foreground mx-1" 
-                        onClick={() => setSelectedTag(word.slice(1))}
-                      >
-                        {word.slice(1)}
-                      </span>
-                    ) : (
-                      word + ' '
-                    )
-                  )}
-                </div>
-                <div className="flex items-center mt-2">
-                  <div className="flex gap-4">
+                <div 
+                  className="px-4 py-3"
+                >
+                  <div className="text-xs text-muted-foreground">
+                    {formatDate(note.createdAt)}
+                  </div>
+                  <div className="mt-1 text-sm">
+                    {note.content.split(' ').map((word, i) => 
+                      word.startsWith('#') ? (
+                        <span 
+                          key={i} 
+                          className="cursor-pointer text-muted-foreground hover:text-primary border-b border-dashed border-muted-foreground mx-1" 
+                          onClick={() => setSelectedTag(word.slice(1))}
+                        >
+                          {word.slice(1)}
+                        </span>
+                      ) : (
+                        word + ' '
+                      )
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-3">
                     <button
                       onClick={() => onEditNote(note)}
-                      className="text-xs text-muted-foreground hover:text-foreground"
+                      className="text-xs text-muted-foreground"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => onDeleteNote(note.id)}
-                      className="text-xs text-muted-foreground hover:text-foreground"
+                      className="text-xs text-muted-foreground"
                     >
                       Delete
                     </button>
                   </div>
                 </div>
               </div>
-              {index < filteredNotes.length - 1 && (
-                <div className="border-t border-border/50 my-4 opacity-30" />
-              )}
-            </>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Fixed Search Bar */}
-      {isFullyOpen && (
-        <div 
-          className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background"
-          onClick={(e) => e.stopPropagation()}
-        >
+        {/* Search Bar */}
+        <div className="px-4 pt-3 pb-4 border-t bg-background sticky bottom-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
@@ -165,7 +140,7 @@ const BottomSheet = ({ notes, onDeleteNote, onEditNote, formatDate, setSelectedT
               placeholder="Search notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2 text-sm rounded-md border border-input bg-background focus:border-input focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="w-full pl-10 pr-10 py-2 text-sm rounded-full border border-input bg-background focus:border-input focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
             {searchQuery && (
               <button
@@ -177,7 +152,7 @@ const BottomSheet = ({ notes, onDeleteNote, onEditNote, formatDate, setSelectedT
             )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

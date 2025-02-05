@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
+import logo from '../assets/logo.svg';
 
 export function Auth() {
   const [email, setEmail] = useState('');
@@ -63,9 +64,14 @@ export function Auth() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header Logo */}
       <div className="p-6">
-        <svg className="w-24 h-8" viewBox="0 0 100 40" fill="currentColor">
-          <text x="10" y="30" className="text-2xl font-bold">Notes</text>
-        </svg>
+        <div className="flex items-center gap-2">
+          <img 
+            src={logo} 
+            alt="Notes" 
+            className="w-8 h-8 dark:invert"
+          />
+          <span className="text-2xl font-bold">Notes</span>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -194,13 +200,7 @@ export function Auth() {
       </div>
 
       {/* Footer */}
-      <div className="border-t p-6 flex items-center justify-between bg-muted/40">
-        <div className="flex items-center gap-2">
-          <svg className="w-8 h-8" viewBox="0 0 40 40" fill="currentColor">
-            <text x="8" y="25" className="text-xl font-bold">N</text>
-          </svg>
-          <span className="text-lg font-semibold">Notes</span>
-        </div>
+      <div className="border-t p-6 flex items-center justify-center bg-muted/40">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">curated by</span>
           <span className="font-semibold">Your Brand</span>

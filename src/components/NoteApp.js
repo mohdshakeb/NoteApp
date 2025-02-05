@@ -6,9 +6,19 @@ import { ScrollArea } from "./ui/scroll-area";
 import { initDB, saveNote, getNotes, syncPendingNotes, deleteNote, updateNote } from '../lib/db';
 import { supabase } from '../lib/supabase';
 import { useTheme } from "./ThemeProvider";
-import { Moon, Sun, ChevronRight, ChevronLeft, Search, LogOut } from "lucide-react";
+import { 
+  MoonIcon, 
+  SunIcon, 
+  ChevronLeftIcon, 
+  ChevronRightIcon, 
+  ChevronUpIcon, 
+  ChevronDownIcon,
+  MagnifyingGlassIcon as SearchIcon,
+  ArrowRightOnRectangleIcon as LogOutIcon
+} from '@heroicons/react/24/outline';
 import BottomSheet from './BottomSheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuSeparator } from "./ui/dropdown";
+import logo from '../assets/logo.svg';
 
 const NoteApp = ({ user }) => {
   const { theme, setTheme } = useTheme();
@@ -26,6 +36,8 @@ const NoteApp = ({ user }) => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [showSidebar, setShowSidebar] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [expandedMobile, setExpandedMobile] = useState(false);
 
   // Auto-focus on mount
   useEffect(() => {
@@ -135,16 +147,19 @@ const NoteApp = ({ user }) => {
   const handleKeyDown = (e) => {
     const text = e.target.innerText;
     setCurrentNote(text);
-    // Show/hide placeholder based on content
-    if (!text.trim()) {
-      e.target.removeAttribute('data-content');
-    } else {
-      e.target.setAttribute('data-content', 'true');
+    
+    // Save on Ctrl+Enter
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      saveNoteToDb();
+      return;
     }
-    if (!showSaveButton && text.trim()) {
-      setShowSaveButton(true);
-    } else if (showSaveButton && !text.trim()) {
+
+    // Show/hide save button based on content
+    if (!text.trim()) {
       setShowSaveButton(false);
+    } else {
+      setShowSaveButton(true);
     }
 
     // Get cursor position from selection
@@ -372,93 +387,122 @@ const NoteApp = ({ user }) => {
     );
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-      {/* Full-width Header */}
-      <div className="w-full bg-background border-b">
-        <div className="max-w-[1600px] mx-auto px-8 py-4">
-          <div className="flex justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 5H21V19H3V5Z" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M7 9L12 13L17 9" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span className="font-semibold">Notes</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="h-8 w-8"
-              >
-                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="focus:outline-none">
-                  <UserAvatar user={user} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5">
-                    <div className="font-medium">{user.user_metadata?.full_name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {notes.length} note{notes.length !== 1 ? 's' : ''} saved
+      {/* Header */}
+      <header className={`
+        border-b bg-background 
+        transition-[padding] duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+        ${showSidebar ? 'sm:pr-[400px]' : 'sm:pr-0'}
+      `}>
+        <div className="flex items-center justify-between px-4 h-16">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <img 
+              src={logo} 
+              alt="Notes" 
+              className="w-28 h-6 dark:invert"
+            />
+          </div>
+
+          {/* Theme and User Menu */}
+          <div className={`
+            flex items-center gap-2
+            transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+            ${showSidebar ? 'translate-x-[calc(100%-5rem)]' : 'translate-x-0'}
+            mr-4 sm:mr-0
+          `}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            >
+              {theme === "light" ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />}
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  {user?.user_metadata?.avatar_url ? (
+                    <img 
+                      src={user.user_metadata.avatar_url} 
+                      alt={user.email}
+                      className="w-8 h-8 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                      {user?.email?.charAt(0).toUpperCase() || 'G'}
                     </div>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-2 py-1.5">
+                  <div className="font-medium">{user.user_metadata?.full_name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {notes.length} note{notes.length !== 1 ? 's' : ''} saved
                   </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                  <LogOutIcon className="w-4 h-4 mr-2" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              variant="outline"
+              onClick={() => setShowSidebar(true)}
+              className={`
+                hidden sm:flex items-center gap-2 ml-2
+                transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+                ${showSidebar 
+                  ? 'translate-x-[200%] opacity-0' 
+                  : 'translate-x-0 opacity-100'
+                }
+              `}
+            >
+              <ChevronLeftIcon className="h-4 w-4" />
+              <span>Read</span>
+            </Button>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="flex flex-col sm:flex-row h-[calc(100vh-128px)]">
+      <div className={`
+        flex flex-col sm:flex-row sm:h-[calc(100vh-128px)]
+        transition-[padding] duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+        ${showSidebar ? 'sm:pr-[400px]' : 'sm:pr-0'}
+      `}>
         {/* Main Content */}
-        <div className="flex-1 bg-background p-4 sm:p-8 flex items-center justify-center">
-          {/* Note Input */}
-          <Card className="border-0 shadow-none relative w-full max-w-[580px] flex flex-col aspect-square sm:aspect-auto">
-            <div 
-              ref={editableRef}
-              contentEditable 
-              onInput={handleKeyDown}
-              className="min-h-[24px] max-h-fit focus:outline-none text-lg overflow-x-hidden text-center empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50"
-              role="textbox"
+        <div className={`
+          h-[45vh] sm:h-[calc(100vh-64px)] 
+          bg-background p-4 sm:p-8 
+          flex items-center justify-center w-full
+          transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+        `}>
+          <Card className="border-0 shadow-none relative w-full max-w-[580px] flex flex-col">
+      <div 
+        ref={editableRef}
+        contentEditable 
+        onInput={handleKeyDown}
+              className="min-h-[24px] focus:outline-none text-lg overflow-x-hidden text-center empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50"
+        role="textbox"
               aria-label="Note input"
               data-placeholder="What are you thinking... (use # for tags)"
-            />
-            
-            {/* Tag Suggestions */}
-            {showSuggestions && (
-              <div 
-                className="fixed bg-background border rounded-md shadow-lg p-0.5 z-50"
-                style={{
-                  top: cursorPosition.y,
-                  left: cursorPosition.x,
-                  transform: 'translateY(-100%)',
-                  maxHeight: '100px',
-                  width: 'fit-content',
-                  minWidth: '60px',
-                  fontSize: '0.75rem'
-                }}
-              >
-                {tagSuggestions.map(tag => (
-                  <button
-                    key={tag}
-                    onClick={() => handleTagSelect(tag)}
-                    className="block w-full text-left px-1.5 py-0.5 hover:bg-accent rounded text-xs whitespace-nowrap"
-                  >
-                    #{tag}
-                  </button>
-                ))}
-              </div>
-            )}
-            
-            {showSaveButton && (
+      />
+      
+      {showSaveButton && (
               <div className="mt-6 flex justify-center">
                 <Button onClick={saveNoteToDb}>
                   Save Note
@@ -469,21 +513,56 @@ const NoteApp = ({ user }) => {
         </div>
 
         {/* Desktop Sidebar */}
-        <div className={`hidden sm:block border-l relative transition-all duration-300 bg-background ${showSidebar ? 'w-[400px]' : 'w-0'}`}>
+        <div className={`
+          border-t sm:border-l bg-background
+          h-[100vh] sm:h-screen
+          w-full sm:w-[400px]
+          flex flex-col
+          relative
+          transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+          ${!showSidebar && 'sm:translate-x-[420px] sm:border-l-0'}
+          hidden sm:flex
+          sm:fixed sm:right-0 sm:top-0
+        `}>
+          {/* Collapse button */}
           <Button
             variant="ghost"
             size="icon"
-            className="absolute -left-4 top-8 h-8 w-8 rounded-full bg-background shadow-md border"
-            onClick={() => setShowSidebar(!showSidebar)}
+            className={`
+              h-8 w-8 rounded-full bg-background border
+              absolute left-1/2 -top-4 -translate-x-1/2
+              sm:left-0 sm:top-[88px] sm:translate-x-[-50%]
+              transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+              ${!showSidebar ? 'opacity-0' : 'opacity-100'}
+            `}
+            onClick={() => {
+              if (window.innerWidth >= 640) {
+                setShowSidebar(!showSidebar);
+              } else {
+                setExpandedMobile(!expandedMobile);
+              }
+            }}
           >
-            {showSidebar ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {window.innerWidth >= 640 ? (
+              <ChevronRightIcon className="h-4 w-4" />
+            ) : (
+              expandedMobile ? <ChevronDownIcon className="h-4 w-4" /> : <ChevronUpIcon className="h-4 w-4" />
+            )}
           </Button>
 
-          {showSidebar && (
+          {/* Sidebar Header - Only show on desktop */}
+          <div className="hidden sm:block px-6 pt-3 pd-2">
+            <h2 className="text-md font-medium">My Notes</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {notes.length} {notes.length === 1 ? 'note' : 'notes'}
+            </p>
+          </div>
+
+          {(showSidebar || window.innerWidth < 640) && (
             <div className="flex flex-col h-full">
               {/* Tags filter */}
               {getRecentTags().length > 0 && (
-                <div className="p-4 bg-background/50">
+                <div className="px-6 pt-4 sm:pt-7 pb-3 bg-background/50">
                   <div className="flex gap-2 flex-wrap">
                     {getRecentTags().map(tag => (
                       <Button
@@ -500,7 +579,7 @@ const NoteApp = ({ user }) => {
               )}
 
               {/* Notes List */}
-              <div className="flex-1 overflow-auto">
+              <div className="flex-1 overflow-auto min-h-0">
                 <div className="px-6 py-4 space-y-4">
                   {filteredNotes.map((note, index) => (
                     <>
@@ -524,21 +603,21 @@ const NoteApp = ({ user }) => {
                               )
                             )}
                           </div>
-                          <div className="flex items-center mt-2">
+                          <div className="flex items-center mt-3">
                             <div className="flex gap-4">
                               <button
                                 onClick={() => handleEditNote(note)}
-                                className="text-xs text-primary hover:underline"
+                                className="text-xs text-muted-foreground hover:text-primary"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDeleteNote(note.id)}
-                                className="text-xs text-destructive hover:underline"
+                                className="text-xs text-muted-foreground hover:text-destructive"
                               >
                                 Delete
-                              </button>
-                            </div>
+          </button>
+        </div>
                           </div>
                         </div>
                       </Card>
@@ -547,19 +626,20 @@ const NoteApp = ({ user }) => {
                       )}
                     </>
                   ))}
+                  <div className="h-16" />
                 </div>
               </div>
 
               {/* Search Bar */}
-              <div className="p-4 border-t bg-background">
+              <div className="px-6 pt-3 pb-8 bg-background sticky bottom-0">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <SearchIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Search notes..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 text-sm rounded-md border border-input bg-background"
+                    className="w-full pl-8 pr-4 py-2 text-sm border bg-background rounded-md focus:outline-slate-300"
                   />
                 </div>
               </div>
@@ -568,26 +648,15 @@ const NoteApp = ({ user }) => {
         </div>
       </div>
 
-      {/* Mobile Bottom Sheet */}
-      <BottomSheet
-        notes={filteredNotes}
-        onDeleteNote={handleDeleteNote}
-        onEditNote={handleEditNote}
-        formatDate={formatDate}
-        setSelectedTag={setSelectedTag}
-      />
-
       {/* Footer */}
-      <div className="hidden sm:flex border-t bg-background">
-        <div className="w-full max-w-[1600px] mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 5H21V19H3V5Z" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M7 9L12 13L17 9" className="stroke-foreground" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span className="font-semibold">Notes</span>
-          </div>
-          <div className="text-sm text-muted-foreground hover:text-foreground">
+      <div className={`
+        hidden sm:flex bg-background
+        transition-[padding] duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+        ${showSidebar ? 'sm:pr-[400px]' : 'sm:pr-0'}
+      `}>
+        <div className="w-full max-w-[1600px] mx-auto px-8 py-4 flex items-center justify-center">
+         
+          <div className="text-xs text-muted-foreground hover:text-foreground">
             Designed and developed by{' '}
             <a 
               href="https://www.shakeb.in" 
@@ -599,6 +668,49 @@ const NoteApp = ({ user }) => {
             </a>
           </div>
         </div>
+      </div>
+
+      {/* Tag Suggestions */}
+      {showSuggestions && (
+        <div 
+          className="fixed bg-background border rounded-md shadow-lg p-0.5 z-[60]"
+          style={{
+            top: cursorPosition.y,
+            left: cursorPosition.x,
+            transform: 'translateY(-100%)',
+            maxHeight: '100px',
+            width: 'fit-content',
+            minWidth: '60px',
+            fontSize: '0.75rem'
+          }}
+        >
+          {tagSuggestions.map((tag, index) => (
+            <Button
+              key={index}
+              variant="secondary"
+              size="sm"
+              onClick={() => handleTagSelect(tag)}
+            >
+              {tag}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {/* Mobile Bottom Sheet */}
+      <div className="sm:hidden">
+        <BottomSheet 
+          notes={notes}
+          onDeleteNote={handleDeleteNote}
+          onEditNote={handleEditNote}
+          formatDate={formatDate}
+          selectedTag={selectedTag}
+          setSelectedTag={setSelectedTag}
+          expandedMobile={expandedMobile}
+          setExpandedMobile={setExpandedMobile}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
       </div>
     </div>
   );
