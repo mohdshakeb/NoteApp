@@ -18,10 +18,40 @@ export async function initDB(userId) {
 // Save note to both IndexedDB and Supabase
 export async function saveNote(db, userId, note) {
   try {
+    // For guest users, only save to IndexedDB
+    if (userId.startsWith('guest-')) {
+      const noteId = note.id || Date.now().toString();
+      // Check if note exists first
+      try {
+        await db.get('notes', noteId);
+        // If note exists, update it instead
+        await db.put('notes', {
+          ...note,
+          id: noteId,
+          userId,
+          syncStatus: 'local',
+          createdAt: note.createdAt || new Date(),
+          updatedAt: new Date()
+        });
+      } catch {
+        // If note doesn't exist, add it
+        await db.add('notes', {
+          ...note,
+          id: noteId,
+          userId,
+          syncStatus: 'local',
+          createdAt: note.createdAt || new Date(),
+          updatedAt: new Date()
+        });
+      }
+      return noteId;
+    }
+
     // First save to Supabase
     const { data, error } = await supabase
       .from('notes')
       .insert([{
+        id: note.id || undefined,
         content: note.content,
         user_id: userId,
         tags: note.tags,
@@ -46,7 +76,7 @@ export async function saveNote(db, userId, note) {
     return data.id;
   } catch (error) {
     // If Supabase fails, save to IndexedDB with pending sync
-    const tempId = Date.now().toString();
+    const tempId = note.id || Date.now().toString();
     await db.add('notes', {
       ...note,
       id: tempId,
@@ -62,6 +92,11 @@ export async function saveNote(db, userId, note) {
 // Get notes from Supabase and sync with IndexedDB
 export async function getNotes(db, userId) {
   try {
+    // For guest users, only use IndexedDB
+    if (userId.startsWith('guest-')) {
+      return db.getAllFromIndex('notes', 'userId', userId);
+    }
+
     // Get notes from Supabase
     console.log('Fetching notes for user:', userId);
     const { data: supabaseNotes, error } = await supabase
@@ -137,6 +172,12 @@ export async function syncPendingNotes(db, userId) {
 // Delete note from both Supabase and IndexedDB
 export async function deleteNote(db, userId, noteId) {
   try {
+    // For guest users, only delete from IndexedDB
+    if (userId.startsWith('guest-')) {
+      await db.delete('notes', noteId);
+      return true;
+    }
+
     // Delete from Supabase
     const { error } = await supabase
       .from('notes')

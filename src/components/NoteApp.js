@@ -39,6 +39,27 @@ const NoteApp = ({ user }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [expandedMobile, setExpandedMobile] = useState(false);
 
+  const defaultNotes = [
+    {
+      id: crypto.randomUUID(),
+      content: "Welcome to Notes! 👋 This is a sample note to help you get started. #welcome #notes",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      id: crypto.randomUUID(),
+      content: "You can add tags to your notes using hashtags like this: #tips",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      id: crypto.randomUUID(),
+      content: "Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+  ];
+
   // Auto-focus on mount
   useEffect(() => {
     if (editableRef.current) {
@@ -308,7 +329,7 @@ const NoteApp = ({ user }) => {
 
   const filteredNotes = notes.filter(note => {
     const matchesSearch = note.content.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTag = !selectedTag || (note.tags && note.tags.includes(selectedTag));
+    const matchesTag = !selectedTag || note.content.includes(`#${selectedTag}`);
     return matchesSearch && matchesTag;
   });
 
@@ -396,6 +417,67 @@ const NoteApp = ({ user }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        const db = await initDB(user.id);
+        setDb(db);
+        // Check if we've already created default notes for this user
+        const hasDefaultNotes = localStorage.getItem(`defaultNotes-${user.id}`);
+        const fetchedNotes = await getNotes(db, user.id);
+        
+        if (fetchedNotes.length === 0 && !hasDefaultNotes) {
+          console.log('Creating default notes...');
+          await Promise.all(defaultNotes.map(note => saveNote(db, user.id, note)));
+          localStorage.setItem(`defaultNotes-${user.id}`, 'true');
+          const initialNotes = await getNotes(db, user.id);
+          setNotes(initialNotes);
+        } else {
+          setNotes(fetchedNotes);
+        }
+      } catch (error) {
+        console.error('Error initializing app:', error);
+      }
+    };
+
+    initializeApp();
+  }, [user.id]);
+
+  const handleTagClick = (tag) => {
+    // If the tag is already selected, deselect it
+    if (selectedTag === tag) {
+      setSelectedTag(null);
+    } else {
+      setSelectedTag(tag);
+    }
+  };
+
+  // Function to get unique tags from notes
+  const getUniqueTags = () => {
+    const allTags = notes.flatMap(note => 
+      note.content.split(' ')
+        .filter(word => word.startsWith('#'))
+        .map(tag => tag.slice(1))
+    );
+    return [...new Set(allTags)];
+  };
+
+  const renderNoteContent = (content) => {
+    return content.split(' ').map((word, i) => 
+      word.startsWith('#') ? (
+        <span 
+          key={i} 
+          className="cursor-pointer text-muted-foreground hover:text-primary border-b border-dashed border-muted-foreground mx-1"
+          onClick={() => handleTagClick(word.slice(1))}
+        >
+          {word.slice(1)}
+        </span>
+      ) : (
+        word + ' '
+      )
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
       {/* Header */}
@@ -410,71 +492,82 @@ const NoteApp = ({ user }) => {
             <img 
               src={logo} 
               alt="Notes" 
-              className="w-28 h-6 dark:invert"
+              className="w-28 h-6 [filter:invert(0)_sepia(0)_saturate(1)_hue-rotate(0deg)_brightness(0.96)] dark:[filter:invert(1)_sepia(0)_saturate(1)_hue-rotate(0deg)_brightness(1)] text-accent-foreground"
             />
           </div>
 
           {/* Theme and User Menu */}
-          <div className={`
-            flex items-center gap-2
-            transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
-            ${showSidebar ? 'translate-x-[calc(100%-5rem)]' : 'translate-x-0'}
-            mr-4 sm:mr-0
-          `}>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            >
-              {theme === "light" ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />}
-            </Button>
+          <div className="relative">
+            <div className={`
+              flex items-center gap-2
+              transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+              ${showSidebar ? 'translate-x-[calc(100%-6.5rem)]' : 'translate-x-0'}
+              mr-4 sm:mr-0
+            `}
+            style={{ transform: showSidebar ? 'translateX(calc(100% - 5rem))' : 'translateX(0)' }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              >
+                {theme === "light" ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />}
+              </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  {user?.user_metadata?.avatar_url ? (
-                    <img 
-                      src={user.user_metadata.avatar_url} 
-                      alt={user.email}
-                      className="w-8 h-8 rounded-full"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                      {user?.email?.charAt(0).toUpperCase() || 'G'}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="focus-visible:ring-0 focus-visible:ring-offset-0"
+                  >
+                    {user?.isGuest ? (
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                        {user.user_metadata.initials}
+                      </div>
+                    ) : user?.user_metadata?.avatar_url ? (
+                      <img 
+                        src={user.user_metadata.avatar_url} 
+                        alt={user.email}
+                        className="w-8 h-8 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                        {(user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U').toUpperCase()}
+                      </div>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <div className="font-medium">{user.user_metadata?.full_name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {notes.length} note{notes.length !== 1 ? 's' : ''} saved
                     </div>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-2 py-1.5">
-                  <div className="font-medium">{user.user_metadata?.full_name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {notes.length} note{notes.length !== 1 ? 's' : ''} saved
                   </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                  <LogOutIcon className="w-4 h-4 mr-2" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                    <LogOutIcon className="w-4 h-4 mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            <Button
-              variant="outline"
-              onClick={() => setShowSidebar(true)}
-              className={`
-                hidden sm:flex items-center gap-2 ml-2
-                transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
-                ${showSidebar 
-                  ? 'translate-x-[200%] opacity-0' 
-                  : 'translate-x-0 opacity-100'
-                }
-              `}
-            >
-              <ChevronLeftIcon className="h-4 w-4" />
-              <span>Read</span>
-            </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowSidebar(true)}
+                className={`
+                  hidden sm:flex items-center gap-2 pl-1 pr-2 ml-1
+                  transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
+                  ${showSidebar 
+                    ? 'translate-x-[200%] opacity-0' 
+                    : 'translate-x-0 opacity-100'
+                  }
+                `}
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+                <span>Read</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -561,22 +654,23 @@ const NoteApp = ({ user }) => {
           {(showSidebar || window.innerWidth < 640) && (
             <div className="flex flex-col h-full">
               {/* Tags filter */}
-              {getRecentTags().length > 0 && (
-                <div className="px-6 pt-4 sm:pt-7 pb-3 bg-background/50">
-                  <div className="flex gap-2 flex-wrap">
-                    {getRecentTags().map(tag => (
-                      <Button
-                        key={tag}
-                        variant={selectedTag === tag ? "default" : "secondary"}
-                        size="sm"
-                        onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-                      >
-                        {tag}
-                      </Button>
-                    ))}
-                  </div>
+              <div className="px-6 pt-8 pb-2 bg-background/50">
+                <div className="flex gap-2 flex-wrap">
+                  {getUniqueTags().map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => handleTagClick(tag)}
+                      className={`px-3 py-1 text-xs rounded border ${
+                        selectedTag === tag 
+                        ? 'bg-primary text-primary-foreground border-primary' 
+                        : 'bg-muted border-input hover:bg-accent'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
 
               {/* Notes List */}
               <div className="flex-1 overflow-auto min-h-0">
@@ -589,19 +683,7 @@ const NoteApp = ({ user }) => {
                             {formatDate(note.createdAt)}
                           </div>
                           <div className="text-[12px]">
-                            {note.content.split(' ').map((word, i) => 
-                              word.startsWith('#') ? (
-                                <span 
-                                  key={i} 
-                                  className="cursor-pointer text-muted-foreground hover:text-primary border-b border-dashed border-muted-foreground mx-1" 
-                                  onClick={() => setSelectedTag(word.slice(1))}
-                                >
-                                  {word.slice(1)}
-                                </span>
-                              ) : (
-                                word + ' '
-                              )
-                            )}
+                            {renderNoteContent(note.content)}
                           </div>
                           <div className="flex items-center mt-3">
                             <div className="flex gap-4">
@@ -656,17 +738,17 @@ const NoteApp = ({ user }) => {
       `}>
         <div className="w-full max-w-[1600px] mx-auto px-8 py-4 flex items-center justify-center">
          
-          <div className="text-xs text-muted-foreground hover:text-foreground">
-            Designed and developed by{' '}
-            <a 
-              href="https://www.shakeb.in" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="underline underline-offset-4"
-            >
-              Shakeb
-            </a>
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">Designed and developed</span>
+          <a 
+            href="https://www.shakeb.in" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="font-medium hover:text-primary transition-colors"
+          >
+            Shakeb
+          </a>
+        </div>
         </div>
       </div>
 

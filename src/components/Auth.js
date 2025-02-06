@@ -68,9 +68,9 @@ export function Auth() {
           <img 
             src={logo} 
             alt="Notes" 
-            className="w-8 h-8 dark:invert"
+            className="w-24 h-8 dark:invert"
           />
-          <span className="text-2xl font-bold">Notes</span>
+          
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export function Auth() {
               Welcome to Notes
             </h2>
             <p className="mt-2 text-muted-foreground">
-              Note taking app designed for teams and individuals
+              Note taking app designed for fast note taking
             </p>
           </div>
 
@@ -201,9 +201,16 @@ export function Auth() {
 
       {/* Footer */}
       <div className="border-t p-6 flex items-center justify-center bg-muted/40">
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">curated by</span>
-          <span className="font-semibold">Your Brand</span>
+      <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">Designed and developed</span>
+          <a 
+            href="https://www.shakeb.in" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="font-medium hover:text-primary transition-colors"
+          >
+            Shakeb
+          </a>
         </div>
       </div>
     </div>
