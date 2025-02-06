@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { Search, X, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { useRef, useMemo } from 'react';
+import { Search, X, XCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
@@ -16,6 +16,14 @@ const BottomSheet = ({
   setSearchQuery
 }) => {
   const sheetRef = useRef(null);
+
+  const uniqueTags = useMemo(() => 
+    Array.from(new Set(notes.flatMap(note => 
+      note.content.split(' ')
+        .filter(word => word.startsWith('#'))
+        .map(tag => tag.slice(1))
+    )))
+  , [notes]);
 
   const filteredNotes = notes.filter(note => {
     const matchesSearch = 
@@ -61,11 +69,7 @@ const BottomSheet = ({
         {notes.length > 0 && (
           <div className="px-4 pt-6 pb-3 bg-background/50">
             <div className="flex gap-2 flex-wrap">
-              {Array.from(new Set(notes.flatMap(note => 
-                note.content.split(' ')
-                  .filter(word => word.startsWith('#'))
-                  .map(tag => tag.slice(1))
-              ))).map(tag => (
+              {uniqueTags.map(tag => (
                 <button
                   key={tag}
                   onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
@@ -76,9 +80,7 @@ const BottomSheet = ({
                   }`}
                 >
                   {tag}
-                  {selectedTag === tag && (
-                    <XCircle className="h-3 w-3 ml-1" />
-                  )}
+                  {selectedTag === tag }
                 </button>
               ))}
             </div>

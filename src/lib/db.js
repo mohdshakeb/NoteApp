@@ -18,32 +18,17 @@ export async function initDB(userId) {
 // Save note to both IndexedDB and Supabase
 export async function saveNote(db, userId, note) {
   try {
-    // For guest users, only save to IndexedDB
     if (userId.startsWith('guest-')) {
-      const noteId = note.id || Date.now().toString();
-      // Check if note exists first
-      try {
-        await db.get('notes', noteId);
-        // If note exists, update it instead
-        await db.put('notes', {
-          ...note,
-          id: noteId,
-          userId,
-          syncStatus: 'local',
-          createdAt: note.createdAt || new Date(),
-          updatedAt: new Date()
-        });
-      } catch {
-        // If note doesn't exist, add it
-        await db.add('notes', {
-          ...note,
-          id: noteId,
-          userId,
-          syncStatus: 'local',
-          createdAt: note.createdAt || new Date(),
-          updatedAt: new Date()
-        });
-      }
+      const noteId = note.id || crypto.randomUUID();
+      const newNote = {
+        ...note,
+        id: noteId,
+        userId,
+        syncStatus: 'local',
+        createdAt: note.createdAt || new Date(),
+        updatedAt: new Date()
+      };
+      await db.put('notes', newNote);
       return noteId;
     }
 
@@ -51,66 +36,65 @@ export async function saveNote(db, userId, note) {
     const { data, error } = await supabase
       .from('notes')
       .insert([{
-        id: note.id || undefined,
         content: note.content,
         user_id: userId,
-        tags: note.tags,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }])
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      const tempId = note.id || crypto.randomUUID();
+      const newNote = {
+        ...note,
+        id: tempId,
+        userId,
+        syncStatus: 'pending',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      const tx = db.transaction('notes', 'readwrite');
+      await tx.store.put(newNote);
+      await tx.done;
+      return tempId;
+    }
 
     // Then save to IndexedDB
-    await db.add('notes', {
+    const newNote = {
       ...note,
       id: data.id,
       userId,
       syncStatus: 'synced',
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at)
-    });
+    };
+    const tx = db.transaction('notes', 'readwrite');
+    await tx.store.put(newNote);
+    await tx.done;
 
     return data.id;
   } catch (error) {
-    // If Supabase fails, save to IndexedDB with pending sync
-    const tempId = note.id || Date.now().toString();
-    await db.add('notes', {
-      ...note,
-      id: tempId,
-      userId,
-      syncStatus: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-    return tempId;
+    console.error('Error saving note:', error);
+    throw error;
   }
 }
 
 // Get notes from Supabase and sync with IndexedDB
 export async function getNotes(db, userId) {
   try {
-    // For guest users, only use IndexedDB
     if (userId.startsWith('guest-')) {
       return db.getAllFromIndex('notes', 'userId', userId);
     }
 
     // Get notes from Supabase
-    console.log('Fetching notes for user:', userId);
     const { data: supabaseNotes, error } = await supabase
       .from('notes')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Supabase fetch error:', error);
-      throw error;
-    }
-
-    console.log('Fetched notes:', supabaseNotes);
+    if (error) throw error;
 
     const formattedNotes = supabaseNotes.map(note => ({
       id: note.id,
@@ -122,8 +106,6 @@ export async function getNotes(db, userId) {
       updatedAt: new Date(note.updated_at)
     }));
 
-    console.log('Formatted notes:', formattedNotes);
-
     // Update IndexedDB with Supabase data
     const tx = db.transaction('notes', 'readwrite');
     await Promise.all([
@@ -133,39 +115,8 @@ export async function getNotes(db, userId) {
 
     return formattedNotes;
   } catch (error) {
-    console.error('Error fetching from Supabase:', error);
+    console.error('Error fetching notes:', error);
     return db.getAllFromIndex('notes', 'userId', userId);
-  }
-}
-
-// Sync pending notes to Supabase
-export async function syncPendingNotes(db, userId) {
-  const tx = db.transaction('notes', 'readwrite');
-  const pendingNotes = await tx.store.index('syncStatus').getAll('pending');
-
-  for (const note of pendingNotes) {
-    try {
-      const { data, error } = await supabase
-        .from('notes')
-        .insert([{
-          content: note.content,
-          user_id: userId,
-          created_at: note.createdAt.toISOString(),
-          updated_at: new Date().toISOString()
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      await tx.store.put({
-        ...note,
-        id: data.id,
-        syncStatus: 'synced'
-      });
-    } catch (error) {
-      console.error('Error syncing note:', error);
-    }
   }
 }
 
@@ -174,7 +125,10 @@ export async function deleteNote(db, userId, noteId) {
   try {
     // For guest users, only delete from IndexedDB
     if (userId.startsWith('guest-')) {
-      await db.delete('notes', noteId);
+      const note = await db.get('notes', noteId);
+      if (note && note.userId === userId) {
+        await db.delete('notes', noteId);
+      }
       return true;
     }
 
@@ -188,7 +142,10 @@ export async function deleteNote(db, userId, noteId) {
     if (error) throw error;
 
     // Delete from IndexedDB
-    await db.delete('notes', noteId);
+    const note = await db.get('notes', noteId);
+    if (note && note.userId === userId) {
+      await db.delete('notes', noteId);
+    }
 
     return true;
   } catch (error) {
@@ -200,6 +157,23 @@ export async function deleteNote(db, userId, noteId) {
 // Update note in both Supabase and IndexedDB
 export async function updateNote(db, userId, note) {
   try {
+    // Check if note exists and belongs to user
+    const existingNote = await db.get('notes', note.id);
+    if (!existingNote || existingNote.userId !== userId) {
+      throw new Error('Note not found or unauthorized');
+    }
+
+    if (userId.startsWith('guest-')) {
+      await db.put('notes', {
+        ...existingNote,
+        ...note,
+        userId,
+        syncStatus: 'local',
+        updatedAt: new Date()
+      });
+      return true;
+    }
+
     // Update in Supabase
     const { error } = await supabase
       .from('notes')
@@ -215,7 +189,9 @@ export async function updateNote(db, userId, note) {
 
     // Update in IndexedDB
     await db.put('notes', {
+      ...existingNote,
       ...note,
+      userId,
       syncStatus: 'synced',
       updatedAt: new Date()
     });
@@ -223,6 +199,136 @@ export async function updateNote(db, userId, note) {
     return true;
   } catch (error) {
     console.error('Error updating note:', error);
+    throw error;
+  }
+}
+
+// Sync pending notes to Supabase
+export async function syncPendingNotes(db, userId) {
+  try {
+    // Skip for guest users
+    if (userId.startsWith('guest-')) return;
+
+    const tx = db.transaction('notes', 'readwrite');
+    const pendingNotes = await tx.store.index('syncStatus').getAll('pending');
+
+    if (pendingNotes.length === 0) return;
+
+    await Promise.all(pendingNotes.map(async (note) => {
+      try {
+        const { data, error } = await supabase
+          .from('notes')
+          .insert([{
+            content: note.content,
+            user_id: userId,
+            created_at: note.createdAt.toISOString(),
+            updated_at: new Date().toISOString()
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        await tx.store.put({
+          ...note,
+          id: data.id,
+          syncStatus: 'synced'
+        });
+      } catch (error) {
+        console.error('Error syncing note:', error);
+      }
+    }));
+
+    await tx.done;
+  } catch (error) {
+    console.error('Error in syncPendingNotes:', error);
+  }
+}
+
+// Default notes for new users
+const getDefaultNotes = () => [
+  {
+    id: 'welcome-1',
+    content: "Welcome to Notes! 👋 This is a sample note to help you get started. #welcome #notes",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: 'welcome-2',
+    content: "You can add tags to your notes using hashtags like this: #tips",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: 'welcome-3',
+    content: "Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+// Create default notes for new users
+export async function createDefaultNotes(db, userId) {
+  try {
+    const isGuest = userId.startsWith('guest-');
+    const defaultNotes = getDefaultNotes();
+
+    if (isGuest) {
+      // Save locally for guest users
+      for (const note of defaultNotes) {
+        const existingNote = await db.get('notes', note.id).catch(() => null);
+        if (!existingNote) {
+          db.put('notes', {
+            ...note,
+            userId,
+            syncStatus: 'local'
+          });
+        }
+      }
+    } else {
+      // Save to Supabase for authenticated users
+      // Check for existing notes first
+      const { data: existingNotes } = await supabase
+        .from('notes')
+        .select('id')
+        .eq('user_id', userId);
+      
+      const existingIds = new Set(existingNotes?.map(n => n.id) || []);
+      const notesToCreate = defaultNotes.filter(note => !existingIds.has(note.id));
+      
+      if (notesToCreate.length === 0) return true;
+
+      const { data, error } = await supabase
+        .from('notes')
+        .insert(
+          notesToCreate.map(note => ({
+            id: note.id,
+            content: note.content,
+            user_id: userId,
+            created_at: note.createdAt.toISOString(),
+            updated_at: note.updatedAt.toISOString()
+          }))
+        )
+        .select();
+
+      if (error) throw error;
+
+      // Save to IndexedDB as well
+      await Promise.all(data.map(note => 
+        db.put('notes', {
+          id: note.id,
+          content: note.content,
+          userId,
+          syncStatus: 'synced',
+          createdAt: new Date(note.created_at),
+          updatedAt: new Date(note.updated_at)
+        })
+      ));
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error creating default notes:', error);
     throw error;
   }
 } 

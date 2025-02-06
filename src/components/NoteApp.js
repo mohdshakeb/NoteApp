@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
-import { initDB, saveNote, getNotes, syncPendingNotes, deleteNote, updateNote } from '../lib/db';
+import { initDB, saveNote, getNotes, deleteNote, updateNote, syncPendingNotes, createDefaultNotes } from '../lib/db';
 import { supabase } from '../lib/supabase';
 import { useTheme } from "./ThemeProvider";
 import { 
@@ -38,6 +38,7 @@ const NoteApp = ({ user }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [expandedMobile, setExpandedMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const defaultNotes = [
     {
@@ -239,36 +240,72 @@ const NoteApp = ({ user }) => {
   };
 
   const handleSignOut = async () => {
-    if (user.isGuest) {
-      localStorage.removeItem('guestUser');
-      localStorage.removeItem('guestNotes');
-      window.location.reload();
-      return;
+    try {
+      // Clear IndexedDB data first
+      if (db) {
+        const tx = db.transaction('notes', 'readwrite');
+        const store = tx.objectStore('notes');
+        await store.clear();
+        await tx.done;
+      }
+
+      // Handle both guest and Google sign out
+      if (user.isGuest) {
+        localStorage.removeItem('guestUser');
+      } else {
+        // Sign out from Supabase
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        
+        // Clear Supabase session
+        await supabase.auth.clearSession();
+      }
+
+      // Clear all local storage
+      localStorage.removeItem(`defaultNotes-${user.id}`);
+      localStorage.removeItem('sb-yzgyhdrughpwaqgcgqeu-auth-token');
+
+    } catch (error) {
+      console.error('Error signing out:', error);
+    } finally {
+      // Clear any remaining auth state
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.clear();
+        window.localStorage.clear();
+      }
+      // Force reload to clear any remaining state
+      window.location.href = '/';
     }
-    await supabase.auth.signOut();
   };
 
   // Handle note deletion
-  const handleDeleteNote = async (noteId) => {
+  const handleDeleteNote = useCallback(async (noteId) => {
     try {
+      setIsLoading(true);
       await deleteNote(db, user.id, noteId);
-      const updatedNotes = notes.filter(note => note.id !== noteId);
+      // Fetch fresh notes after deletion
+      const updatedNotes = await getNotes(db, user.id);
       setNotes(updatedNotes);
-      // Cleanup unused tags
-      cleanupUnusedTags(updatedNotes);
     } catch (error) {
       console.error('Error deleting note:', error);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [db, user.id]);
 
   // Handle note edit
-  const handleEditNote = (note) => {
-    setEditingNote(note);
-    editableRef.current.innerText = note.content;
-    editableRef.current.focus();
-    setCurrentNote(note.content);
-    setShowSaveButton(true);
-  };
+  const handleEditNote = useCallback(async (updatedNote) => {
+    try {
+      await updateNote(db, user.id, updatedNote);
+      setNotes(prevNotes =>
+        prevNotes.map(note =>
+          note.id === updatedNote.id ? updatedNote : note
+        )
+      );
+    } catch (error) {
+      console.error('Error updating note:', error);
+    }
+  }, [db, user.id]);
 
   // Update saveNoteToDb to maintain sort order
   const saveNoteToDb = async () => {
@@ -327,11 +364,13 @@ const NoteApp = ({ user }) => {
     return recentTags;
   };
 
-  const filteredNotes = notes.filter(note => {
-    const matchesSearch = note.content.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTag = !selectedTag || note.content.includes(`#${selectedTag}`);
-    return matchesSearch && matchesTag;
-  });
+  const filteredNotes = useMemo(() => {
+    return notes.filter(note => {
+      const matchesSearch = note.content.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTag = !selectedTag || note.content.includes(`#${selectedTag}`);
+      return matchesSearch && matchesTag;
+    });
+  }, [notes, searchQuery, selectedTag]);
 
   // Handle tag suggestion selection
   const handleTagSelect = (tag) => {
@@ -420,37 +459,37 @@ const NoteApp = ({ user }) => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        setIsLoading(true);
         const db = await initDB(user.id);
         setDb(db);
-        // Check if we've already created default notes for this user
-        const hasDefaultNotes = localStorage.getItem(`defaultNotes-${user.id}`);
         const fetchedNotes = await getNotes(db, user.id);
-        
-        if (fetchedNotes.length === 0 && !hasDefaultNotes) {
-          console.log('Creating default notes...');
-          await Promise.all(defaultNotes.map(note => saveNote(db, user.id, note)));
-          localStorage.setItem(`defaultNotes-${user.id}`, 'true');
+
+        // Create default notes if user has no notes
+        if (fetchedNotes.length === 0) {
+          await createDefaultNotes(db, user.id);
           const initialNotes = await getNotes(db, user.id);
           setNotes(initialNotes);
         } else {
           setNotes(fetchedNotes);
         }
+
+        setIsLoading(false);
       } catch (error) {
         console.error('Error initializing app:', error);
+        setIsLoading(false);
       }
     };
 
     initializeApp();
   }, [user.id]);
 
-  const handleTagClick = (tag) => {
-    // If the tag is already selected, deselect it
+  const handleTagClick = useCallback((tag) => {
     if (selectedTag === tag) {
       setSelectedTag(null);
     } else {
       setSelectedTag(tag);
     }
-  };
+  }, [selectedTag]);
 
   // Function to get unique tags from notes
   const getUniqueTags = () => {
@@ -462,18 +501,19 @@ const NoteApp = ({ user }) => {
     return [...new Set(allTags)];
   };
 
+  // Function to render note content with clickable tags
   const renderNoteContent = (content) => {
     return content.split(' ').map((word, i) => 
       word.startsWith('#') ? (
         <span 
-          key={i} 
+          key={`tag-${i}-${word}`}
           className="cursor-pointer text-muted-foreground hover:text-primary border-b border-dashed border-muted-foreground mx-1"
           onClick={() => handleTagClick(word.slice(1))}
         >
-          {word.slice(1)}
+          {word}
         </span>
       ) : (
-        word + ' '
+        <span key={`word-${i}`}>{word}{' '}</span>
       )
     );
   };
