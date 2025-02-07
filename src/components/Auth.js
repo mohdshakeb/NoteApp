@@ -8,8 +8,6 @@ export function Auth() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [guestName, setGuestName] = useState('');
-  const [showGuestForm, setShowGuestForm] = useState(false);
 
   const getInitials = (name) => {
     return name
@@ -40,24 +38,6 @@ export function Auth() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGuestMode = (e) => {
-    e.preventDefault();
-    if (!guestName.trim()) return;
-    
-    const initials = getInitials(guestName);
-    const guestUser = {
-      id: 'guest-' + Date.now(),
-      user_metadata: {
-        full_name: guestName,
-        initials: initials
-      },
-      isGuest: true
-    };
-    
-    localStorage.setItem('guestUser', JSON.stringify(guestUser));
-    window.location.reload();
   };
 
   return (
@@ -154,35 +134,7 @@ export function Auth() {
                 )}
               </form>
 
-              {!showGuestForm ? (
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => setShowGuestForm(true)}
-                >
-                  Continue as Guest
-                </Button>
-              ) : (
-                <form onSubmit={handleGuestMode} className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium" htmlFor="guestName">
-                      Your Name
-                    </label>
-                    <input
-                      id="guestName"
-                      type="text"
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      placeholder="Enter your name"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" variant="outline" className="w-full">
-                    Start as Guest
-                  </Button>
-                </form>
-              )}
+              
             </div>
           </Card>
 

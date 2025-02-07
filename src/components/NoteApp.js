@@ -40,6 +40,8 @@ const NoteApp = ({ user }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [expandedMobile, setExpandedMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingNoteId, setEditingNoteId] = useState(null);
+  const [editingContent, setEditingContent] = useState('');
 
   const defaultNotes = [
     {
@@ -84,10 +86,8 @@ const NoteApp = ({ user }) => {
         const db = await initDB(user.id);
         setDb(db);
         
-        // First try to get existing notes
         const fetchedNotes = await getNotes(db, user.id);
         
-        // If no notes exist, create default notes
         if (Array.isArray(fetchedNotes) && fetchedNotes.length === 0) {
           await createDefaultNotes(db, user.id);
           const initialNotes = await getNotes(db, user.id);
@@ -309,64 +309,102 @@ const NoteApp = ({ user }) => {
   }, [db, user.id, notes]);
 
   // Handle note edit
-  const handleEditNote = useCallback(async (updatedNote) => {
+  const handleEditNote = (note) => {
+    setEditingNote(note);
+    setCurrentNote(note.content);
+    setShowSaveButton(true);
+    if (editableRef.current) {
+      editableRef.current.innerText = note.content;
+      editableRef.current.focus();
+    }
+  };
+
+  const handleEditSave = async (noteId) => {
     try {
-      await updateNote(db, user.id, updatedNote);
-      setNotes(prevNotes =>
-        prevNotes.map(note =>
-          note.id === updatedNote.id ? updatedNote : note
+      const noteToEdit = notes.find(n => n.id === noteId);
+      if (!noteToEdit || editingContent === noteToEdit.content) {
+        setEditingNoteId(null);
+        return;
+      }
+
+      const updatedNote = {
+        ...noteToEdit,
+        content: editingContent,
+        updatedAt: new Date()
+      };
+
+      const result = await updateNote(db, user.id, updatedNote);
+      
+      setNotes(prevNotes => 
+        prevNotes.map(note => 
+          note.id === noteId ? result : note
         )
       );
+      setEditingNoteId(null);
     } catch (error) {
       console.error('Error updating note:', error);
+      alert('Failed to update note. Please try again.');
     }
-  }, [db, user.id]);
+  };
 
-  // Update saveNoteToDb to maintain sort order
+  const handleEditCancel = () => {
+    setEditingNoteId(null);
+    setEditingContent('');
+  };
+
+  // Save note to database
   const saveNoteToDb = async () => {
-    if (currentNote.trim() && db && user) {
-      const tags = extractTags(currentNote);
-      const newNote = {
-        content: currentNote,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userId: user.id,
-        tags
-      };
-      
-      if (user.isGuest) {
-        const guestNotes = JSON.parse(localStorage.getItem('guestNotes') || '[]');
-        const noteWithId = { ...newNote, id: Date.now() };
-        guestNotes.unshift(noteWithId);
-        localStorage.setItem('guestNotes', JSON.stringify(guestNotes));
-        setNotes([noteWithId, ...notes]);
+    try {
+      if (!currentNote.trim()) return;
+
+      let savedNote;  // Variable to store the saved/updated note
+
+      if (editingNote) {
+        // Update existing note
+        const updatedNote = {
+          ...editingNote,
+          content: currentNote,
+          updatedAt: new Date()
+        };
+        const result = await updateNote(db, user.id, updatedNote);
+        setNotes(prevNotes => 
+          prevNotes.map(note => 
+            note.id === editingNote.id ? result : note
+          )
+        );
+        setEditingNote(null);
+        savedNote = result;
       } else {
-        const id = await saveNote(db, user.id, newNote);
-        setNotes(prev => [{ ...newNote, id }, ...prev]);
+        // Create new note
+        const noteId = await saveNote(db, user.id, {
+          content: currentNote,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        
+        const newNote = {
+          id: noteId,
+          content: currentNote,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        setNotes(prevNotes => [newNote, ...prevNotes]);
+        savedNote = newNote;
       }
-      
+
       setCurrentNote('');
       setShowSaveButton(false);
-      // Open right panel after saving
-      if (!showSidebar) {
-        setShowSidebar(true);
-      }
-      // Reset input placeholder
-      if (editableRef.current) {
-        editableRef.current.removeAttribute('data-content');
-      }
-      
-      // Update all tags
-      setAllTags(prev => {
-        const newTags = new Set(prev);
-        tags.forEach(tag => newTags.add(tag));
-        return newTags;
-      });
-      
+      cleanupUnusedTags([...notes, savedNote]);
+
+      // Reset input field
       if (editableRef.current) {
         editableRef.current.innerText = '';
         editableRef.current.focus();
       }
+    } catch (error) {
+      console.error('Error saving note:', error);
+      alert('Failed to save note. Please try again.');
     }
   };
 
@@ -594,20 +632,20 @@ const NoteApp = ({ user }) => {
           transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
         `}>
           <Card className="border-0 shadow-none relative w-full max-w-[580px] flex flex-col">
-      <div 
-        ref={editableRef}
-        contentEditable 
-        onInput={handleKeyDown}
+            <div 
+              ref={editableRef}
+              contentEditable 
+              onInput={handleKeyDown}
               className="min-h-[24px] focus:outline-none text-lg overflow-x-hidden text-center empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50"
-        role="textbox"
+              role="textbox"
               aria-label="Note input"
               data-placeholder="What are you thinking... (use # for tags)"
-      />
-      
-      {showSaveButton && (
+            />
+            
+            {showSaveButton && (
               <div className="mt-6 flex justify-center">
                 <Button onClick={saveNoteToDb}>
-                  Save Note
+                  {editingNote ? 'Update Note' : 'Save Note'}
                 </Button>
               </div>
             )}
@@ -686,16 +724,40 @@ const NoteApp = ({ user }) => {
                 <div className="px-6 py-4 space-y-4">
                   {filteredNotes.map((note, index) => (
                     <React.Fragment key={note.id}>
-                      <Card 
-                        className="border-0 shadow-none bg-background/50"
-                      >
+                      <Card className="border-0 shadow-none bg-background/50">
                         <div className="text-foreground">
                           <div className="text-[12px] text-muted-foreground mb-1">
                             {formatDate(note.createdAt)}
                           </div>
-                          <div className="text-[12px]">
-                            {renderNoteContent(note.content)}
-                          </div>
+                          {editingNoteId === note.id ? (
+                            <div className="space-y-2">
+                              <textarea
+                                value={editingContent}
+                                onChange={(e) => setEditingContent(e.target.value)}
+                                className="w-full min-h-[100px] p-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                                autoFocus
+                              />
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleEditSave(note.id)}
+                                >
+                                  Save
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={handleEditCancel}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-[12px]">
+                              {renderNoteContent(note.content)}
+                            </div>
+                          )}
                           <div className="flex items-center mt-3">
                             <div className="flex gap-4">
                               <button
@@ -709,8 +771,8 @@ const NoteApp = ({ user }) => {
                                 className="text-xs text-muted-foreground hover:text-destructive"
                               >
                                 Delete
-          </button>
-        </div>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </Card>

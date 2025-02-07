@@ -18,27 +18,6 @@ export async function initDB(userId) {
 // Save note to both IndexedDB and Supabase
 export async function saveNote(db, userId, note) {
   try {
-    if (userId.startsWith('guest-')) {
-      const noteId = note.id || crypto.randomUUID();
-      const newNote = {
-        ...note,
-        id: noteId,
-        userId,
-        syncStatus: 'local',
-        createdAt: note.createdAt || new Date(),
-        updatedAt: new Date()
-      };
-      await db.put('notes', newNote);
-      
-      const allNotes = await db.getAllFromIndex('notes', 'userId', userId);
-      
-      if (allNotes && allNotes.length > 0) {
-        localStorage.setItem(`guest-notes-${userId}`, JSON.stringify(allNotes));
-      }
-      
-      return noteId;
-    }
-
     // First save to Supabase
     const { data, error } = await supabase
       .from('notes')
@@ -90,11 +69,6 @@ export async function saveNote(db, userId, note) {
 // Helper function to check if user has any notes
 async function hasExistingNotes(db, userId) {
   try {
-    if (userId.startsWith('guest-')) {
-      const existingNotes = await db.getAllFromIndex('notes', 'userId', userId);
-      return existingNotes.length > 0;
-    }
-
     // Check Supabase for existing notes
     const { data, error } = await supabase
       .from('notes')
@@ -114,31 +88,8 @@ async function hasExistingNotes(db, userId) {
 export async function getNotes(db, userId) {
   let hasNotes = false;
   try {
-    // First check if user already has notes
     hasNotes = await hasExistingNotes(db, userId);
 
-    if (userId.startsWith('guest-')) {
-      // First try to get notes from localStorage
-      const savedNotes = localStorage.getItem(`guest-notes-${userId}`);
-      let notes = [];
-      
-      if (savedNotes) {
-        notes = JSON.parse(savedNotes);
-      } else {
-        notes = await db.getAllFromIndex('notes', 'userId', userId);
-      }
-      
-      // Only return empty array if no notes exist
-      if (!hasNotes && notes.length === 0) {
-        return [];
-      }
-      
-      // Sort notes by creation date (newest first)
-      notes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      return notes;
-    }
-
-    // Get notes from Supabase
     const { data: supabaseNotes, error } = await supabase
       .from('notes')
       .select('*')
@@ -147,62 +98,54 @@ export async function getNotes(db, userId) {
 
     if (error) throw error;
 
-    // Only return empty array if no notes exist anywhere
     if (!hasNotes && (!supabaseNotes || supabaseNotes.length === 0)) {
       return [];
     }
 
-    return formatSupabaseNotes(supabaseNotes);
+    return supabaseNotes.map(note => ({
+      id: note.id,
+      content: note.content,
+      userId: note.user_id,
+      syncStatus: 'synced',
+      tags: note.tags || [],
+      createdAt: new Date(note.created_at),
+      updatedAt: new Date(note.updated_at)
+    }));
   } catch (error) {
     console.error('Error fetching notes:', error);
     return hasNotes ? [] : null;
   }
 }
 
-// Helper function to format Supabase notes
-function formatSupabaseNotes(supabaseNotes) {
-  return supabaseNotes.map(note => ({
-    id: note.id,
-    content: note.content,
-    userId: note.user_id,
-    syncStatus: 'synced',
-    tags: note.tags || [],
-    createdAt: new Date(note.created_at),
-    updatedAt: new Date(note.updated_at)
-  }));
-}
-
 // Delete note from both Supabase and IndexedDB
 export async function deleteNote(db, userId, noteId) {
   try {
-    if (userId.startsWith('guest-')) {
-      const note = await db.get('notes', noteId);
-      if (!note || note.userId !== userId) {
-        throw new Error('Note not found or unauthorized');
-      }
-      await db.delete('notes', noteId);
-      // Update localStorage
-      const remainingNotes = await db.getAllFromIndex('notes', 'userId', userId);
-      localStorage.setItem(`guest-notes-${userId}`, JSON.stringify(remainingNotes));
-      return true;
+    // Delete from Supabase
+    const { data, error } = await supabase
+      .from('notes')
+      .select()
+      .eq('id', noteId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      throw new Error('Note not found or unauthorized');
     }
 
     // Delete from Supabase
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from('notes')
       .delete()
       .eq('id', noteId)
       .eq('user_id', userId);
 
-    if (error) throw error;
+    if (deleteError) throw deleteError;
 
-    // Delete from IndexedDB
+    // Delete from IndexedDB if it exists
     const note = await db.get('notes', noteId);
-    // Only delete if note exists and belongs to this user
-    if (!note || note.userId !== userId) {
-      throw new Error('Note not found or unauthorized');
+    if (note) {
+      await db.delete('notes', noteId);
     }
-    await db.delete('notes', noteId);
 
     return true;
   } catch (error) {
@@ -213,47 +156,52 @@ export async function deleteNote(db, userId, noteId) {
 
 // Update note in both Supabase and IndexedDB
 export async function updateNote(db, userId, note) {
+  console.log('updateNote called with:', { userId, note });
   try {
-    // Check if note exists and belongs to user
-    const existingNote = await db.get('notes', note.id);
-    if (!existingNote || existingNote.userId !== userId) {
+    // First check if note exists in Supabase
+    const { data: existingNote, error: checkError } = await supabase
+      .from('notes')
+      .select()
+      .eq('id', note.id)
+      .eq('user_id', userId)
+      .single();
+
+    console.log('Existing note check:', { existingNote, checkError });
+    if (checkError) {
       throw new Error('Note not found or unauthorized');
     }
 
-    if (userId.startsWith('guest-')) {
-      await db.put('notes', {
-        ...existingNote,
-        ...note,
-        userId,
-        syncStatus: 'local',
-        updatedAt: new Date()
-      });
-      return true;
-    }
-
     // Update in Supabase
-    const { error } = await supabase
+    const { data: updatedNote, error: updateError } = await supabase
       .from('notes')
       .update({
         content: note.content,
-        tags: note.tags,
         updated_at: new Date().toISOString()
       })
       .eq('id', note.id)
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .select()
+      .single();
 
-    if (error) throw error;
+    console.log('Update result:', { updatedNote, updateError });
+    if (updateError) throw updateError;
 
     // Update in IndexedDB
-    await db.put('notes', {
-      ...existingNote,
-      ...note,
-      userId,
+    const tx = db.transaction('notes', 'readwrite');
+    const updatedNoteForDB = {
+      id: updatedNote.id,
+      content: updatedNote.content,
+      userId: existingNote.user_id,
       syncStatus: 'synced',
-      updatedAt: new Date()
-    });
+      createdAt: new Date(existingNote.created_at),
+      updatedAt: new Date(updatedNote.updated_at)
+    };
+    console.log('Updating IndexedDB with:', updatedNoteForDB);
+    await tx.store.put(updatedNoteForDB);
+    await tx.done;
 
-    return true;
+    // Return the updated note so UI can be updated
+    return updatedNoteForDB;
   } catch (error) {
     console.error('Error updating note:', error);
     throw error;
@@ -263,9 +211,6 @@ export async function updateNote(db, userId, note) {
 // Sync pending notes to Supabase
 export async function syncPendingNotes(db, userId) {
   try {
-    // Skip for guest users
-    if (userId.startsWith('guest-')) return;
-
     const tx = db.transaction('notes', 'readwrite');
     const pendingNotes = await tx.store.index('syncStatus').getAll('pending');
 
@@ -273,6 +218,25 @@ export async function syncPendingNotes(db, userId) {
 
     await Promise.all(pendingNotes.map(async (note) => {
       try {
+        // Try to update first
+        const { error: updateError } = await supabase
+          .from('notes')
+          .update({
+            content: note.content,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', note.id)
+          .eq('user_id', userId);
+
+        if (!updateError) {
+          await tx.store.put({
+            ...note,
+            syncStatus: 'synced'
+          });
+          return;
+        }
+
+        // If update fails, try to insert
         const { data, error } = await supabase
           .from('notes')
           .insert([{
@@ -330,56 +294,37 @@ export async function createDefaultNotes(db, userId) {
       return true;
     }
 
-    const isGuest = userId.startsWith('guest-');
     const defaultNotes = getDefaultNotes();
 
     // Clear any existing data
     await clearExistingNotes(db, userId);
 
-    if (isGuest) {
-      // Create all notes in a single transaction
-      const tx = db.transaction('notes', 'readwrite');
-      await Promise.all(defaultNotes.map(note => 
-        tx.store.put({
-          ...note,
-          id: crypto.randomUUID(),
-          userId,
-          syncStatus: 'local'
-        })
-      ));
-      await tx.done;
+    // Create notes in Supabase first
+    const { data, error: insertError } = await supabase
+      .from('notes')
+      .insert(defaultNotes.map(note => ({
+        content: note.content,
+        user_id: userId,
+        created_at: note.createdAt.toISOString(),
+        updated_at: note.updatedAt.toISOString()
+      })))
+      .select();
 
-      // Save to localStorage after successful creation
-      const allNotes = await db.getAllFromIndex('notes', 'userId', userId);
-      localStorage.setItem(`guest-notes-${userId}`, JSON.stringify(allNotes));
-    } else {
-      // Create notes in Supabase first
-      const { data, error: insertError } = await supabase
-        .from('notes')
-        .insert(defaultNotes.map(note => ({
-          content: note.content,
-          user_id: userId,
-          created_at: note.createdAt.toISOString(),
-          updated_at: note.updatedAt.toISOString()
-        })))
-        .select();
+    if (insertError) throw insertError;
 
-      if (insertError) throw insertError;
-
-      // Then save to IndexedDB in a single transaction
-      const tx = db.transaction('notes', 'readwrite');
-      await Promise.all(data.map(note => 
-        tx.store.put({
-          id: note.id,
-          content: note.content,
-          userId,
-          syncStatus: 'synced',
-          createdAt: new Date(note.created_at),
-          updatedAt: new Date(note.updated_at)
-        })
-      ));
-      await tx.done;
-    }
+    // Then save to IndexedDB in a single transaction
+    const tx = db.transaction('notes', 'readwrite');
+    await Promise.all(data.map(note => 
+      tx.store.put({
+        id: note.id,
+        content: note.content,
+        userId: note.user_id,
+        syncStatus: 'synced',
+        createdAt: new Date(note.created_at),
+        updatedAt: new Date(note.updated_at)
+      })
+    ));
+    await tx.done;
 
     return true;
   } catch (error) {
@@ -399,27 +344,15 @@ async function clearExistingNotes(db, userId) {
   });
   await tx.done;
 
-  // Clear Supabase if not guest
-  if (!userId.startsWith('guest-')) {
-    await supabase
-      .from('notes')
-      .delete()
-      .eq('user_id', userId);
-  }
-
-  // Clear localStorage for guest users
-  if (userId.startsWith('guest-')) {
-    localStorage.removeItem(`guest-notes-${userId}`);
-  }
+  await supabase
+    .from('notes')
+    .delete()
+    .eq('user_id', userId);
 }
 
 // Delete account and all associated data
 export async function deleteAccount(db, userId) {
   try {
-    if (userId.startsWith('guest-')) {
-      throw new Error('Cannot delete guest account');
-    }
-
     // Delete all notes from Supabase
     const { error: notesError } = await supabase
       .from('notes')
@@ -441,10 +374,6 @@ export async function deleteAccount(db, userId) {
       return cursor.continue().then(deleteNote);
     });
     await tx.done;
-
-    // Clear any local storage
-    localStorage.removeItem(`guest-notes-${userId}`);
-    localStorage.clear();
 
     return true;
   } catch (error) {
