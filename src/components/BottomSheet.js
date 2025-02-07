@@ -47,7 +47,7 @@ const BottomSheet = ({
         bg-background shadow-lg 
         transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
         border-t
-        ${expandedMobile ? 'h-[calc(100vh-64px)]' : 'h-[55vh]'}
+        ${expandedMobile ? 'h-[calc(100vh-64px)]' : 'h-[50vh]'}
       `}
     >
       {/* Collapse Button */}

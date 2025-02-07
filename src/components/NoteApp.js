@@ -19,6 +19,7 @@ import {
 import BottomSheet from './BottomSheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuSeparator } from "./ui/dropdown";
 import logo from '../assets/logo.svg';
+import { UserDropdown } from './ui/UserDropdown';
 
 const NoteApp = ({ user }) => {
   const { theme, setTheme } = useTheme();
@@ -77,29 +78,33 @@ const NoteApp = ({ user }) => {
 
   // Get notes from Supabase and sync with IndexedDB
   useEffect(() => {
-    if (db && user) {
-      if (user.isGuest) {
-        // Load notes from localStorage for guest users
-        const guestNotes = JSON.parse(localStorage.getItem('guestNotes') || '[]');
-        setNotes(guestNotes);
-        return;
+    const initializeApp = async () => {
+      try {
+        setIsLoading(true);
+        const db = await initDB(user.id);
+        setDb(db);
+        const fetchedNotes = await getNotes(db, user.id);
+        
+        // Create default notes only if no notes exist at all
+        if (!fetchedNotes || fetchedNotes.length === 0) {
+          await createDefaultNotes(db, user.id);
+          const initialNotes = await getNotes(db, user.id);
+          setNotes(initialNotes);
+        } else {
+          setNotes(fetchedNotes);
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error initializing app:', error);
+        setIsLoading(false);
       }
-      
-      getNotes(db, user.id).then(fetchedNotes => {
-        // Sort notes by creation date (newest first)
-        const sortedNotes = fetchedNotes.sort((a, b) => 
-          new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        setNotes(sortedNotes || []);
-        // Extract all tags from existing notes
-        const tags = new Set();
-        fetchedNotes?.forEach(note => {
-          note.tags?.forEach(tag => tags.add(tag));
-        });
-        setAllTags(tags);
-      });
+    };
+
+    if (user) {
+      initializeApp();
     }
-  }, [db, user]);
+  }, [user?.id]);
 
   // Debounced function to show save button
   const debouncedShowSaveButton = useCallback(
@@ -282,16 +287,24 @@ const NoteApp = ({ user }) => {
   const handleDeleteNote = useCallback(async (noteId) => {
     try {
       setIsLoading(true);
+      // Get the note before deleting
+      const noteToDelete = notes.find(note => note.id === noteId);
+      if (!noteToDelete) {
+        throw new Error('Note not found');
+      }
+
       await deleteNote(db, user.id, noteId);
-      // Fetch fresh notes after deletion
-      const updatedNotes = await getNotes(db, user.id);
-      setNotes(updatedNotes);
+
+      // Update state only for the deleted note
+      setNotes(prevNotes => prevNotes.filter(note => note.id !== noteId));
     } catch (error) {
       console.error('Error deleting note:', error);
+      // Show error to user
+      alert('Failed to delete note. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  }, [db, user.id]);
+  }, [db, user.id, notes]);
 
   // Handle note edit
   const handleEditNote = useCallback(async (updatedNote) => {
@@ -456,33 +469,6 @@ const NoteApp = ({ user }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        setIsLoading(true);
-        const db = await initDB(user.id);
-        setDb(db);
-        const fetchedNotes = await getNotes(db, user.id);
-
-        // Create default notes if user has no notes
-        if (fetchedNotes.length === 0) {
-          await createDefaultNotes(db, user.id);
-          const initialNotes = await getNotes(db, user.id);
-          setNotes(initialNotes);
-        } else {
-          setNotes(fetchedNotes);
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error initializing app:', error);
-        setIsLoading(false);
-      }
-    };
-
-    initializeApp();
-  }, [user.id]);
-
   const handleTagClick = useCallback((tag) => {
     if (selectedTag === tag) {
       setSelectedTag(null);
@@ -553,44 +539,10 @@ const NoteApp = ({ user }) => {
                 {theme === "light" ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />}
               </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="focus-visible:ring-0 focus-visible:ring-offset-0"
-                  >
-                    {user?.isGuest ? (
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                        {user.user_metadata.initials}
-                      </div>
-                    ) : user?.user_metadata?.avatar_url ? (
-                      <img 
-                        src={user.user_metadata.avatar_url} 
-                        alt={user.email}
-                        className="w-8 h-8 rounded-full"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                        {(user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U').toUpperCase()}
-                      </div>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  <div className="px-2 py-1.5">
-                    <div className="font-medium">{user.user_metadata?.full_name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {notes.length} note{notes.length !== 1 ? 's' : ''} saved
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                    <LogOutIcon className="w-4 h-4 mr-2" />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <UserDropdown 
+                user={user} 
+                onSignOut={handleSignOut}
+              />
 
               <Button
                 variant="outline"
@@ -716,8 +668,10 @@ const NoteApp = ({ user }) => {
               <div className="flex-1 overflow-auto min-h-0">
                 <div className="px-6 py-4 space-y-4">
                   {filteredNotes.map((note, index) => (
-                    <>
-                      <Card key={note.id} className="border-0 shadow-none bg-background/50">
+                    <React.Fragment key={note.id}>
+                      <Card 
+                        className="border-0 shadow-none bg-background/50"
+                      >
                         <div className="text-foreground">
                           <div className="text-[12px] text-muted-foreground mb-1">
                             {formatDate(note.createdAt)}
@@ -746,7 +700,7 @@ const NoteApp = ({ user }) => {
                       {index < filteredNotes.length - 1 && (
                         <div className="border-t border-border/50 my-4 opacity-100" />
                       )}
-                    </>
+                    </React.Fragment>
                   ))}
                   <div className="h-16" />
                 </div>
