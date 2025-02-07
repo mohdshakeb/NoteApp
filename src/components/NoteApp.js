@@ -3,7 +3,7 @@ import { debounce } from 'lodash';
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
-import { initDB, saveNote, getNotes, deleteNote, updateNote, syncPendingNotes, createDefaultNotes } from '../lib/db';
+import { initDB, saveNote, getNotes, deleteNote, updateNote, syncPendingNotes, createDefaultNotes, deleteAccount } from '../lib/db';
 import { supabase } from '../lib/supabase';
 import { useTheme } from "./ThemeProvider";
 import { 
@@ -83,17 +83,19 @@ const NoteApp = ({ user }) => {
         setIsLoading(true);
         const db = await initDB(user.id);
         setDb(db);
+        
+        // First try to get existing notes
         const fetchedNotes = await getNotes(db, user.id);
         
-        // Create default notes only if no notes exist at all
-        if (!fetchedNotes || fetchedNotes.length === 0) {
+        // If no notes exist, create default notes
+        if (Array.isArray(fetchedNotes) && fetchedNotes.length === 0) {
           await createDefaultNotes(db, user.id);
           const initialNotes = await getNotes(db, user.id);
           setNotes(initialNotes);
         } else {
           setNotes(fetchedNotes);
         }
-        
+
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing app:', error);
@@ -504,6 +506,20 @@ const NoteApp = ({ user }) => {
     );
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      setIsLoading(true);
+      // First delete all user data
+      await deleteAccount(db, user.id);
+      // Force reload to clear everything
+      window.location.replace('/');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Failed to delete account. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
       {/* Header */}
@@ -542,6 +558,7 @@ const NoteApp = ({ user }) => {
               <UserDropdown 
                 user={user} 
                 onSignOut={handleSignOut}
+                onDeleteAccount={handleDeleteAccount}
               />
 
               <Button
