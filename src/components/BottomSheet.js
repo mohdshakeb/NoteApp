@@ -17,27 +17,28 @@ const BottomSheet = ({
 }) => {
   const sheetRef = useRef(null);
 
-  const uniqueTags = useMemo(() => 
-    Array.from(new Set(notes.flatMap(note => 
+  const uniqueTags = useMemo(() => {
+    const tagSet = new Set();
+    notes.forEach(note => {
       note.content.split(' ')
         .filter(word => word.startsWith('#'))
-        .map(tag => tag.slice(1))
-    )))
-  , [notes]);
+        .forEach(tag => tagSet.add(tag.slice(1)));
+    });
+    return Array.from(tagSet);
+  }, [notes]);
 
-  const filteredNotes = notes.filter(note => {
-    const matchesSearch = 
-      note.content.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTag = 
-      !selectedTag || 
-      note.content
-        .split(' ')
-        .filter(word => word.startsWith('#'))
-        .map(tag => tag.slice(1))
-        .includes(selectedTag);
-    
-    return matchesSearch && matchesTag;
-  });
+  const filteredNotes = useMemo(() => {
+    const searchLower = searchQuery.toLowerCase();
+    return notes.filter(note => {
+      if (searchQuery && !note.content.toLowerCase().includes(searchLower)) {
+        return false;
+      }
+      if (selectedTag && !note.content.includes(`#${selectedTag}`)) {
+        return false;
+      }
+      return true;
+    });
+  }, [notes, searchQuery, selectedTag]);
 
   return (
     <div 

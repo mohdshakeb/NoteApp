@@ -9,14 +9,6 @@ export function Auth() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const getInitials = (name) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase();
-  };
-
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -138,16 +130,16 @@ export function Auth() {
             </div>
           </Card>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-sm text-muted-foreground">
             By clicking "Continue" you agree to our{' '}
-            <a href="#" className="underline hover:text-primary">
+            <button onClick={() => window.open('/terms', '_blank')} className="underline hover:text-primary">
               Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="#" className="underline hover:text-primary">
+            </button>
+            {' '}and{' '}
+            <button onClick={() => window.open('/privacy', '_blank')} className="underline hover:text-primary">
               Privacy Policy
-            </a>
-          </p>
+            </button>
+          </div>
         </div>
       </div>
 

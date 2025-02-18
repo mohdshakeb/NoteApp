@@ -29,7 +29,6 @@ const NoteApp = ({ user }) => {
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [db, setDb] = useState(null);
   const [selectedTag, setSelectedTag] = useState(null);
-  const [allTags, setAllTags] = useState(new Set());
   const [editingNote, setEditingNote] = useState(null);
   const [tagSuggestions, setTagSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -143,13 +142,9 @@ const NoteApp = ({ user }) => {
   };
 
   // Clean up unused tags
-  const cleanupUnusedTags = (currentNotes) => {
-    const usedTags = new Set();
-    currentNotes.forEach(note => {
-      note.tags?.forEach(tag => usedTags.add(tag));
-    });
-    setAllTags(usedTags);
-  };
+  const cleanupUnusedTags = useCallback((updatedNotes) => {
+    // No need to update allTags since it's now computed with useMemo
+  }, []);
 
   // Helper function for formatting dates
   const formatDate = (date) => {
@@ -557,6 +552,54 @@ const NoteApp = ({ user }) => {
       setIsLoading(false);
     }
   };
+
+  // Use useMemo for tags
+  const allTags = useMemo(() => {
+    const tags = new Set();
+    notes.forEach(note => {
+      const matches = note.content.match(/#(\w+)/g);
+      if (matches) {
+        matches.forEach(tag => tags.add(tag.slice(1)));
+      }
+    });
+    return tags;
+  }, [notes]);
+
+  // Update tag suggestions when typing
+  const updateTagSuggestions = (text) => {
+    const lastWord = text.split(/\s+/).pop();
+    if (lastWord.startsWith('#')) {
+      const searchTerm = lastWord.slice(1).toLowerCase();
+      const suggestions = Array.from(allTags)
+        .filter(tag => tag.toLowerCase().includes(searchTerm))
+        .slice(0, 5);
+      setTagSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  // Add cleanup for event listeners and subscriptions
+  useEffect(() => {
+    async function initDatabase() {
+      try {
+        const database = await initDB(user.id);
+        setDb(database);
+      } catch (error) {
+        console.error('Error initializing database:', error);
+      }
+    }
+    
+    initDatabase();
+    
+    return () => {
+      // Close IndexedDB connection
+      if (db) {
+        db.close();
+      }
+    };
+  }, [user?.id]);
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">

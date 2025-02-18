@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { supabase, testSupabaseConnection } from './lib/supabase';
+import React from 'react';
+import { supabase } from './lib/supabase';
 import NoteApp from './components/NoteApp';
 import { Auth } from './components/Auth';
 import { ThemeProvider } from './components/ThemeProvider';

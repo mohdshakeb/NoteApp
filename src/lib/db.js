@@ -380,4 +380,11 @@ export async function deleteAccount(db, userId) {
     console.error('Error deleting account:', error);
     throw error;
   }
+}
+
+// Add batch operations for better performance
+export async function batchSaveNotes(db, userId, notes) {
+  const tx = db.transaction('notes', 'readwrite');
+  await Promise.all(notes.map(note => tx.store.put(note)));
+  await tx.done;
 } 
