@@ -391,7 +391,7 @@ const NoteApp = ({ user }) => {
       setCurrentNote('');
       setShowSaveButton(false);
       cleanupUnusedTags([...notes, savedNote]);
-
+      
       // Reset input field
       if (editableRef.current) {
         editableRef.current.innerText = '';
@@ -602,7 +602,7 @@ const NoteApp = ({ user }) => {
   }, [user?.id]);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+    <div className="h-screen bg-background overflow-hidden">
       {/* Header */}
       <header className={`
         border-b bg-background 
@@ -675,17 +675,17 @@ const NoteApp = ({ user }) => {
           transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)
         `}>
           <Card className="border-0 shadow-none relative w-full max-w-[580px] flex flex-col">
-            <div 
-              ref={editableRef}
-              contentEditable 
-              onInput={handleKeyDown}
+      <div 
+        ref={editableRef}
+        contentEditable 
+        onInput={handleKeyDown}
               className="min-h-[24px] focus:outline-none text-lg overflow-x-hidden text-center empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50"
-              role="textbox"
+        role="textbox"
               aria-label="Note input"
               data-placeholder="What are you thinking... (use # for tags)"
-            />
-            
-            {showSaveButton && (
+      />
+      
+      {showSaveButton && (
               <div className="mt-6 flex justify-center">
                 <Button onClick={saveNoteToDb}>
                   {editingNote ? 'Update Note' : 'Save Note'}
@@ -814,8 +814,8 @@ const NoteApp = ({ user }) => {
                                 className="text-xs text-muted-foreground hover:text-destructive"
                               >
                                 Delete
-                              </button>
-                            </div>
+          </button>
+        </div>
                           </div>
                         </div>
                       </Card>

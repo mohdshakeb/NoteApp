@@ -36,7 +36,7 @@ export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
           <Button 
             variant="ghost" 
             size="icon"
-            className="focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="focus-visible:ring-0 focus-visible:ring-offset-0 relative"
           >
             {user?.user_metadata?.avatar_url ? (
               <img 
@@ -52,9 +52,11 @@ export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
-          align="end" 
+          align="end"
+          alignOffset={0}  // This ensures exact alignment
+          sideOffset={8}
           className="w-56"
-          sideOffset={5}
+          forceMount
         >
           <div className="px-2 py-1.5">
             <div className="font-medium">{user.user_metadata?.full_name}</div>
