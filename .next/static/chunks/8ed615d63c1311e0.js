@@ -1,1 +1,0 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,34059,o=>{o.v("/_next/static/media/logo.cdc130be.svg")}]);
