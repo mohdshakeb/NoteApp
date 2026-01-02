@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
+"use client";
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext({
   theme: 'light',
@@ -6,16 +7,28 @@ const ThemeContext = createContext({
 });
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(
-    localStorage.getItem('theme') || 'light'
-  );
+  const [theme, setTheme] = useState('light');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme) {
+      setTheme(storedTheme);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
     localStorage.setItem('theme', theme);
-  }, [theme]);
+  }, [theme, mounted]);
+
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
@@ -24,4 +37,4 @@ export function ThemeProvider({ children }) {
   );
 }
 
-export const useTheme = () => useContext(ThemeContext); 
+export const useTheme = () => useContext(ThemeContext);

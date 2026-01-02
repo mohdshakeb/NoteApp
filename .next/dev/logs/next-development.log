@@ -1,0 +1,889 @@
+[00:00:02.326] Server  LOG     ✓ Ready in 1486ms
+[00:00:35.211] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:18:39.816] Server  LOG     ✓ Compiled in 2.9s
+[00:19:03.510] Server  LOG     ✓ Compiled in 338ms
+[00:22:27.944] Server  LOG     ✓ Compiled in 259ms
+[00:28:22.621] Server  LOG     ✓ Compiled in 214ms
+[00:29:30.300] Browser LOG     updateNote called with: {"note":{"content":"","createdAt":"2026-01-01T16:30:41.839Z","id":519,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T10:21:08.896Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:29:30.482] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"","created_at":"2026-01-01T16:30:41.839+00:00","id":519,"tags":[],"updated_at":"2026-01-01T16:30:41.839+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:29:30.630] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"","created_at":"2026-01-01T16:30:41.839+00:00","id":519,"tags":[],"updated_at":"2026-01-02T10:21:09.083+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:29:30.631] Browser LOG     Updating IndexedDB with: {"content":"","createdAt":"2026-01-01T16:30:41.839Z","id":519,"syncStatus":"synced","updatedAt":"2026-01-02T10:21:09.083Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:11.143] Browser LOG     updateNote called with: {"note":{"content":"\n\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T10:22:49.741Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:11.405] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-01T16:33:12.537+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:11.507] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"\n\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:22:50.006+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:11.507] Browser LOG     Updating IndexedDB with: {"content":"\n\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:22:50.006Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:16.851] Browser LOG     updateNote called with: {"note":{"content":"\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:22:55.451Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:17.121] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"\n\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:22:50.006+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:17.121] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:22:55.633+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:17.121] Browser LOG     Updating IndexedDB with: {"content":"\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:22:55.633Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:21.268] Browser LOG     updateNote called with: {"note":{"content":"\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:22:59.869Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:21.475] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:22:55.633+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:21.632] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:23:00.076+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:21.632] Browser LOG     Updating IndexedDB with: {"content":"\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:23:00.076Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:28.581] Browser LOG     updateNote called with: {"note":{"content":"\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:23:07.182Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:28.733] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:23:00.076+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:28.879] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:23:07.333+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:28.879] Browser LOG     Updating IndexedDB with: {"content":"\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:23:07.333Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:29.359] Browser LOG     updateNote called with: {"note":{"content":"Let's see if it #works if it doesn't I'll have to make it #perfect","createdAt":"2026-01-01T14:31:32.327Z","id":517,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T10:23:07.959Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:29.587] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's see if it #works if it doesn't I'll have to make it #perfect","created_at":"2026-01-01T14:31:32.327+00:00","id":517,"tags":[],"updated_at":"2026-01-01T14:31:32.327+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:29.808] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's see if it #works if it doesn't I'll have to make it #perfect","created_at":"2026-01-01T14:31:32.327+00:00","id":517,"tags":[],"updated_at":"2026-01-02T10:23:08.187+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:29.809] Browser LOG     Updating IndexedDB with: {"content":"Let's see if it #works if it doesn't I'll have to make it #perfect","createdAt":"2026-01-01T14:31:32.327Z","id":517,"syncStatus":"synced","updatedAt":"2026-01-02T10:23:08.187Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:45.613] Browser LOG     updateNote called with: {"note":{"content":"\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:23:24.197Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:31:45.810] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:23:07.333+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:45.944] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:23:24.411+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:31:45.944] Browser LOG     Updating IndexedDB with: {"content":"\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:23:24.411Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:34:02.067] Server  LOG     ✓ Compiled in 283ms
+[00:34:16.043] Server  LOG     ✓ Compiled in 776ms
+[00:34:23.963] Browser LOG     updateNote called with: {"note":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T10:26:02.564Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:34:24.128] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:23:24.411+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:34:24.254] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:26:02.729+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[00:34:24.254] Browser LOG     Updating IndexedDB with: {"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T10:26:02.729Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[00:34:28.477] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:43:58.556] Server  LOG     ✓ Compiled in 134ms
+[00:43:58.825] Browser ERROR   uncaughtError: ReferenceError: TagsRail is not defined
+[00:44:07.551] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:44:07.572] Server  LOG     ✓ Compiled in 545ms
+[00:44:09.354] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:44:17.651] Server  LOG     ✓ Compiled in 395ms
+[01:11:12.119] Browser LOG     updateNote called with: {"note":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T11:02:50.751Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[01:11:12.444] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T10:26:02.729+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[01:11:12.445] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T11:02:50.863+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[01:11:12.445] Browser LOG     Updating IndexedDB with: {"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T11:02:50.863Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[01:11:44.641] Browser LOG     updateNote called with: {"note":{"content":"I'm trying out #design ","createdAt":"2026-01-02T11:02:51.008Z","id":521,"updatedAt":"2026-01-02T11:03:23.282Z"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[01:11:44.888] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T11:02:50.873+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[01:11:44.989] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"I'm trying out #design ","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T11:03:23.528+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[01:11:44.989] Browser LOG     Updating IndexedDB with: {"content":"I'm trying out #design ","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T11:03:23.528Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[01:12:21.151] Browser LOG     updateNote called with: {"note":{"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T11:03:59.793Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[01:12:21.305] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"I'm trying out #design ","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T11:03:23.528+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[01:12:21.412] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T11:03:59.933+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[01:12:21.412] Browser LOG     Updating IndexedDB with: {"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T11:03:59.933Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[01:25:47.699] Server  LOG     ✓ Compiled in 540ms
+[01:27:23.752] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:27:24.172] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[01:35:10.681] Server  LOG     ✓ Compiled in 433ms
+[02:16:49.887] Server  LOG     ✓ Compiled in 556ms
+[02:17:02.619] Server  LOG     ✓ Compiled in 206ms
+[02:24:55.980] Server  LOG     ✓ Compiled in 902ms
+[02:25:20.310] Server  LOG     ✓ Compiled in 919ms
+[02:46:01.105] Server  LOG     ✓ Compiled in 641ms
+[02:48:14.039] Browser ERROR   Error signing out: {}
+[02:48:17.324] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:48:17.494] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[02:48:35.943] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:48:36.299] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[02:51:22.794] Browser ERROR   Error signing out: {}
+[02:51:24.416] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:52:27.263] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:09:58.499] Server  LOG     ✓ Compiled in 430ms
+[03:09:58.735] Browser ERROR   uncaughtError: ReferenceError: groupedDates is not defined
+[03:12:56.582] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[03:12:56.614] Server  LOG     ✓ Compiled in 233ms
+[03:12:57.902] Browser ERROR   uncaughtError: ReferenceError: activeDateKey is not defined
+[03:12:59.757] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:12:59.992] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[03:12:59.992] Browser ERROR   uncaughtError: ReferenceError: activeDateKey is not defined
+[03:15:19.937] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[03:15:19.963] Server  LOG     ✓ Compiled in 223ms
+[03:15:21.366] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:15:21.851] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[03:19:30.198] Server  LOG     ✓ Compiled in 251ms
+[03:19:30.565] Browser ERROR   uncaughtError: ReferenceError: sortedTags is not defined
+[03:21:25.492] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[03:21:25.552] Server  LOG     ✓ Compiled in 210ms
+[03:21:27.567] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:21:49.984] Browser ERROR   Error signing out: {}
+[03:21:51.820] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:22:00.190] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:22:00.417] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[03:29:03.933] Server  LOG     ✓ Compiled in 911ms
+[03:29:31.652] Server  LOG     ✓ Compiled in 307ms
+[03:29:31.827] Browser ERROR   uncaughtError: ReferenceError: getTagColor is not defined
+[03:30:00.886] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[03:30:01.706] Server  LOG     ✓ Compiled in 973ms
+[03:30:02.327] Browser ERROR   uncaughtError: ReferenceError: getTagColor is not defined
+[03:30:04.010] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:30:04.308] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[03:30:04.581] Browser ERROR   uncaughtError: ReferenceError: getTagColor is not defined
+[03:35:48.169] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[03:35:48.232] Server  LOG     ✓ Compiled in 343ms
+[03:35:49.427] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:35:49.640] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[03:35:51.128] Browser ERROR   uncaughtError: ReferenceError: useRef is not defined
+[03:38:15.035] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[03:38:15.064] Server  LOG     ✓ Compiled in 254ms
+[03:38:16.824] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:38:17.019] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[03:39:48.141] Browser LOG     updateNote called with: {"note":{"content":"Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!","createdAt":"2025-02-13T16:40:53.451Z","id":349,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T13:31:26.864Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[03:39:48.647] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!","created_at":"2025-02-13T16:40:53.451+00:00","id":349,"tags":[],"updated_at":"2026-01-01T16:19:45.181+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[03:39:48.824] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!","created_at":"2025-02-13T16:40:53.451+00:00","id":349,"tags":[],"updated_at":"2026-01-02T13:31:27.444+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[03:39:48.824] Browser LOG     Updating IndexedDB with: {"content":"Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!","createdAt":"2025-02-13T16:40:53.451Z","id":349,"syncStatus":"synced","updatedAt":"2026-01-02T13:31:27.444Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[03:46:08.739] Server  LOG     ✓ Compiled in 554ms
+[03:47:02.558] Browser LOG     updateNote called with: {"note":{"content":"Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!","createdAt":"2025-02-13T16:40:53.451Z","id":349,"syncStatus":"synced","updatedAt":"2026-01-02T13:38:41.382Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[03:47:03.614] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!","created_at":"2025-02-13T16:40:53.451+00:00","id":349,"tags":[],"updated_at":"2026-01-02T13:31:27.444+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[03:47:03.729] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!","created_at":"2025-02-13T16:40:53.451+00:00","id":349,"tags":[],"updated_at":"2026-01-02T13:38:42.442+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[03:47:03.729] Browser LOG     Updating IndexedDB with: {"content":"Click on any tag to filter notes. Try clicking on #welcome or #tips to see how it works!","createdAt":"2025-02-13T16:40:53.451Z","id":349,"syncStatus":"synced","updatedAt":"2026-01-02T13:38:42.442Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[03:48:19.908] Server  LOG     ✓ Compiled in 259ms
+[03:50:02.577] Browser LOG     updateNote called with: {"note":{"content":"Let's chec","createdAt":"2026-01-02T13:38:51.088Z","id":524,"updatedAt":"2026-01-02T13:41:41.405Z"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[03:50:03.449] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"","created_at":"2026-01-02T13:38:50.982+00:00","id":524,"tags":[],"updated_at":"2026-01-02T13:38:50.982+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[03:50:03.755] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's chec","created_at":"2026-01-02T13:38:50.982+00:00","id":524,"tags":[],"updated_at":"2026-01-02T13:41:42.279+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[03:50:03.755] Browser LOG     Updating IndexedDB with: {"content":"Let's chec","createdAt":"2026-01-02T13:38:50.982Z","id":524,"syncStatus":"synced","updatedAt":"2026-01-02T13:41:42.279Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[03:51:46.389] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:52:31.684] Browser LOG     updateNote called with: {"note":{"content":"Let's check","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T13:44:10.516Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[03:52:31.889] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T13:43:01.654+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[03:52:31.994] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's check","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T13:44:10.72+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[03:52:31.994] Browser LOG     Updating IndexedDB with: {"content":"Let's check","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","updatedAt":"2026-01-02T13:44:10.720Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[03:58:51.301] Server  LOG     ✓ Compiled in 3.3s
+[03:59:00.198] Server  LOG     ✓ Compiled in 222ms
+[03:59:36.880] Server  LOG     ✓ Compiled in 187ms
+[03:59:37.099] Browser ERROR   uncaughtError: ReferenceError: TiptapEditor is not defined
+[03:59:42.560] Server  LOG     ✓ Compiled in 2.4s
+[03:59:42.853] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[03:59:44.562] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:59:45.273] Browser ERROR   uncaughtError: Error: Tiptap Error: SSR has been detected, please set `immediatelyRender` explicitly to `false` to avoid hydration mismatches.
+[04:00:13.102] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[04:00:13.172] Server  LOG     ✓ Compiled in 539ms
+[04:00:14.327] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[04:00:14.628] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[04:00:15.153] Browser ERROR   uncaughtError: Error: Tiptap Error: SSR has been detected, please set `immediatelyRender` explicitly to `false` to avoid hydration mismatches.
+[04:04:59.771] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[04:04:59.791] Server  LOG     ✓ Compiled in 426ms
+[04:05:01.468] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[04:05:01.721] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[04:05:03.434] Browser ERROR   uncaughtError: TypeError: this.findTags is not a function
+[04:05:03.434] Browser ERROR   uncaughtError: TypeError: Cannot read properties of null (reading 'scrollIntoView')
+[04:10:00.874] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[04:10:01.059] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[04:10:02.562] Browser ERROR   uncaughtError: TypeError: this.findTags is not a function
+[04:10:02.562] Browser ERROR   uncaughtError: TypeError: Cannot read properties of null (reading 'scrollIntoView')
+[04:11:58.784] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[04:11:58.827] Server  LOG     ✓ Compiled in 385ms
+[04:12:00.355] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[04:12:00.526] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+
+[04:12:00.760] Server  LOG     ✓ Compiled in 292ms
+[04:13:48.134] Browser LOG     updateNote called with: {"note":{"content":"Let's check if it works #product ","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T14:05:26.951Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[04:13:49.219] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's check","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T13:44:10.72+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[04:13:49.321] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's check if it works #product ","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T14:05:28.015+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[04:13:49.321] Browser LOG     Updating IndexedDB with: {"content":"Let's check if it works #product ","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","updatedAt":"2026-01-02T14:05:28.015Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[04:21:13.742] Server  LOG     ✓ Compiled in 723ms
+[04:29:35.516] Server  LOG     ✓ Compiled in 491ms
+[04:30:09.213] Server  LOG     ✓ Compiled in 300ms
+[04:30:09.441] Browser ERROR   uncaughtError: ReferenceError: getTagMeta is not defined
+[04:31:26.058] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[04:31:26.063] Server  LOG     ✓ Compiled in 547ms
+[04:31:28.697] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[04:38:11.825] Server  LOG     ✓ Compiled in 400ms
+[04:40:20.497] Server  LOG     ✓ Compiled in 315ms
+[04:42:51.826] Browser LOG     updateNote called with: {"note":{"content":"Humanities final goal was to #conquertheworld ","createdAt":"2025-02-23T18:35:23.544Z","id":364,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T14:34:30.677Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[04:42:53.191] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Humanities final goal","created_at":"2025-02-23T18:35:23.544+00:00","id":364,"tags":[],"updated_at":"2025-02-23T18:35:23.544+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[04:42:53.356] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Humanities final goal was to #conquertheworld ","created_at":"2025-02-23T18:35:23.544+00:00","id":364,"tags":[],"updated_at":"2026-01-02T14:34:32.044+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[04:42:53.356] Browser LOG     Updating IndexedDB with: {"content":"Humanities final goal was to #conquertheworld ","createdAt":"2025-02-23T18:35:23.544Z","id":364,"syncStatus":"synced","updatedAt":"2026-01-02T14:34:32.044Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[04:45:49.315] Server  LOG     ✓ Compiled in 335ms
+[04:53:48.761] Server  LOG     ✓ Compiled in 423ms
+[04:54:11.376] Server  LOG     ✓ Compiled in 295ms
+[04:55:30.943] Browser ERROR   uncaughtError: ReferenceError: onBlur is not defined
+[05:01:06.577] Server  LOG     ✓ Compiled in 360ms
+[05:01:35.226] Browser ERROR   uncaughtError: TypeError: Component is not a function
+[05:02:03.622] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[05:02:03.630] Server  LOG     ✓ Compiled in 258ms
+[05:02:06.736] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:06:26.591] Browser ERROR   Error deleting note: {}
+[05:06:26.593] Browser ERROR   Error deleting note: {}
+[05:06:26.593] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[05:06:30.216] Browser LOG     updateNote called with: {"note":{"content":"Let's check if it works #product","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T14:58:09.079Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:30.390] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's check if it works #product ","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T14:05:28.015+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:30.531] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's check if it works #product","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T14:58:09.254+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:30.531] Browser LOG     Updating IndexedDB with: {"content":"Let's check if it works #product","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:09.254Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:38.742] Browser ERROR   Error deleting note: {}
+[05:06:38.742] Browser ERROR   Error deleting note: {}
+[05:06:38.742] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[05:06:39.201] Browser LOG     updateNote called with: {"note":{"content":"Let's check if it works #product","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:18.066Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:39.395] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's check if it works #product","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T14:58:09.254+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:39.395] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's check if it works #product","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T14:58:18.172+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:39.395] Browser LOG     Updating IndexedDB with: {"content":"Let's check if it works #product","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:18.172Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:43.313] Browser ERROR   Error deleting note: {}
+[05:06:43.313] Browser ERROR   Error deleting note: {}
+[05:06:43.313] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[05:06:46.460] Browser LOG     updateNote called with: {"note":{"content":"Let's check if it works #product","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:25.218Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:46.548] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's check if it works #product","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T14:58:18.172+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:46.548] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's check if it works #product","created_at":"2026-01-02T13:43:01.654+00:00","id":526,"tags":[],"updated_at":"2026-01-02T14:58:25.336+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:46.548] Browser LOG     Updating IndexedDB with: {"content":"Let's check if it works #product","createdAt":"2026-01-02T13:43:01.654Z","id":526,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:25.336Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:49.903] Browser LOG     updateNote called with: {"note":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible.","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T14:58:28.766Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:50.099] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible. \n\n","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T11:02:50.863+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:50.099] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible.","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T14:58:28.87+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:50.099] Browser LOG     Updating IndexedDB with: {"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible.","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:28.870Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:53.932] Browser LOG     updateNote called with: {"note":{"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T14:58:32.794Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:06:54.126] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T11:03:59.933+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:54.126] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T14:58:32.899+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:06:54.126] Browser LOG     Updating IndexedDB with: {"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:32.899Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:07:06.837] Browser ERROR   Error deleting note: {}
+[05:07:06.837] Browser ERROR   Error deleting note: {}
+[05:07:06.837] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[05:07:07.878] Browser LOG     updateNote called with: {"note":{"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:46.562Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:07:07.878] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T14:58:32.899+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:07:07.878] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T14:58:46.66+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:07:07.878] Browser LOG     Updating IndexedDB with: {"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T14:58:46.660Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:18:59.939] Server  LOG     ✓ Compiled in 320ms
+[05:19:02.135] Server  LOG     ✓ Compiled in 972ms
+[05:19:02.236] Browser ERROR   ./src/components/NoteApp.js:148:1
+Parsing ecmascript source code failed
+  146 |   </div>
+  147 | );
+> 148 | };
+      | ^
+  149 |
+  150 | export default NoteApp;
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/NoteApp.js [Client Component Browser]
+    ./src/app/page.js [Client Component Browser]
+    ./src/app/page.js [Server Component]
+
+  Client Component SSR:
+    ./src/components/NoteApp.js [Client Component SSR]
+    ./src/app/page.js [Client Component SSR]
+    ./src/app/page.js [Server Component]
+[05:19:29.444] Server  LOG     ✓ Compiled in 892ms
+[05:23:12.190] Browser ERROR   Error deleting note: {}
+[05:23:12.190] Browser ERROR   Error deleting note: {}
+[05:23:12.190] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[05:23:15.930] Browser LOG     updateNote called with: {"note":{"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T15:14:54.772Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:23:16.117] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T14:58:46.66+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:23:16.310] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T15:14:54.96+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:23:16.310] Browser LOG     Updating IndexedDB with: {"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T15:14:54.960Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:23:29.736] Browser LOG     updateNote called with: {"note":{"content":"Let's see if it works. the #timeline still doesn't work we will have to make it work as soon as possible.","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T15:15:08.580Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:23:29.940] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's see if it works. the timeline still doesn't work we will have to make it work as soon as possible.","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T14:58:28.87+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:23:30.075] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's see if it works. the #timeline still doesn't work we will have to make it work as soon as possible.","created_at":"2026-01-01T16:19:33.423+00:00","id":518,"tags":[],"updated_at":"2026-01-02T15:15:08.782+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:23:30.075] Browser LOG     Updating IndexedDB with: {"content":"Let's see if it works. the #timeline still doesn't work we will have to make it work as soon as possible.","createdAt":"2026-01-01T16:19:33.423Z","id":518,"syncStatus":"synced","updatedAt":"2026-01-02T15:15:08.782Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:23:33.768] Browser ERROR   Error deleting note: {}
+[05:23:33.768] Browser ERROR   Error deleting note: {}
+[05:23:33.768] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[05:24:26.955] Browser LOG     updateNote called with: {"note":{"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T15:16:05.795Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:24:27.504] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T15:14:54.96+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:24:27.655] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T15:16:06.348+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:24:27.655] Browser LOG     Updating IndexedDB with: {"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T15:16:06.348Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:24:39.083] Browser LOG     updateNote called with: {"note":{"content":"Hey there! Check out note.shakeb.in to give it a try. I’d love to hear your thoughts and feedback! Thank you!","createdAt":"2025-02-13T16:41:11.845Z","id":350,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T15:16:17.925Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[05:24:39.252] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Hey there! Check out note.shakeb.in to give it a try. I’d love to hear your thoughts and feedback! Thank you!","created_at":"2025-02-13T16:41:11.845+00:00","id":350,"tags":[],"updated_at":"2025-02-13T16:41:11.845+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:24:39.361] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Hey there! Check out note.shakeb.in to give it a try. I’d love to hear your thoughts and feedback! Thank you!","created_at":"2025-02-13T16:41:11.845+00:00","id":350,"tags":[],"updated_at":"2026-01-02T15:16:18.076+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[05:24:39.361] Browser LOG     Updating IndexedDB with: {"content":"Hey there! Check out note.shakeb.in to give it a try. I’d love to hear your thoughts and feedback! Thank you!","createdAt":"2025-02-13T16:41:11.845Z","id":350,"syncStatus":"synced","updatedAt":"2026-01-02T15:16:18.076Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:49:48.273] Browser LOG     updateNote called with: {"note":{"content":"Add notes on #mobile","createdAt":"2025-02-14T05:37:37.206Z","id":351,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T16:41:26.979Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:49:48.706] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Add notes on #mobile","created_at":"2025-02-14T05:37:37.206+00:00","id":351,"tags":[],"updated_at":"2025-02-14T05:37:37.206+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:49:48.847] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Add notes on #mobile","created_at":"2025-02-14T05:37:37.206+00:00","id":351,"tags":[],"updated_at":"2026-01-02T16:41:27.413+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:49:48.847] Browser LOG     Updating IndexedDB with: {"content":"Add notes on #mobile","createdAt":"2025-02-14T05:37:37.206Z","id":351,"syncStatus":"synced","updatedAt":"2026-01-02T16:41:27.413Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:49:58.345] Browser ERROR   Error deleting note: {}
+[06:49:58.345] Browser ERROR   Error deleting note: {}
+[06:49:58.345] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[06:50:09.671] Browser LOG     updateNote called with: {"note":{"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T16:41:48.378Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:50:09.797] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T15:16:06.348+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:50:09.927] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"I'm trying out #design and #mobile does it work","created_at":"2026-01-02T11:02:50.873+00:00","id":521,"tags":[],"updated_at":"2026-01-02T16:41:48.496+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:50:09.927] Browser LOG     Updating IndexedDB with: {"content":"I'm trying out #design and #mobile does it work","createdAt":"2026-01-02T11:02:50.873Z","id":521,"syncStatus":"synced","updatedAt":"2026-01-02T16:41:48.496Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:54:59.345] Server  LOG     ✓ Compiled in 648ms
+[06:58:46.409] Browser LOG     updateNote called with: {"note":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T16:50:25.113Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:58:46.559] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T16:41:48.479+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:58:46.702] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T16:50:25.266+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:58:46.702] Browser LOG     Updating IndexedDB with: {"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T16:50:25.266Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:58:49.086] Browser LOG     updateNote called with: {"note":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T16:50:27.711Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:58:49.258] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T16:50:25.266+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:58:49.258] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T16:50:27.852+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:58:49.258] Browser LOG     Updating IndexedDB with: {"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T16:50:27.852Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:58:54.053] Browser ERROR   Error deleting note: {}
+[06:58:54.053] Browser ERROR   Error deleting note: {}
+[06:58:54.053] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[06:59:16.780] Browser LOG     updateNote called with: {"note":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T16:50:55.323Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:59:16.780] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T16:50:27.852+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:59:16.780] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T16:50:55.414+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:59:16.780] Browser LOG     Updating IndexedDB with: {"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T16:50:55.414Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:59:19.875] Browser LOG     updateNote called with: {"note":{"content":"Let's check","createdAt":"2026-01-01T14:22:43.064Z","id":515,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T16:50:58.581Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[06:59:20.115] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Let's check","created_at":"2026-01-01T14:22:43.064+00:00","id":515,"tags":[],"updated_at":"2026-01-01T14:22:43.064+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:59:20.115] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Let's check","created_at":"2026-01-01T14:22:43.064+00:00","id":515,"tags":[],"updated_at":"2026-01-02T16:50:58.734+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[06:59:20.115] Browser LOG     Updating IndexedDB with: {"content":"Let's check","createdAt":"2026-01-01T14:22:43.064Z","id":515,"syncStatus":"synced","updatedAt":"2026-01-02T16:50:58.734Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:17:24.310] Server  LOG     ✓ Compiled in 742ms
+[07:17:56.077] Server  LOG     ✓ Compiled in 324ms
+[07:18:57.838] Server  LOG     ✓ Compiled in 653ms
+[07:19:12.373] Server  LOG     ✓ Compiled in 251ms
+[07:19:12.479] Browser ERROR   ./src/components/NotebookFeed.jsx:78:43
+Parsing ecmascript source code failed
+  76 |
+  77 |     // Sort notes: Oldest -> Newest for "Notebook" feel
+> 78 |     const sortedNotes = React.useMemo(() => {
+     |                                           ^
+  79 |         return [...notes].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  80 |     }, [notes]);
+  81 |
+
+Unexpected token. Did you mean `{'>'}` or `&gt;`?
+
+Import traces:
+  Client Component Browser:
+    ./src/components/NotebookFeed.jsx [Client Component Browser]
+    ./src/components/NoteApp.js [Client Component Browser]
+    ./src/app/page.js [Client Component Browser]
+    ./src/app/page.js [Server Component]
+
+  Client Component SSR:
+    ./src/components/NotebookFeed.jsx [Client Component SSR]
+    ./src/components/NoteApp.js [Client Component SSR]
+    ./src/app/page.js [Client Component SSR]
+    ./src/app/page.js [Server Component]
+[07:19:33.281] Server  LOG     ✓ Compiled in 179ms
+[07:20:10.433] Browser ERROR   Error deleting note: {}
+[07:20:10.433] Browser ERROR   Error deleting note: {}
+[07:20:10.433] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[07:20:14.090] Browser LOG     updateNote called with: {"note":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T17:11:52.778Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:20:14.248] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"The damage is done.\n\nWhen you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this:\n\nThey will move on.\nIn a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere.\n\nBut they’ll never forget how you treated them —\nHow you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy.\n\nThey might never speak about it.\nBut they’ll carry the scars — silently.\n\nPower should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T16:50:55.414+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:20:14.360] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:11:52.954+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:20:14.360] Browser LOG     Updating IndexedDB with: {"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:11:52.954Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:20:23.667] Browser ERROR   Error deleting note: {}
+[07:20:23.667] Browser ERROR   Error deleting note: {}
+[07:20:23.667] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[07:20:25.275] Browser LOG     updateNote called with: {"note":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:12:03.980Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:20:25.438] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:11:52.954+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:20:25.538] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:12:04.131+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:20:25.538] Browser LOG     Updating IndexedDB with: {"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:12:04.131Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:20:55.800] Browser ERROR   Error deleting note: {}
+[07:20:55.800] Browser ERROR   Error deleting note: {}
+[07:20:55.801] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[07:20:57.086] Browser LOG     updateNote called with: {"note":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:12:35.792Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:20:57.294] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:12:04.131+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:20:57.294] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:12:35.937+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:20:57.294] Browser LOG     Updating IndexedDB with: {"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:12:35.937Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:21:22.741] Browser LOG     updateNote called with: {"note":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:13:01.423Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:21:22.976] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:12:35.937+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:21:22.976] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:13:01.617+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:21:22.976] Browser LOG     Updating IndexedDB with: {"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:13:01.617Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:21:31.479] Browser LOG     updateNote called with: {"note":{"content":"Keeping it alive","createdAt":"2025-04-07T10:28:58.800Z","id":493,"syncStatus":"synced","tags":[],"updatedAt":"2026-01-02T17:13:10.187Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:21:31.745] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"Keeping it alive","created_at":"2025-04-07T10:28:58.8+00:00","id":493,"tags":[],"updated_at":"2025-04-07T10:28:58.8+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:21:31.856] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"Keeping it alive","created_at":"2025-04-07T10:28:58.8+00:00","id":493,"tags":[],"updated_at":"2026-01-02T17:13:10.452+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:21:31.856] Browser LOG     Updating IndexedDB with: {"content":"Keeping it alive","createdAt":"2025-04-07T10:28:58.800Z","id":493,"syncStatus":"synced","updatedAt":"2026-01-02T17:13:10.452Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:22:54.654] Browser ERROR   Error deleting note: {}
+[07:22:54.658] Browser ERROR   Error deleting note: {}
+[07:22:54.658] Browser ERROR   unhandledRejection: Error: Note not found or unauthorized
+[07:23:03.344] Browser LOG     updateNote called with: {"note":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:14:42.050Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"},"userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:23:03.522] Browser LOG     Existing note check: {"checkError":null,"existingNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:13:01.617+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:23:03.646] Browser LOG     Update result: {"updateError":null,"updatedNote":{"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","created_at":"2026-01-02T16:41:48.479+00:00","id":540,"tags":[],"updated_at":"2026-01-02T17:14:42.203+00:00","user_id":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}}
+[07:23:03.646] Browser LOG     Updating IndexedDB with: {"content":"The damage is done. When you terminate an employee due to performance issues, office politics, or force them to resign by creating a toxic environment — remember this: They will move on. In a few months, they’ll find better #opportunities, rebuild their confidence, and thrive elsewhere. But they’ll never forget how you treated them — How you shouted, humiliated, and misunderstood them, simply because your ego got in the way of basic empathy. They might never speak about it. But they’ll carry the scars — silently. Power should never come at the cost of someone’s dignity.","createdAt":"2026-01-02T16:41:48.479Z","id":540,"syncStatus":"synced","updatedAt":"2026-01-02T17:14:42.203Z","userId":"6e5b027f-d4b5-4374-8261-0d532f12d1cc"}
+[07:29:15.336] Server  LOG     ✓ Compiled in 1677ms
+[07:29:16.488] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'user_metadata')
+[07:29:44.221] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[07:29:44.239] Server  LOG     ✓ Compiled in 616ms
+[07:29:48.533] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[07:29:48.991] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+                            className="font-mono text-sm antialiased"
+-                           data-new-gr-c-s-check-loaded="14.1267.0"
+-                           data-gr-ext-installed=""
+                          >
+                  ...
+

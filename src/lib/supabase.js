@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Replace these with your actual Supabase credentials from your project settings
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://example.supabase.co'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'example-key'
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -10,7 +10,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey)
 export async function testSupabaseConnection() {
   try {
     console.log('Testing Supabase connection...');
-    console.log('Using URL:', process.env.REACT_APP_SUPABASE_URL);
+    console.log('Using URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
     const { data, error } = await supabase.from('notes').select('count').single();
     if (error) {
       console.error('Supabase connection error:', error);
@@ -23,4 +23,4 @@ export async function testSupabaseConnection() {
     console.error('Supabase connection test failed:', error);
     return false;
   }
-} 
+}

@@ -1,3 +1,4 @@
+"use client";
 import { useRef, useMemo } from 'react';
 import { Search, X, XCircle } from 'lucide-react';
 import { Button } from './ui/button';
