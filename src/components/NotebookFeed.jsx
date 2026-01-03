@@ -1,6 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { TiptapEditor } from './TiptapEditor';
+import dynamic from 'next/dynamic';
 import { cn } from '../lib/utils';
+
+// Lazy load the editor to reduce initial bundle size to improve performance
+const TiptapEditor = dynamic(() => import('./TiptapEditor').then(mod => mod.TiptapEditor), {
+    ssr: false,
+    loading: () => <div className="h-24 w-full animate-pulse bg-muted/20 rounded-lg" />
+});
 
 export const NotebookFeed = ({
     notes,
@@ -8,8 +14,8 @@ export const NotebookFeed = ({
     onCreateNote,
     onDeleteNote,
     onFocusBox,
-    onEditorFocus, // [NEW]
-    onEditorBlur   // [NEW]
+    onEditorFocus,
+    onEditorBlur
 }) => {
     const feedRef = useRef(null);
     const bottomRef = useRef(null);

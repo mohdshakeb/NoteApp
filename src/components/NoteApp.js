@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import debounce from 'lodash.debounce';
+import React, { useState, useEffect } from 'react';
 
 // Components
 import { TimelineRail } from './TimelineRail';
@@ -17,6 +16,8 @@ import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
 // Hooks
 import { useNotes } from '../hooks/useNotes';
 import { useTags } from '../hooks/useTags';
+import { useTagNavigation } from '../hooks/useTagNavigation';
+import { useMobileNav } from '../hooks/useMobileNav';
 
 // Lib
 import { deleteAccount } from '../lib/db';
@@ -26,34 +27,36 @@ import logo from '../assets/logo.svg';
 const NoteApp = ({ user }) => {
   const { theme, setTheme } = useTheme();
 
-  // Custom Hooks
+  // Core Data Hooks
   const { notes, isLoading, db, addNote, editNote, removeNote } = useNotes(user);
-  const { allTags, getSuggestions } = useTags(notes);
+  const { allTags } = useTags(notes);
 
-  // We mostly rely on NotebookFeed's internal state + useNotes now.
-  // But we need to track active note for TimelineRail highlight.
+  // Active Note State
   const [activeNoteId, setActiveNoteId] = useState(null);
 
-  // Tag Navigation State
-  const [tagNav, setTagNav] = useState({
-    tag: null,
-    matches: [],
-    currentIndex: 0
-  });
+  // Custom Navigation Hooks
+  const {
+    tagNav,
+    handleTagClick,
+    handleNavNext,
+    handleNavPrev,
+    handleNavClose
+  } = useTagNavigation(notes, setActiveNoteId);
 
-  // Mobile Drawer State
-  const [mobileDrawer, setMobileDrawer] = useState({
-    isOpen: false,
-    type: null // 'date' | 'tags'
-  });
-
-  // Track editor focus to hide generic floating UI on mobile
-  const [isEditorFocused, setIsEditorFocused] = useState(false);
+  const {
+    mobileDrawer,
+    isEditorFocused,
+    setIsEditorFocused,
+    handleMobileDateClick,
+    handleMobileTagsClick,
+    closeMobileDrawer,
+    handleMobileDateSelect,
+    handleMobileTagSelect
+  } = useMobileNav(notes, setActiveNoteId, handleTagClick);
 
   // Initialize active note to the last one (newest) on load
   useEffect(() => {
     if (notes.length > 0 && !activeNoteId) {
-      // Sort similar to Feed to ensure we pick the visual "last" one
       const sorted = [...notes].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
       setActiveNoteId(sorted[sorted.length - 1].id);
     }
@@ -100,107 +103,6 @@ const NoteApp = ({ user }) => {
     }
   };
 
-  const handleTagClick = useCallback((tag) => {
-    // 1. Find all notes with this tag
-    const regex = new RegExp(`#${tag}\\b`, 'i');
-    const matches = notes
-      .filter(n => regex.test(n.content))
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map(n => n.id);
-
-    if (matches.length === 0) return;
-
-    // 2. Set State (Only if > 1 match)
-    if (matches.length > 1) {
-      setTagNav({
-        tag,
-        matches,
-        currentIndex: 0
-      });
-    } else {
-      // Clear nav if we were open on another tag
-      setTagNav({ tag: null, matches: [], currentIndex: 0 });
-    }
-
-    // 3. Scroll to first
-    const element = document.getElementById(matches[0]);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setActiveNoteId(matches[0]);
-    }
-  }, [notes]);
-
-  const handleNavNext = () => {
-    if (!tagNav.tag || tagNav.matches.length === 0) return;
-
-    const nextIndex = (tagNav.currentIndex + 1) % tagNav.matches.length;
-
-    setTagNav(prev => ({ ...prev, currentIndex: nextIndex }));
-
-    const id = tagNav.matches[nextIndex];
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setActiveNoteId(id);
-    }
-  };
-
-  const handleNavPrev = () => {
-    if (!tagNav.tag || tagNav.matches.length === 0) return;
-
-    // Wrap around correctly
-    const prevIndex = (tagNav.currentIndex - 1 + tagNav.matches.length) % tagNav.matches.length;
-
-    setTagNav(prev => ({ ...prev, currentIndex: prevIndex }));
-
-    const id = tagNav.matches[prevIndex];
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setActiveNoteId(id);
-    }
-  };
-
-  const handleNavClose = () => {
-    setTagNav({ tag: null, matches: [], currentIndex: 0 });
-  };
-
-
-  // Mobile Navigation Handlers
-  const handleMobileDateClick = () => {
-    setMobileDrawer({ isOpen: true, type: 'date' });
-  };
-
-  const handleMobileTagsClick = () => {
-    setMobileDrawer({ isOpen: true, type: 'tags' });
-  };
-
-  const closeMobileDrawer = () => {
-    setMobileDrawer({ isOpen: false, type: null });
-  };
-
-  const handleMobileDateSelect = (date) => {
-    // Find first note for this date
-    const target = notes.find(n => {
-      const d = new Date(n.createdAt);
-      return d.getFullYear() === date.getFullYear() &&
-        d.getMonth() === date.getMonth() &&
-        d.getDate() === date.getDate();
-    });
-
-    if (target) {
-      const el = document.getElementById(target.id);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setActiveNoteId(target.id);
-    }
-    closeMobileDrawer();
-  };
-
-  const handleMobileTagSelect = (tag) => {
-    handleTagClick(tag);
-    closeMobileDrawer();
-  };
-
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
       {/* Logo: Top Left */}
@@ -212,9 +114,8 @@ const NoteApp = ({ user }) => {
         />
       </div>
 
-      {/* Bottom Left Stack: Toggle above Avatar - HIDDEN ON MOBILE because Avatar is in Pill */}
+      {/* Bottom Left Stack: Toggle above Avatar - HIDDEN ON MOBILE */}
       <div className="fixed bottom-8 left-8 z-50 hidden sm:flex flex-col items-center gap-6">
-        {/* Theme Toggle */}
         <Button
           variant="ghost"
           size="icon"
@@ -224,7 +125,6 @@ const NoteApp = ({ user }) => {
           {theme === "light" ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />}
         </Button>
 
-        {/* User Avatar */}
         <UserDropdown
           user={user}
           onSignOut={handleSignOut}
@@ -232,7 +132,7 @@ const NoteApp = ({ user }) => {
         />
       </div>
 
-      {/* Main Content Area - Notebook Layout */}
+      {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden relative">
         <TimelineRail
           notes={notes}
@@ -254,11 +154,8 @@ const NoteApp = ({ user }) => {
           onCreateNote={(content) => addNote(content)}
           onDeleteNote={(id) => removeNote(id)}
           onFocusBox={(note) => {
-            if (note) {
-              setActiveNoteId(note.id);
-            }
+            if (note) setActiveNoteId(note.id);
           }}
-          // Pass focus handlers to track keyboard state
           onEditorFocus={() => setIsEditorFocused(true)}
           onEditorBlur={() => setIsEditorFocused(false)}
         />
