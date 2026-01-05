@@ -423,8 +423,12 @@ export async function checkForGuestNotes(db) {
   try {
     const tx = db.transaction(STORE_NAME, 'readonly');
     const index = tx.store.index('userId');
-    const count = await index.count('guest');
-    return count;
+    const notes = await index.getAll('guest');
+
+    // Filter out empty notes (whitespace only)
+    const validNotes = notes.filter(n => n.content && n.content.trim().length > 0);
+
+    return validNotes.length;
   } catch (e) {
     console.error("Error checking guest notes:", e);
     return 0;
@@ -461,10 +465,15 @@ export async function migrateGuestData(db, realUserId) {
 
     console.log(`Migrating ${guestNotes.length} guest notes to user ${realUserId}`);
 
-    console.log(`Migrating ${guestNotes.length} guest notes to user ${realUserId}`);
-
+    console.log(`Migrating ${guestNotes.length} total guest notes (checking validity)...`);
 
     await Promise.all(guestNotes.map(async (note) => {
+      // If note is empty, just delete it (cleanup)
+      if (!note.content || !note.content.trim()) {
+        await tx.store.delete(note.id);
+        return;
+      }
+
       // Update local note to new user and set as pending
       await tx.store.put({
         ...note,
@@ -482,6 +491,26 @@ export async function migrateGuestData(db, realUserId) {
   } catch (e) {
     console.error("Error migrating guest data:", e);
     return false;
+  }
+}
+
+// Cleanup Empty Notes (Post-Merge)
+export async function cleanupEmptyNotes(db, userId) {
+  try {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const index = tx.store.index('userId');
+    const notes = await index.getAll(userId);
+
+    const emptyNotes = notes.filter(n => !n.content || !n.content.trim());
+
+    if (emptyNotes.length > 0) {
+      // console.log(`[db] Cleaning up ${emptyNotes.length} empty notes for ${userId}`);
+      await Promise.all(emptyNotes.map(n => tx.store.delete(n.id)));
+    }
+
+    await tx.done;
+  } catch (e) {
+    console.error("Error cleaning empty notes:", e);
   }
 }
 

@@ -81,6 +81,22 @@ export const NotebookFeed = ({
         return () => observer.disconnect();
     }, [notes, onFocusBox, sortedNotes]);
 
+    // Initial Scroll to Bottom (Newest Note)
+    const hasInitialScrolled = useRef(false);
+    useEffect(() => {
+        if (!hasInitialScrolled.current && sortedNotes.length > 0) {
+            // Find the last entry block
+            const blocks = document.querySelectorAll('.entry-block');
+            const lastBlock = blocks[blocks.length - 1];
+
+            if (lastBlock) {
+                // 'start' aligns with scroll-margin-top (25vh) -> Perfect Position
+                lastBlock.scrollIntoView({ block: 'start' });
+                hasInitialScrolled.current = true;
+            }
+        }
+    }, [sortedNotes]);
+
     return (
         <div className="flex-1 h-full overflow-y-auto bg-background scroll-smooth" ref={feedRef}>
             {/* Adjusted padding: px-4 for mobile, sm:px-8 for tablet/desktop */}

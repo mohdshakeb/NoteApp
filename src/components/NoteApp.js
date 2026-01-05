@@ -22,7 +22,7 @@ import { useTagNavigation } from '../hooks/useTagNavigation';
 import { useMobileNav } from '../hooks/useMobileNav';
 
 // Lib
-import { deleteAccount, checkForGuestNotes, migrateGuestData, clearGuestData } from '../lib/db'; // [Updated]
+import { deleteAccount, checkForGuestNotes, migrateGuestData, clearGuestData, cleanupEmptyNotes } from '../lib/db'; // [Updated]
 import { supabase } from '../lib/supabase';
 import logo from '../assets/logo.svg';
 
@@ -61,6 +61,7 @@ const NoteApp = ({ user }) => {
   const handleMergeGuestData = async () => {
     if (!db || !user) return;
     await migrateGuestData(db, user.id);
+    await cleanupEmptyNotes(db, user.id); // [NEW] Remove redundant empty notes
     setShowMergeDialog(false);
     // Refresh notes to show merged data without reloading page
     refreshNotes();
