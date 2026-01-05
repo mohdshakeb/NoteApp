@@ -144,7 +144,8 @@ export const NotebookFeed = ({
                                     onBlur={(e) => {
                                         if (onEditorBlur) onEditorBlur();
                                     }}
-                                    autoFocus={note.isNew}
+                                    // Disable auto-focus on mobile to keep Nav Pill visible
+                                    autoFocus={note.isNew && (typeof window !== 'undefined' ? window.innerWidth >= 640 : true)}
                                     isLast={isLast}
                                 />
                             </div>

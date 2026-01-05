@@ -17,10 +17,17 @@ export const formatDate = (date) => {
   } else if (date >= yesterday) {
     return 'Yesterday';
   } else {
-    return date.toLocaleDateString('en-US', {
+    const options = {
       weekday: 'short',
       day: 'numeric',
       month: 'short'
-    });
+    };
+
+    // Show year if not current year
+    if (date.getFullYear() !== now.getFullYear()) {
+      options.year = 'numeric';
+    }
+
+    return date.toLocaleDateString('en-US', options);
   }
 }; 

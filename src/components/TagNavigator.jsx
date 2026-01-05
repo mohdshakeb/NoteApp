@@ -17,8 +17,8 @@ export const TagNavigator = ({
     const meta = getTagMeta(tag);
 
     return (
-        <div className="fixed bottom-8 right-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="flex items-center gap-2 px-3 py-2 bg-background border rounded-full shadow-lg">
+        <div className="fixed bottom-24 right-4 sm:bottom-8 sm:right-8 z-[60] animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="flex items-center gap-2 px-4 h-[54px] bg-background/80 backdrop-blur-md border border-border/50 rounded-full shadow-lg">
                 <div className="flex items-center gap-2 pl-1 pr-3 border-r relative group">
                     {/* Tag colored dot */}
                     <div className={cn("w-2 h-2 rounded-full", meta.tick)} />

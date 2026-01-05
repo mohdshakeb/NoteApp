@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { cn } from '../lib/utils';
+import { cn, formatDate } from '../lib/utils';
 import { ChevronUp } from 'lucide-react';
 import { UserDropdown } from './ui/UserDropdown';
 
@@ -25,13 +25,10 @@ export const MobileNavPill = ({
         return new Date(note.createdAt);
     }, [activeNoteId, notes]);
 
-    // Format date: "Jan 12" (No Year)
+    // Format date using shared utility (handles Year logic)
     const dateLabel = useMemo(() => {
         if (!activeDate) return "Timeline";
-        return activeDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric'
-        });
+        return formatDate(activeDate);
     }, [activeDate]);
 
     // Visual: 3 overlapping circles for tags
@@ -48,7 +45,7 @@ export const MobileNavPill = ({
             "fixed bottom-6 inset-x-4 z-50 transition-all duration-300 sm:hidden",
             isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
         )}>
-            <div className="flex items-center justify-between w-full h-[54px] bg-background border border-border/50 rounded-full shadow-lg px-2 pl-4">
+            <div className="flex items-center justify-between w-full h-[54px] bg-background/80 backdrop-blur-md border border-border/50 rounded-full shadow-lg px-2 pl-4">
 
                 {/* Date Side (Left) */}
                 <button

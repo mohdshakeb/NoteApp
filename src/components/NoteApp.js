@@ -164,8 +164,8 @@ const NoteApp = ({ user }) => {
         onDiscard={handleDiscardGuestData}
       />
 
-      {/* Logo: Top Left */}
-      <div className="fixed top-8 left-8 z-50 pointer-events-none select-none bg-background/60 backdrop-blur-md rounded-full px-4 py-2 border border-border/20">
+      {/* Logo: Top Left - Aligned with Pill (left-4) */}
+      <div className="fixed top-8 left-4 z-50 pointer-events-none select-none bg-background/60 backdrop-blur-md rounded-full px-4 py-2 border border-border/20 support-backdrop-blur:bg-background/60">
         <img
           src={logo.src}
           alt="Notes"
