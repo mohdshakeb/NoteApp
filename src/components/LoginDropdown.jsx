@@ -65,7 +65,12 @@ export function LoginDropdown({ children }) {
                     <Button
                         variant="outline"
                         className="w-full flex items-center justify-center gap-2 h-10"
-                        onClick={() => supabase.auth.signInWithOAuth({ provider: 'google' })}
+                        onClick={() => supabase.auth.signInWithOAuth({
+                            provider: 'google',
+                            options: {
+                                redirectTo: window.location.origin
+                            }
+                        })}
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path
