@@ -124,7 +124,13 @@ const NoteApp = ({ user }) => {
       }
 
       localStorage.removeItem(`defaultNotes-${user?.id}`);
-      localStorage.removeItem('sb-yzgyhdrughpwaqgcgqeu-auth-token');
+
+      // Robustly clear Supabase tokens (handling different project IDs)
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          localStorage.removeItem(key);
+        }
+      });
 
     } catch (error) {
       console.error('Error signing out:', error);
