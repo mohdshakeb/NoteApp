@@ -10,9 +10,14 @@ import {
 } from "./dropdown"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./alert-dialog"
 
+import { useTheme } from "../ThemeProvider"; // [NEW] import
+import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'; // [NEW] import
+
 export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [alertOpen, setAlertOpen] = useState(false)
+  const { theme, setTheme } = useTheme();
+  const [imageError, setImageError] = useState(false); // [NEW] Track broken images
 
   const handleDeleteClick = () => {
     setDropdownOpen(false)
@@ -33,47 +38,62 @@ export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
     <>
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="icon"
-            className="focus-visible:ring-0 focus-visible:ring-offset-0 relative"
+            className="focus-visible:ring-0 focus-visible:ring-offset-0 relative rounded-full h-8 w-8 overflow-hidden"
           >
-            {user?.user_metadata?.avatar_url ? (
-              <img 
-                src={user.user_metadata.avatar_url} 
+            {user?.user_metadata?.avatar_url && !imageError ? (
+              <img
+                src={user.user_metadata.avatar_url}
                 alt={user.email}
-                className="w-8 h-8 rounded-full"
+                className="w-full h-full object-cover"
+                onError={() => setImageError(true)} // [NEW] Fallback on error
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+              <div className="w-full h-full bg-primary/10 flex items-center justify-center text-sm font-medium">
                 {(user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U').toUpperCase()}
               </div>
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent 
+        <DropdownMenuContent
           align="end"
-          alignOffset={0}  // This ensures exact alignment
+          alignOffset={0}
           sideOffset={8}
           className="w-56"
           forceMount
         >
           <div className="px-2 py-1.5">
-            <div className="font-medium">{user.user_metadata?.full_name}</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="font-medium truncate">{user.user_metadata?.full_name || 'User'}</div>
+            <div className="text-xs text-muted-foreground truncate">
               {user.email}
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem 
+
+          {/* Theme Toggle Item */}
+          <DropdownMenuItem
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className="cursor-pointer"
+          >
+            <div className="flex items-center gap-2 w-full">
+              {theme === 'light' ? <MoonIcon className="w-4 h-4" /> : <SunIcon className="w-4 h-4" />}
+              <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+            </div>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
             onClick={onSignOut}
-            className="text-muted-foreground focus:text-muted-foreground"
+            className="text-muted-foreground focus:text-muted-foreground cursor-pointer"
           >
             Sign out
           </DropdownMenuItem>
           {!user.isGuest && (
             <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
+              className="text-destructive focus:text-destructive cursor-pointer"
               onSelect={(e) => {
                 e.preventDefault()
                 handleDeleteClick()

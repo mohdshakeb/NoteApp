@@ -32,7 +32,7 @@ export function useTagNavigation(notes, setActiveNoteId) {
         // 3. Scroll to first
         const element = document.getElementById(matches[0]);
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             setActiveNoteId(matches[0]);
         }
     }, [notes, setActiveNoteId]);
@@ -47,7 +47,7 @@ export function useTagNavigation(notes, setActiveNoteId) {
         const id = tagNav.matches[nextIndex];
         const element = document.getElementById(id);
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             setActiveNoteId(id);
         }
     }, [tagNav, setActiveNoteId]);
@@ -63,7 +63,7 @@ export function useTagNavigation(notes, setActiveNoteId) {
         const id = tagNav.matches[prevIndex];
         const element = document.getElementById(id);
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             setActiveNoteId(id);
         }
     }, [tagNav, setActiveNoteId]);

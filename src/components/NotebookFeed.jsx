@@ -42,14 +42,16 @@ export const NotebookFeed = ({
                 });
 
                 // Find the winner
+                // Find the winner
                 let bestCandidate = null;
                 let minDistance = Infinity;
-                const viewportCenter = window.innerHeight / 2;
+                // Target Line: 25% down (Center of the 10%-40% active zone)
+                const targetLine = window.innerHeight * 0.25;
 
                 intersectingNotesRef.current.forEach((node) => {
                     const rect = node.getBoundingClientRect();
                     const nodeCenter = rect.top + (rect.height / 2);
-                    const dist = Math.abs(viewportCenter - nodeCenter);
+                    const dist = Math.abs(targetLine - nodeCenter);
 
                     if (dist < minDistance) {
                         minDistance = dist;
@@ -68,7 +70,8 @@ export const NotebookFeed = ({
             {
                 root: null,
                 threshold: 0,
-                rootMargin: "-35% 0px -35% 0px" // 30% Active Zone
+                // Top 10% ignored, Bottom 60% ignored -> 10% to 40% Active Zone (30% height)
+                rootMargin: "-10% 0px -60% 0px"
             }
         );
 
@@ -81,7 +84,20 @@ export const NotebookFeed = ({
     return (
         <div className="flex-1 h-full overflow-y-auto bg-background scroll-smooth" ref={feedRef}>
             {/* Adjusted padding: px-4 for mobile, sm:px-8 for tablet/desktop */}
-            <div className="min-h-full w-full max-w-4xl mx-auto px-4 py-12 sm:px-8 sm:pl-32 sm:pr-32">
+            <div
+                className="min-h-full w-full max-w-4xl mx-auto px-8 pt-[25vh] pb-12 sm:px-8 sm:pl-32 sm:pr-32 flex flex-col cursor-text"
+                onClick={(e) => {
+                    // Only trigger if clicking the container itself (gutters), not children
+                    if (e.target === e.currentTarget) {
+                        const lastNote = sortedNotes[sortedNotes.length - 1];
+                        if (lastNote && !lastNote.content.trim()) {
+                            lastNoteRef.current?.focus();
+                        } else {
+                            onCreateNote('');
+                        }
+                    }
+                }}
+            >
                 <div className="flex flex-col gap-12">
                     {sortedNotes.map((note, index) => {
                         const isLast = index === sortedNotes.length - 1;
@@ -90,8 +106,14 @@ export const NotebookFeed = ({
                                 <TiptapEditor
                                     ref={isLast ? lastNoteRef : null}
                                     note={note}
+                                    onAutoSave={(id, content) => {
+                                        // Auto-save always UPDATES, never deletes.
+                                        // This ensures typing is saved safely.
+                                        onUpdateNote(note, content);
+                                    }}
                                     onSave={(id, content) => {
-                                        if (!content || !content.trim()) {
+                                        // Only delete if empty AND not the only note (on Blur)
+                                        if ((!content || !content.trim()) && sortedNotes.length > 1) {
                                             onDeleteNote(note.id);
                                         } else {
                                             onUpdateNote(note, content);
@@ -105,24 +127,6 @@ export const NotebookFeed = ({
                                     }}
                                     onBlur={(e) => {
                                         if (onEditorBlur) onEditorBlur();
-
-                                        // "Always Active" Logic
-                                        setTimeout(() => {
-                                            const active = document.activeElement;
-                                            const isEditor = active && (
-                                                active.classList.contains('ProseMirror') ||
-                                                active.closest('.ProseMirror')
-                                            );
-
-                                            if (!isEditor) {
-                                                const lastNote = sortedNotes[sortedNotes.length - 1];
-                                                if (lastNote && !lastNote.content.trim()) {
-                                                    lastNoteRef.current?.focus();
-                                                } else {
-                                                    onCreateNote('');
-                                                }
-                                            }
-                                        }, 100);
                                     }}
                                     autoFocus={note.isNew}
                                     isLast={isLast}
@@ -134,7 +138,7 @@ export const NotebookFeed = ({
 
                 <div
                     ref={bottomRef}
-                    className="h-[50vh] w-full cursor-text"
+                    className="flex-1 w-full cursor-text min-h-[50vh]"
                     onClick={() => {
                         const lastNote = sortedNotes[sortedNotes.length - 1];
                         if (lastNote && !lastNote.content.trim()) {

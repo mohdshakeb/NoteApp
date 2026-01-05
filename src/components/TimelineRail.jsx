@@ -92,7 +92,7 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick }) => {
                             if (noteId) {
                                 const element = document.getElementById(noteId);
                                 if (element) {
-                                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                 }
                             }
                         };

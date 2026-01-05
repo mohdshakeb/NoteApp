@@ -12,97 +12,51 @@
   }
 
   :root {
-    /* Zinc Scale (Light) */
+    /* Zinc Scale (Light) - Cleaned up to ensure no syntax errors */
     --background: 0 0% 98%;
-    /* zinc-50 */
     --foreground: 240 5.9% 10%;
-    /* zinc-900 */
-
     --card: 0 0% 100%;
-    /* white */
     --card-foreground: 240 5.9% 10%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 240 5.9% 10%;
-
     --primary: 240 5.9% 10%;
-    /* zinc-900 */
     --primary-foreground: 0 0% 98%;
-    /* zinc-50 */
-
     --secondary: 240 4.8% 95.9%;
-    /* zinc-100 */
     --secondary-foreground: 240 5.9% 10%;
-
     --muted: 240 4.8% 95.9%;
-    /* zinc-100 */
     --muted-foreground: 240 3.8% 46.1%;
-    /* zinc-500 */
-
     --accent: 240 4.8% 95.9%;
-    /* zinc-100 */
     --accent-foreground: 240 5.9% 10%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 240 5.9% 90%;
-    /* zinc-200 */
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
-
     --radius: 0rem;
-    /* Industrial square look? Or keep rounded? Keeping default for now but maybe 0 needed for brutalist mono? */
   }
 }
 
 .dark {
   /* Zinc Scale (Dark) */
   --background: 240 10% 3.9%;
-  /* zinc-950 */
   --foreground: 0 0% 98%;
-  /* zinc-50 */
-
   --card: 240 10% 3.9%;
   --card-foreground: 0 0% 98%;
-
   --popover: 240 10% 3.9%;
   --popover-foreground: 0 0% 98%;
-
   --primary: 0 0% 98%;
   --primary-foreground: 240 5.9% 10%;
-
   --secondary: 240 3.7% 15.9%;
-  /* zinc-800 */
   --secondary-foreground: 0 0% 98%;
-
   --muted: 240 3.7% 15.9%;
-  /* zinc-800 */
   --muted-foreground: 240 5% 64.9%;
-  /* zinc-400 */
-
   --accent: 240 3.7% 15.9%;
-  /* zinc-800 */
   --accent-foreground: 0 0% 98%;
-
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-
   --border: 240 3.7% 15.9%;
-  /* zinc-800 */
   --input: 240 3.7% 15.9%;
   --ring: 240 4.9% 83.9%;
-}
-
-[contenteditable]:empty:before {
-  content: attr(data-placeholder);
-  color: #888;
-  cursor: text;
-  display: block;
-}
-
-[contenteditable][data-content]:before {
-  content: none;
 }
 
 /* Hide scrollbar */
@@ -112,9 +66,7 @@
 
 .no-scrollbar {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -133,10 +85,17 @@
   caret-color: hsl(var(--foreground));
 }
 
-.ProseMirror p.is-editor-empty:first-child::before {
-  color: #adadad;
+/* Tiptap Placeholder - Only on first line */
+.ProseMirror p.is-editor-empty:first-child::before,
+.ProseMirror p.is-empty:first-child::before {
+  color: hsl(var(--muted-foreground));
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+.entry-block {
+  scroll-margin-top: 25vh;
+  /* Aligns with the 25% Active Zone Target */
 }

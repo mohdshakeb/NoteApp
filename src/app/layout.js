@@ -2,7 +2,7 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata = {
-  title: 'Note App',
+  title: 'Notes',
   description: 'Offline-first Note Application',
 }
 

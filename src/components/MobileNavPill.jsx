@@ -3,6 +3,8 @@ import { cn } from '../lib/utils';
 import { ChevronUp } from 'lucide-react';
 import { UserDropdown } from './ui/UserDropdown';
 
+import { LoginDropdown } from './LoginDropdown'; // [NEW]
+
 export const MobileNavPill = ({
     notes,
     activeNoteId,
@@ -11,8 +13,10 @@ export const MobileNavPill = ({
     onSignOut,
     onDeleteAccount,
     onDateClick,
-    onTagsClick
+    onTagsClick,
+    // onLoginClick removed as Dropdown handles it
 }) => {
+    // ... (memo hooks same as before) ...
     // Derive active date from activeNoteId
     const activeDate = useMemo(() => {
         if (!activeNoteId) return null;
@@ -55,7 +59,7 @@ export const MobileNavPill = ({
                     <ChevronUp className="w-3 h-3 text-muted-foreground" />
                 </button>
 
-                {/* Right Side: Tags + Avatar */}
+                {/* Right Side: Tags + Avatar/Login */}
                 <div className="flex items-center gap-3">
                     {/* Tags Trigger */}
                     <button
@@ -68,14 +72,22 @@ export const MobileNavPill = ({
                     {/* Divider */}
                     <div className="w-[1px] h-5 bg-border" />
 
-                    {/* User Avatar */}
-                    <div className="flex items-center">
-                        <UserDropdown
-                            user={user}
-                            onSignOut={onSignOut}
-                            onDeleteAccount={onDeleteAccount}
-                            align="end" // Align dropdown to right
-                        />
+                    {/* User Avatar or Login */}
+                    <div className="flex items-center pr-1">
+                        {user ? (
+                            <UserDropdown
+                                user={user}
+                                onSignOut={onSignOut}
+                                onDeleteAccount={onDeleteAccount}
+                                align="end"
+                            />
+                        ) : (
+                            <LoginDropdown>
+                                <button className="text-sm font-semibold text-primary hover:opacity-80 px-2">
+                                    Login
+                                </button>
+                            </LoginDropdown>
+                        )}
                     </div>
                 </div>
             </div>

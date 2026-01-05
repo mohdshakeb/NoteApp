@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { initDB, getNotes, saveNote, updateNote, deleteNote, syncPendingNotes, createDefaultNotes } from '../lib/db';
 
 export function useNotes(user) {
@@ -7,40 +7,62 @@ export function useNotes(user) {
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize DB and Fetch Notes
-  useEffect(() => {
-    const initializeApp = async () => {
-      if (!user) return;
+  const initializedUserRef = useRef(null);
 
-      try {
-        setIsLoading(true);
-        const dbInstance = await initDB(user.id);
-        setDb(dbInstance);
+  const fetchNotesData = useCallback(async (forced = false) => {
+    // Prevent double init for the SAME user, but allow if user CHANGED
+    const currentUserId = user ? user.id : 'guest';
 
-        const fetchedNotes = await getNotes(dbInstance, user.id);
+    // If forced is true, we bypass the ref check (e.g. for manual refresh)
+    if (!forced && initializedUserRef.current === currentUserId) return;
+    initializedUserRef.current = currentUserId;
 
-        // Handle default notes creation if empty
-        if (Array.isArray(fetchedNotes) && fetchedNotes.length === 0) {
-          const created = await createDefaultNotes(dbInstance, user.id);
-          if (created) {
-            const initialNotes = await getNotes(dbInstance, user.id);
-            setNotes(initialNotes);
-          } else {
-            setNotes([]);
-          }
-        } else {
-          setNotes(fetchedNotes || []);
-        }
+    try {
+      setIsLoading(true);
+      // Ensure DB is init (idempotent)
+      const dbInstance = await initDB(currentUserId);
+      setDb(dbInstance);
 
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error initializing app:', error);
-        setIsLoading(false);
-        setNotes([]);
+      const fetchedNotes = await getNotes(dbInstance, currentUserId);
+      let finalNotes = fetchedNotes || [];
+
+      // Logic: "One empty and active note should be displayed after the two notes."
+      // First, sort strictly ASCENDING (Oldest first) so we check the VISUAL last note.
+      // (getNotes returns Descending/Newest first by default)
+      const sortedForCheck = [...finalNotes].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      const lastNote = sortedForCheck[sortedForCheck.length - 1];
+
+      // Only create new blank note if the last one has content
+      if (!lastNote || (lastNote.content && lastNote.content.trim())) {
+        const initialNote = {
+          content: '',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        const id = await saveNote(dbInstance, currentUserId, initialNote);
+        const newBlankNote = { ...initialNote, id, isNew: true };
+        finalNotes = [...finalNotes, newBlankNote];
+      } else {
+        // If last note is empty, ensure we don't have duplicates?
+        // Actually, if last is empty, we do nothing. The existing empty note will be displayed.
       }
-    };
 
-    initializeApp();
+      setNotes(finalNotes);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error initializing app:', error);
+      setIsLoading(false);
+      setNotes([]);
+    }
   }, [user]);
+
+  useEffect(() => {
+    fetchNotesData();
+  }, [fetchNotesData]);
+
+  const refreshNotes = useCallback(() => {
+    fetchNotesData(true);
+  }, [fetchNotesData]);
 
   // Sync Listener
   useEffect(() => {
@@ -56,9 +78,10 @@ export function useNotes(user) {
 
   const addNote = async (content) => {
     try {
-      if (!db || !user) throw new Error("Database or user not initialized");
+      if (!db) throw new Error("Database not initialized");
+      const currentUserId = user ? user.id : 'guest';
 
-      const noteId = await saveNote(db, user.id, {
+      const noteId = await saveNote(db, currentUserId, {
         content,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -67,6 +90,7 @@ export function useNotes(user) {
       const newNote = {
         id: noteId,
         content,
+        userId: currentUserId, // Critical: Missing this caused index drop on update
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -81,7 +105,8 @@ export function useNotes(user) {
 
   const editNote = async (originalNote, newContent) => {
     try {
-      if (!db || !user) throw new Error("Database or user not initialized");
+      if (!db) throw new Error("Database not initialized");
+      const currentUserId = user ? user.id : 'guest';
 
       const updatedNote = {
         ...originalNote,
@@ -89,7 +114,7 @@ export function useNotes(user) {
         updatedAt: new Date()
       };
 
-      const result = await updateNote(db, user.id, updatedNote);
+      const result = await updateNote(db, currentUserId, updatedNote);
       setNotes(prev => prev.map(n => n.id === originalNote.id ? result : n));
       return result;
     } catch (error) {
@@ -99,16 +124,17 @@ export function useNotes(user) {
   };
 
   const removeNote = useCallback(async (noteId) => {
-    if (!db || !user) return;
+    if (!db) return;
+    const currentUserId = user ? user.id : 'guest';
 
     try {
-      setIsLoading(true); // Optional: global loading state for delete? Maybe not.
-      // Actually locally locally loading might be better, but 'isLoading' is usually for initial load.
-      // I'll skip setting isLoading for delete to avoid UI flickering entire screen.
-      await deleteNote(db, user.id, noteId);
+      setIsLoading(true);
+      await deleteNote(db, currentUserId, noteId);
       setNotes(prev => prev.filter(n => n.id !== noteId));
+      setIsLoading(false);
     } catch (error) {
       console.error('Error deleting note:', error);
+      setIsLoading(false);
       throw error;
     }
   }, [db, user]);
@@ -119,6 +145,7 @@ export function useNotes(user) {
     db,
     addNote,
     editNote,
-    removeNote
+    removeNote,
+    refreshNotes
   };
 }
