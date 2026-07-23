@@ -15,7 +15,9 @@ export const NotebookFeed = ({
     onDeleteNote,
     onFocusBox,
     onEditorFocus,
-    onEditorBlur
+    onEditorBlur,
+    activeMatchIds,
+    matchWashClass
 }) => {
     const feedRef = useRef(null);
     const bottomRef = useRef(null);
@@ -118,7 +120,14 @@ export const NotebookFeed = ({
                     {sortedNotes.map((note, index) => {
                         const isLast = index === sortedNotes.length - 1;
                         return (
-                            <div key={note.id} className="entry-block" data-note-id={note.id}>
+                            <div
+                                key={note.id}
+                                className={cn(
+                                    "entry-block -mx-6 px-6 rounded-xl transition-colors duration-300",
+                                    activeMatchIds?.has(note.id) && matchWashClass
+                                )}
+                                data-note-id={note.id}
+                            >
                                 <TiptapEditor
                                     ref={isLast ? lastNoteRef : null}
                                     note={note}

@@ -1,3 +1,5 @@
+const plugin = require("tailwindcss/plugin");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -57,6 +59,12 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      transitionTimingFunction: {
+        // Stronger than the built-in curves — see globals.css :root for the source values
+        out: "var(--ease-out)",
+        "in-out": "var(--ease-in-out)",
+        drawer: "var(--ease-drawer)",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -73,5 +81,12 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} 
+  plugins: [
+    require("tailwindcss-animate"),
+    // `can-hover:` gates hover styles to devices that actually have hover capability,
+    // preventing stuck hover states on touch after a tap
+    plugin(({ addVariant }) => {
+      addVariant("can-hover", "@media (hover: hover) and (pointer: fine)");
+    }),
+  ],
+}

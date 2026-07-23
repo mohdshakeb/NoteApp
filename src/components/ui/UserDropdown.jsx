@@ -10,13 +10,9 @@ import {
 } from "./dropdown"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./alert-dialog"
 
-import { useTheme } from "../ThemeProvider"; // [NEW] import
-import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'; // [NEW] import
-
 export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [alertOpen, setAlertOpen] = useState(false)
-  const { theme, setTheme } = useTheme();
   const [imageError, setImageError] = useState(false); // [NEW] Track broken images
 
   const handleDeleteClick = () => {
@@ -70,19 +66,6 @@ export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
               {user.email}
             </div>
           </div>
-          <DropdownMenuSeparator />
-
-          {/* Theme Toggle Item */}
-          <DropdownMenuItem
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="cursor-pointer"
-          >
-            <div className="flex items-center gap-2 w-full">
-              {theme === 'light' ? <MoonIcon className="w-4 h-4" /> : <SunIcon className="w-4 h-4" />}
-              <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
-            </div>
-          </DropdownMenuItem>
-
           <DropdownMenuSeparator />
 
           <DropdownMenuItem

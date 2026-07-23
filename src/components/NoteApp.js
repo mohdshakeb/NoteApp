@@ -1,10 +1,11 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 // Components
 import { TimelineRail } from './TimelineRail';
 import { TagsRail } from './TagsRail';
 import { TagNavigator } from './TagNavigator';
+import { NoteResultsOverlay } from './NoteResultsOverlay';
 import { MobileNavPill } from './MobileNavPill';
 import { MobileDrawers } from './MobileDrawers';
 import { NotebookFeed } from './NotebookFeed';
@@ -14,16 +15,20 @@ import { useTheme } from "./ThemeProvider";
 import { LoginDropdown } from './LoginDropdown';
 import { MergeToast } from './MergeToast'; // [NEW]
 import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
+import { Search } from 'lucide-react';
 
 // Hooks
 import { useNotes } from '../hooks/useNotes';
 import { useTags } from '../hooks/useTags';
-import { useTagNavigation } from '../hooks/useTagNavigation';
+import { useNoteFinder } from '../hooks/useNoteFinder';
 import { useMobileNav } from '../hooks/useMobileNav';
 
 // Lib
 import { deleteAccount, checkForGuestNotes, migrateGuestData, clearGuestData, cleanupEmptyNotes } from '../lib/db'; // [Updated]
 import { supabase } from '../lib/supabase';
+import { getTagMeta } from '../lib/colors';
+import { exactTagFromQuery } from '../lib/tagMatch';
+import { cn } from '../lib/utils';
 import logo from '../assets/logo.svg';
 
 const NoteApp = ({ user }) => {
@@ -76,12 +81,49 @@ const NoteApp = ({ user }) => {
 
   // Custom Navigation Hooks
   const {
-    tagNav,
+    session,
     handleTagClick,
+    handleSearchQuery,
     handleNavNext,
     handleNavPrev,
-    handleNavClose
-  } = useTagNavigation(notes, setActiveNoteId);
+    handleNavClose,
+    isOverlayOpen,
+    openOverlay,
+    openSearchOverlay,
+    closeOverlay,
+    jumpToMatch
+  } = useNoteFinder(notes, setActiveNoteId);
+
+  // Persistent match wash on every matching note while a tag-nav or search
+  // session is active — tag color for tag mode (and for an exact "#tag"
+  // search, which behaves identically to clicking that tag), a neutral
+  // fallback for a plain-text search.
+  const activeMatchIds = useMemo(() => new Set(session.matches), [session.matches]);
+  const matchWashClass = useMemo(() => {
+    if (session.mode === 'tag') return getTagMeta(session.query).wash;
+    if (session.mode === 'search') {
+      const trimmed = session.query.trim();
+      const exactTag = exactTagFromQuery(trimmed);
+      if (exactTag) return getTagMeta(exactTag).wash;
+      if (trimmed.length >= 2) return 'bg-accent/15 dark:bg-accent/25';
+    }
+    return '';
+  }, [session.mode, session.query]);
+
+  // Global Cmd/Ctrl+K — opens search from anywhere, including while a note is
+  // focused in the editor. Safe against the current Tiptap extension list
+  // (StarterKit + TagHighlight + Placeholder — none bind Cmd+K); re-check if
+  // a link extension is ever added, since Cmd+K is a common "insert link" binding.
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openSearchOverlay();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [openSearchOverlay]);
 
   const {
     mobileDrawer,
@@ -173,8 +215,42 @@ const NoteApp = ({ user }) => {
         />
       </div>
 
-      {/* Bottom Left Stack: Login/User Dropdown - HIDDEN ON MOBILE */}
-      <div className="fixed bottom-8 left-8 z-50 hidden sm:flex flex-col items-center gap-6">
+      {/* Top Right Stack: Search / Theme Toggle - aligned with logo - shown on all breakpoints */}
+      <div className="fixed top-8 right-4 sm:right-8 z-50 flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={openSearchOverlay}
+          title="Search (⌘K)"
+          className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-md border border-border/50 can-hover:hover:bg-muted active:scale-95 transition-transform"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+          className="relative h-10 w-10 rounded-full bg-background/80 backdrop-blur-md border border-border/50 can-hover:hover:bg-muted active:scale-95 transition-transform"
+        >
+          <SunIcon
+            className={cn(
+              "h-4 w-4 absolute transition-[transform,opacity] duration-200 ease-out",
+              theme === 'light' ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"
+            )}
+          />
+          <MoonIcon
+            className={cn(
+              "h-4 w-4 absolute transition-[transform,opacity] duration-200 ease-out",
+              theme === 'dark' ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 rotate-90"
+            )}
+          />
+        </Button>
+      </div>
+
+      {/* Bottom Left: Login / User Dropdown - HIDDEN ON MOBILE */}
+      <div className="fixed bottom-8 left-8 z-50 hidden sm:block">
         {user ? (
           <UserDropdown
             user={user}
@@ -216,15 +292,27 @@ const NoteApp = ({ user }) => {
           }}
           onEditorFocus={() => setIsEditorFocused(true)}
           onEditorBlur={() => setIsEditorFocused(false)}
+          activeMatchIds={activeMatchIds}
+          matchWashClass={matchWashClass}
         />
 
         <TagNavigator
-          tag={tagNav.tag}
-          currentIndex={tagNav.currentIndex}
-          totalMatches={tagNav.matches.length}
+          tag={session.mode === 'tag' ? session.query : null}
+          currentIndex={session.currentIndex}
+          totalMatches={session.matches.length}
           onNext={handleNavNext}
           onPrev={handleNavPrev}
           onClose={handleNavClose}
+          onOpenOverlay={openOverlay}
+        />
+
+        <NoteResultsOverlay
+          isOpen={isOverlayOpen}
+          session={session}
+          notes={notes}
+          onSelect={jumpToMatch}
+          onClose={closeOverlay}
+          onQueryChange={handleSearchQuery}
         />
 
         <MobileNavPill

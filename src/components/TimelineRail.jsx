@@ -105,7 +105,7 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick }) => {
                             >
                                 {/* Ruler Tick (Left side) */}
                                 <div className={cn(
-                                    "h-[1.5px] rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-foreground group-hover:opacity-100",
+                                    "h-[1.5px] rounded-full transition-[width,background-color,opacity] duration-150 ease-out group-hover:w-6 group-hover:bg-foreground group-hover:opacity-100",
                                     isSameDate
                                         ? "w-6 bg-foreground opacity-100"
                                         : "w-2 bg-muted-foreground opacity-30"
@@ -113,7 +113,7 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick }) => {
 
                                 {/* Date Label (Appears on Right of tick) */}
                                 <span className={cn(
-                                    "text-[11px] font-mono tracking-wide transition-all duration-300 whitespace-nowrap group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-foreground",
+                                    "text-[11px] font-mono tracking-wide transition-[transform,opacity,color] duration-150 ease-out whitespace-nowrap group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-foreground",
                                     isSameDate
                                         ? "opacity-100 text-foreground translate-x-0"
                                         : "opacity-0 text-muted-foreground -translate-x-4"

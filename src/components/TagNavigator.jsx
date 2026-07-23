@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronUp, ChevronDown, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
 import { getTagMeta } from '../lib/colors';
+import { usePresence } from '../hooks/usePresence';
 
 export const TagNavigator = ({
     tag,
@@ -10,47 +11,61 @@ export const TagNavigator = ({
     totalMatches,
     onNext,
     onPrev,
-    onClose
+    onClose,
+    onOpenOverlay
 }) => {
-    if (!tag) return null;
+    const { shouldRender, handleAnimationEnd } = usePresence(!!tag);
 
-    const meta = getTagMeta(tag);
+    // Snapshot the last non-null props so content doesn't blank out
+    // while the exit animation is still playing (tag goes null immediately,
+    // but the element stays mounted for `handleAnimationEnd` to fire).
+    const [display, setDisplay] = useState({ tag, currentIndex, totalMatches });
+    useEffect(() => {
+        if (tag) setDisplay({ tag, currentIndex, totalMatches });
+    }, [tag, currentIndex, totalMatches]);
+
+    if (!shouldRender) return null;
+
+    const meta = getTagMeta(display.tag);
 
     return (
-        <div className="fixed bottom-24 right-4 sm:bottom-8 sm:right-8 z-[60] animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div
+            data-state={tag ? 'open' : 'closed'}
+            onAnimationEnd={handleAnimationEnd}
+            className="anim-pill fixed bottom-24 right-4 sm:bottom-8 sm:right-8 z-[60]"
+        >
             <div className="flex items-center gap-2 px-4 h-[54px] bg-background/80 backdrop-blur-md border border-border/50 rounded-full shadow-lg">
                 <div className="flex items-center gap-2 pl-1 pr-3 border-r relative group">
                     {/* Tag colored dot */}
                     <div className={cn("w-2 h-2 rounded-full", meta.tick)} />
                     <span className={cn("text-sm font-medium", meta.text)}>
-                        #{tag}
+                        #{display.tag}
                     </span>
-                    <span className="text-xs text-muted-foreground font-mono ml-1">
-                        {currentIndex + 1} / {totalMatches}
-                    </span>
-
-                    {/* Close button (Hidden until hover? Or always visible? Let's make it always visible but minimal) 
-                         Wait, the design says "Next/Prev/Close".
-                         Let's put Close at the end.
-                     */}
+                    <button
+                        onClick={onOpenOverlay}
+                        className="text-xs text-muted-foreground font-mono ml-1 rounded can-hover:hover:text-foreground transition-[color,transform] active:scale-95"
+                        title="View all matches"
+                    >
+                        {display.currentIndex + 1} / {display.totalMatches}
+                    </button>
                 </div>
 
                 <div className="flex items-center gap-1">
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 rounded-full hover:bg-muted"
+                        className="h-6 w-6 rounded-full can-hover:hover:bg-muted active:scale-95 transition-transform"
                         onClick={onPrev}
-                        disabled={totalMatches <= 1}
+                        disabled={display.totalMatches <= 1}
                     >
                         <ChevronUp className="h-4 w-4" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 rounded-full hover:bg-muted"
+                        className="h-6 w-6 rounded-full can-hover:hover:bg-muted active:scale-95 transition-transform"
                         onClick={onNext}
-                        disabled={totalMatches <= 1}
+                        disabled={display.totalMatches <= 1}
                     >
                         <ChevronDown className="h-4 w-4" />
                     </Button>
@@ -60,7 +75,7 @@ export const TagNavigator = ({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                        className="h-6 w-6 rounded-full can-hover:hover:bg-destructive/10 can-hover:hover:text-destructive active:scale-95 transition-transform"
                         onClick={onClose}
                     >
                         <X className="h-3.5 w-3.5" />

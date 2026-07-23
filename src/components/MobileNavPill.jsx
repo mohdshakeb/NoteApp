@@ -42,7 +42,7 @@ export const MobileNavPill = ({
 
     return (
         <div className={cn(
-            "fixed bottom-6 inset-x-4 z-50 transition-all duration-300 sm:hidden",
+            "fixed bottom-6 inset-x-4 z-50 transition-[transform,opacity] duration-300 ease-out sm:hidden",
             isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
         )}>
             <div className="flex items-center justify-between w-full h-[54px] bg-background/80 backdrop-blur-md border border-border/50 rounded-full shadow-lg px-2 pl-4">
@@ -50,7 +50,7 @@ export const MobileNavPill = ({
                 {/* Date Side (Left) */}
                 <button
                     onClick={onDateClick}
-                    className="flex items-center gap-2 text-sm font-medium active:opacity-70 transition-opacity"
+                    className="flex items-center gap-2 text-sm font-medium active:opacity-70 active:scale-95 transition-[opacity,transform]"
                 >
                     <span className="text-foreground">{dateLabel}</span>
                     <ChevronUp className="w-3 h-3 text-muted-foreground" />

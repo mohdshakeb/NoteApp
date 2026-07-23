@@ -70,7 +70,7 @@ export const TagsRail = ({ notes, activeNoteId, tags = [], onTagClick }) => {
                             >
                                 {/* Tag Label (Appears on LEFT of tick for Right Rail) */}
                                 <span className={cn(
-                                    "text-[11px] font-mono tracking-wide transition-all duration-300 whitespace-nowrap",
+                                    "text-[11px] font-mono tracking-wide transition-[transform,opacity,color] duration-150 ease-out whitespace-nowrap",
                                     isActive
                                         ? `opacity-100 translate-x-0 ${meta.text}`
                                         : "opacity-0 text-muted-foreground translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-foreground"
@@ -80,7 +80,7 @@ export const TagsRail = ({ notes, activeNoteId, tags = [], onTagClick }) => {
 
                                 {/* Ruler Tick (Right side) */}
                                 <div className={cn(
-                                    "shrink-0 h-[2px] rounded-full transition-all duration-300 opacity-100",
+                                    "shrink-0 h-[2px] rounded-full transition-[width] duration-150 ease-out opacity-100",
                                     meta.tick, // Always apply the color
                                     isActive
                                         ? "w-6" // Active: Wide
