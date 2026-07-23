@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { cn } from '../lib/utils';
+import { JumpToLatestPill } from './JumpToLatestPill';
 
 // Lazy load the editor to reduce initial bundle size to improve performance
 const TiptapEditor = dynamic(() => import('./TiptapEditor').then(mod => mod.TiptapEditor), {
@@ -17,7 +18,8 @@ export const NotebookFeed = ({
     onEditorFocus,
     onEditorBlur,
     activeMatchIds,
-    matchWashClass
+    matchWashClass,
+    isTagNavActive
 }) => {
     const feedRef = useRef(null);
     const bottomRef = useRef(null);
@@ -99,6 +101,62 @@ export const NotebookFeed = ({
         }
     }, [sortedNotes]);
 
+    // Tracks whether the trailing spacer (right after the newest note) is in
+    // view, so we know when to surface the "jump to latest" pill — mirrors
+    // the chat-app "scroll to bottom" affordance instead of requiring a
+    // permanent add-note button.
+    const [isNearBottom, setIsNearBottom] = useState(true);
+    useEffect(() => {
+        const root = feedRef.current;
+        const target = bottomRef.current;
+        if (!root || !target) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsNearBottom(entry.isIntersecting),
+            { root, threshold: 0 }
+        );
+        observer.observe(target);
+        return () => observer.disconnect();
+    }, []);
+
+    // If focusOrCreateLastNote (below) has to create a brand-new note, the
+    // DOM node doesn't exist yet at click time — wait for it to render, then
+    // scroll to it (same 'start' + scroll-margin alignment used everywhere
+    // else).
+    const pendingScrollRef = useRef(false);
+    useEffect(() => {
+        if (pendingScrollRef.current) {
+            pendingScrollRef.current = false;
+            const blocks = document.querySelectorAll('.entry-block');
+            const lastBlock = blocks[blocks.length - 1];
+            lastBlock?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [sortedNotes.length]);
+
+    // Shared by the gutter click, the trailing spacer click, and the jump
+    // pill: focus the existing blank note if one's waiting, otherwise create
+    // a fresh one.
+    const focusOrCreateLastNote = () => {
+        const lastNote = sortedNotes[sortedNotes.length - 1];
+        if (lastNote && !lastNote.content.trim()) {
+            lastNoteRef.current?.focus();
+        } else {
+            pendingScrollRef.current = true;
+            onCreateNote('');
+        }
+    };
+
+    const handleJumpToLatest = () => {
+        const lastNote = sortedNotes[sortedNotes.length - 1];
+        if (lastNote && !lastNote.content.trim()) {
+            // Blank note already waiting — just scroll to it and focus.
+            document.getElementById(lastNote.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            lastNoteRef.current?.focus();
+        } else {
+            focusOrCreateLastNote();
+        }
+    };
+
     return (
         <div className="flex-1 h-full overflow-y-auto bg-background scroll-smooth" ref={feedRef}>
             {/* Adjusted padding: px-4 for mobile, sm:px-8 for tablet/desktop */}
@@ -107,12 +165,7 @@ export const NotebookFeed = ({
                 onClick={(e) => {
                     // Only trigger if clicking the container itself (gutters), not children
                     if (e.target === e.currentTarget) {
-                        const lastNote = sortedNotes[sortedNotes.length - 1];
-                        if (lastNote && !lastNote.content.trim()) {
-                            lastNoteRef.current?.focus();
-                        } else {
-                            onCreateNote('');
-                        }
+                        focusOrCreateLastNote();
                     }
                 }}
             >
@@ -122,8 +175,9 @@ export const NotebookFeed = ({
                         return (
                             <div
                                 key={note.id}
+                                id={note.id}
                                 className={cn(
-                                    "entry-block -mx-6 px-6 rounded-xl transition-colors duration-300",
+                                    "entry-block -mx-6 px-6 rounded-xl transition-colors duration-150",
                                     activeMatchIds?.has(note.id) && matchWashClass
                                 )}
                                 data-note-id={note.id}
@@ -165,16 +219,14 @@ export const NotebookFeed = ({
                 <div
                     ref={bottomRef}
                     className="flex-1 w-full cursor-text min-h-[50vh]"
-                    onClick={() => {
-                        const lastNote = sortedNotes[sortedNotes.length - 1];
-                        if (lastNote && !lastNote.content.trim()) {
-                            lastNoteRef.current?.focus();
-                        } else {
-                            onCreateNote('');
-                        }
-                    }}
+                    onClick={focusOrCreateLastNote}
                 />
             </div>
+
+            <JumpToLatestPill
+                visible={!isNearBottom && !isTagNavActive}
+                onClick={handleJumpToLatest}
+            />
         </div>
     );
 };

@@ -103,12 +103,14 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick }) => {
                                 onClick={handleDateClick}
                                 className="group flex items-center justify-start w-full gap-3 h-3 cursor-pointer pointer-events-auto"
                             >
-                                {/* Ruler Tick (Left side) */}
+                                {/* Ruler Tick (Left side) — box stays w-6 always; visual width comes
+                                    from scaleX so the tick never triggers layout reflow or nudges
+                                    the label (left edge is the anchor, matching justify-start). */}
                                 <div className={cn(
-                                    "h-[1.5px] rounded-full transition-[width,background-color,opacity] duration-150 ease-out group-hover:w-6 group-hover:bg-foreground group-hover:opacity-100",
+                                    "w-6 h-[1.5px] rounded-full origin-left transition-[transform,background-color,opacity] duration-150 ease-out group-hover:scale-x-100 group-hover:bg-foreground group-hover:opacity-100",
                                     isSameDate
-                                        ? "w-6 bg-foreground opacity-100"
-                                        : "w-2 bg-muted-foreground opacity-30"
+                                        ? "scale-x-100 bg-foreground opacity-100"
+                                        : "scale-x-[0.333] bg-muted-foreground opacity-30"
                                 )} />
 
                                 {/* Date Label (Appears on Right of tick) */}

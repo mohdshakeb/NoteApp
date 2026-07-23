@@ -115,7 +115,11 @@ export function useNotes(user) {
       };
 
       const result = await updateNote(db, currentUserId, updatedNote);
-      setNotes(prev => prev.map(n => n.id === originalNote.id ? result : n));
+      // updateNote returns null if the note was deleted concurrently (e.g. another
+      // tab/device) — drop it from state instead of storing null in the notes array.
+      setNotes(prev => result
+        ? prev.map(n => n.id === originalNote.id ? result : n)
+        : prev.filter(n => n.id !== originalNote.id));
       return result;
     } catch (error) {
       console.error('Error updating note:', error);

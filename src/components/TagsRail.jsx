@@ -78,13 +78,15 @@ export const TagsRail = ({ notes, activeNoteId, tags = [], onTagClick }) => {
                                     {tag}
                                 </span>
 
-                                {/* Ruler Tick (Right side) */}
+                                {/* Ruler Tick (Right side) — box stays w-6 always; visual width comes
+                                    from scaleX so the tick never triggers layout reflow or nudges
+                                    the label (right edge is the anchor, matching justify-end). */}
                                 <div className={cn(
-                                    "shrink-0 h-[2px] rounded-full transition-[width] duration-150 ease-out opacity-100",
+                                    "shrink-0 w-6 h-[2px] rounded-full origin-right transition-transform duration-150 ease-out opacity-100",
                                     meta.tick, // Always apply the color
                                     isActive
-                                        ? "w-6" // Active: Wide
-                                        : "w-3 group-hover:w-6" // Inactive: Short, expands on hover
+                                        ? "scale-x-100" // Active: Wide
+                                        : "scale-x-50 group-hover:scale-x-100" // Inactive: Short, expands on hover
                                 )} />
                             </div>
                         );

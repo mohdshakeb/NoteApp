@@ -32,7 +32,7 @@ export function useMobileNav(notes, setActiveNoteId, handleTagClick) {
 
         if (target) {
             const el = document.getElementById(target.id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             setActiveNoteId(target.id);
         }
         closeMobileDrawer();

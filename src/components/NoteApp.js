@@ -294,10 +294,11 @@ const NoteApp = ({ user }) => {
           onEditorBlur={() => setIsEditorFocused(false)}
           activeMatchIds={activeMatchIds}
           matchWashClass={matchWashClass}
+          isTagNavActive={session.mode === 'tag'}
         />
 
         <TagNavigator
-          tag={session.mode === 'tag' ? session.query : null}
+          tag={session.mode === 'tag' && session.matches.length > 1 ? session.query : null}
           currentIndex={session.currentIndex}
           totalMatches={session.matches.length}
           onNext={handleNavNext}

@@ -50,7 +50,7 @@ export const MobileNavPill = ({
                 {/* Date Side (Left) */}
                 <button
                     onClick={onDateClick}
-                    className="flex items-center gap-2 text-sm font-medium active:opacity-70 active:scale-95 transition-[opacity,transform]"
+                    className="flex items-center gap-2 text-sm font-medium active:opacity-70 active:scale-95 transition-[opacity,transform] duration-150 ease-out"
                 >
                     <span className="text-foreground">{dateLabel}</span>
                     <ChevronUp className="w-3 h-3 text-muted-foreground" />

@@ -18,7 +18,7 @@ export const NoteResultsOverlay = ({
     onClose,
     onQueryChange
 }) => {
-    const { shouldRender, handleAnimationEnd } = usePresence(isOpen);
+    const { shouldRender, handleTransitionEnd } = usePresence(isOpen);
     const panelRef = useRef(null);
 
     // Snapshot the last non-null session so content (and, for search, the
@@ -100,7 +100,7 @@ export const NoteResultsOverlay = ({
                 />
                 <div
                     data-state={state}
-                    onAnimationEnd={handleAnimationEnd}
+                    onTransitionEnd={handleTransitionEnd}
                     className="anim-sheet absolute bottom-0 left-0 right-0 bg-background border-t rounded-t-3xl shadow-2xl max-h-[80vh] flex flex-col"
                 >
                     {isSearch ? (
@@ -120,7 +120,7 @@ export const NoteResultsOverlay = ({
             <div
                 ref={panelRef}
                 data-state={state}
-                onAnimationEnd={handleAnimationEnd}
+                onTransitionEnd={handleTransitionEnd}
                 className={cn(
                     "hidden sm:flex fixed z-[70] w-[380px] max-h-[60vh] flex-col bg-background/95 backdrop-blur-md border border-border/50 rounded-2xl shadow-lg",
                     isSearch
@@ -213,7 +213,7 @@ const ResultRow = ({ note, snippetQuery, meta, onClick }) => {
     return (
         <button
             onClick={onClick}
-            className="w-full text-left px-3 py-2.5 rounded-lg can-hover:hover:bg-muted transition-[background-color,transform] active:scale-[0.98] flex flex-col gap-1"
+            className="w-full text-left px-3 py-2.5 rounded-lg can-hover:hover:bg-muted transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] flex flex-col gap-1"
         >
             <div className="flex items-center gap-2">
                 {meta && <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", meta.tick)} />}

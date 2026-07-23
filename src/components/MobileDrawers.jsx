@@ -15,7 +15,7 @@ export const MobileDrawers = ({
     onSelectDate,
     onSelectTag
 }) => {
-    const { shouldRender, handleAnimationEnd } = usePresence(isOpen);
+    const { shouldRender, handleTransitionEnd } = usePresence(isOpen);
 
     // `type` nulls out the instant `isOpen` does (see useMobileNav's
     // closeMobileDrawer), so snapshot it to avoid the sheet's content
@@ -41,7 +41,7 @@ export const MobileDrawers = ({
             {/* Sheet */}
             <div
                 data-state={state}
-                onAnimationEnd={handleAnimationEnd}
+                onTransitionEnd={handleTransitionEnd}
                 className="anim-sheet absolute bottom-0 left-0 right-0 bg-background border-t rounded-t-3xl shadow-2xl max-h-[80vh] flex flex-col"
             >
 

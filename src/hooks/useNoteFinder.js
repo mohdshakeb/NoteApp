@@ -24,11 +24,11 @@ export function useNoteFinder(notes, setActiveNoteId) {
 
         if (matches.length === 0) return;
 
-        // Only start a steppable session if there's more than one match —
-        // otherwise clear any nav we had open on a different tag.
-        setSession(matches.length > 1
-            ? { mode: 'tag', query: tag, matches, currentIndex: 0 }
-            : EMPTY_SESSION);
+        // Always start a tag session — this is what drives the match
+        // highlight wash, regardless of match count. Whether the steppable
+        // pill itself renders is decided separately (see NoteApp.js), since
+        // a single match has nothing to step through.
+        setSession({ mode: 'tag', query: tag, matches, currentIndex: 0 });
 
         scrollToNote(matches[0]);
     }, [notes, scrollToNote]);

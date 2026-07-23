@@ -111,97 +111,82 @@
 
 /* --- Floating overlay animations (TagNavigator, MergeToast) --- */
 /* Toggle via data-state="open" | "closed"; pair with the usePresence hook
-   so the element stays mounted long enough for the exit animation to play. */
+   so the element stays mounted long enough for the exit transition to play.
+   These are `transition`s (not @keyframes) so that rapid open/close toggling
+   retargets smoothly from the current on-screen value instead of restarting
+   from a hardcoded `from` state — @starting-style covers the first-mount
+   entrance so no JS "mount closed, then flip open" dance is needed. */
 @layer components {
   .anim-pill[data-state="open"] {
-    animation: pill-in var(--duration-drawer) var(--ease-out) forwards;
+    transition: opacity var(--duration-drawer) var(--ease-out), transform var(--duration-drawer) var(--ease-out);
+    opacity: 1;
+    transform: translateY(0);
+    @starting-style { opacity: 0; transform: translateY(1rem); }
   }
   .anim-pill[data-state="closed"] {
-    animation: pill-out var(--duration-base) var(--ease-in-out) forwards;
+    transition: opacity var(--duration-base) var(--ease-in-out), transform var(--duration-base) var(--ease-in-out);
+    opacity: 0;
+    transform: translateY(1rem);
   }
 
   .anim-backdrop[data-state="open"] {
-    animation: backdrop-in var(--duration-base) var(--ease-out) forwards;
+    transition: opacity var(--duration-base) var(--ease-out);
+    opacity: 1;
+    @starting-style { opacity: 0; }
   }
   .anim-backdrop[data-state="closed"] {
-    animation: backdrop-out var(--duration-base) var(--ease-in-out) forwards;
+    transition: opacity var(--duration-base) var(--ease-in-out);
+    opacity: 0;
   }
 
   .anim-sheet[data-state="open"] {
-    animation: sheet-in var(--duration-drawer) var(--ease-drawer) forwards;
+    transition: transform var(--duration-drawer) var(--ease-drawer);
+    transform: translateY(0);
+    @starting-style { transform: translateY(100%); }
   }
   .anim-sheet[data-state="closed"] {
-    animation: sheet-out var(--duration-drawer) var(--ease-drawer) forwards;
+    transition: transform var(--duration-drawer) var(--ease-drawer);
+    transform: translateY(100%);
   }
 
   .anim-panel[data-state="open"] {
-    animation: panel-in var(--duration-drawer) var(--ease-out) forwards;
+    transition: opacity var(--duration-drawer) var(--ease-out), transform var(--duration-drawer) var(--ease-out);
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    @starting-style { opacity: 0; transform: scale(0.96) translateY(0.5rem); }
   }
   .anim-panel[data-state="closed"] {
-    animation: panel-out var(--duration-base) var(--ease-in-out) forwards;
+    transition: opacity var(--duration-base) var(--ease-in-out), transform var(--duration-base) var(--ease-in-out);
+    opacity: 0;
+    transform: scale(0.96) translateY(0.5rem);
   }
 
   /* Top-anchored variant: panel sits below its trigger (search icon), so it
      should slide down into place, mirroring anim-panel's slide-up which is
      tuned for a bottom-anchored trigger (the tag pill). */
   .anim-panel-top[data-state="open"] {
-    animation: panel-in-top var(--duration-drawer) var(--ease-out) forwards;
+    transition: opacity var(--duration-drawer) var(--ease-out), transform var(--duration-drawer) var(--ease-out);
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    @starting-style { opacity: 0; transform: scale(0.96) translateY(-0.5rem); }
   }
   .anim-panel-top[data-state="closed"] {
-    animation: panel-out-top var(--duration-base) var(--ease-in-out) forwards;
+    transition: opacity var(--duration-base) var(--ease-in-out), transform var(--duration-base) var(--ease-in-out);
+    opacity: 0;
+    transform: scale(0.96) translateY(-0.5rem);
   }
 }
 
-@keyframes pill-in {
-  from { opacity: 0; transform: translateY(1rem); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes pill-out {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(1rem); }
-}
-@keyframes backdrop-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes backdrop-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-@keyframes sheet-in {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-@keyframes sheet-out {
-  from { transform: translateY(0); }
-  to { transform: translateY(100%); }
-}
-@keyframes panel-in {
-  from { opacity: 0; transform: scale(0.96) translateY(0.5rem); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-@keyframes panel-out {
-  from { opacity: 1; transform: scale(1) translateY(0); }
-  to { opacity: 0; transform: scale(0.96) translateY(0.5rem); }
-}
-@keyframes panel-in-top {
-  from { opacity: 0; transform: scale(0.96) translateY(-0.5rem); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-@keyframes panel-out-top {
-  from { opacity: 1; transform: scale(1) translateY(0); }
-  to { opacity: 0; transform: scale(0.96) translateY(-0.5rem); }
-}
-
-/* Reduced motion: keep opacity/color transitions, strip movement */
+/* Reduced motion: keep opacity transitions, strip movement */
 @media (prefers-reduced-motion: reduce) {
   .animate-in,
   .animate-out,
   .anim-pill[data-state],
+  .anim-backdrop[data-state],
   .anim-sheet[data-state],
   .anim-panel[data-state],
   .anim-panel-top[data-state] {
-    animation-duration: var(--duration-fast) !important;
+    transition-duration: var(--duration-fast) !important;
   }
 
   .animate-in,
@@ -212,36 +197,14 @@
     --tw-exit-translate-y: 0 !important;
   }
 
-  @keyframes pill-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes pill-out {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  @keyframes sheet-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes sheet-out {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  @keyframes panel-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes panel-out {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  @keyframes panel-in-top {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes panel-out-top {
-    from { opacity: 1; }
-    to { opacity: 0; }
+  .anim-pill[data-state="open"],
+  .anim-pill[data-state="closed"],
+  .anim-sheet[data-state="open"],
+  .anim-sheet[data-state="closed"],
+  .anim-panel[data-state="open"],
+  .anim-panel[data-state="closed"],
+  .anim-panel-top[data-state="open"],
+  .anim-panel-top[data-state="closed"] {
+    transform: none !important;
   }
 }

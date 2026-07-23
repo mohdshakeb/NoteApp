@@ -119,7 +119,6 @@ export const TiptapEditor = forwardRef(({
 
     return (
         <div
-            id={note.id}
             className="group relative w-full max-w-3xl mx-auto py-4 cursor-text"
             onClick={() => {
                 if (!editor?.isFocused) {
@@ -127,8 +126,6 @@ export const TiptapEditor = forwardRef(({
                 }
             }}
         >
-            <EditorContent editor={editor} />
-
             <EditorContent editor={editor} />
         </div>
     );

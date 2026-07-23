@@ -14,11 +14,11 @@ export const TagNavigator = ({
     onClose,
     onOpenOverlay
 }) => {
-    const { shouldRender, handleAnimationEnd } = usePresence(!!tag);
+    const { shouldRender, handleTransitionEnd } = usePresence(!!tag);
 
     // Snapshot the last non-null props so content doesn't blank out
     // while the exit animation is still playing (tag goes null immediately,
-    // but the element stays mounted for `handleAnimationEnd` to fire).
+    // but the element stays mounted for `handleTransitionEnd` to fire).
     const [display, setDisplay] = useState({ tag, currentIndex, totalMatches });
     useEffect(() => {
         if (tag) setDisplay({ tag, currentIndex, totalMatches });
@@ -31,7 +31,7 @@ export const TagNavigator = ({
     return (
         <div
             data-state={tag ? 'open' : 'closed'}
-            onAnimationEnd={handleAnimationEnd}
+            onTransitionEnd={handleTransitionEnd}
             className="anim-pill fixed bottom-24 right-4 sm:bottom-8 sm:right-8 z-[60]"
         >
             <div className="flex items-center gap-2 px-4 h-[54px] bg-background/80 backdrop-blur-md border border-border/50 rounded-full shadow-lg">
@@ -43,7 +43,7 @@ export const TagNavigator = ({
                     </span>
                     <button
                         onClick={onOpenOverlay}
-                        className="text-xs text-muted-foreground font-mono ml-1 rounded can-hover:hover:text-foreground transition-[color,transform] active:scale-95"
+                        className="text-xs text-muted-foreground font-mono ml-1 rounded can-hover:hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-95"
                         title="View all matches"
                     >
                         {display.currentIndex + 1} / {display.totalMatches}
