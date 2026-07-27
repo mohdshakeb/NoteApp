@@ -74,17 +74,15 @@ export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
           >
             Sign out
           </DropdownMenuItem>
-          {!user.isGuest && (
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive cursor-pointer"
-              onSelect={(e) => {
-                e.preventDefault()
-                handleDeleteClick()
-              }}
-            >
-              Delete Account
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive cursor-pointer"
+            onSelect={(e) => {
+              e.preventDefault()
+              handleDeleteClick()
+            }}
+          >
+            Delete Account
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

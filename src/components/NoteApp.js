@@ -157,13 +157,9 @@ const NoteApp = ({ user }) => {
         await tx.done;
       }
 
-      if (user?.isGuest) {
-        localStorage.removeItem('guestUser');
-      } else {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        await supabase.auth.clearSession();
-      }
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      await supabase.auth.clearSession();
 
       localStorage.removeItem(`defaultNotes-${user?.id}`);
 
