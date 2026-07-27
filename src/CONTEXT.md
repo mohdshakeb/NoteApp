@@ -25,10 +25,7 @@ src/
 │   ├── MergeToast.jsx       # Guest data merge confirmation — ACTIVE, used by NoteApp.js
 │   ├── LoginDropdown.jsx    # Login dropdown — Google OAuth + magic-link email (no GitHub)
 │   ├── ThemeProvider.js     # Dark/light theme context
-│   ├── ui/                  # Shadcn/ui components (Button, Card, Dropdown, AlertDialog, ScrollArea, UserDropdown, etc.)
-│   ├── Auth.js              # ⚠️ DEAD CODE — not imported anywhere, superseded by LoginDropdown.jsx
-│   ├── LoginModal.jsx       # ⚠️ DEAD CODE — not imported anywhere
-│   └── MergeDialog.jsx      # ⚠️ DEAD CODE — not imported anywhere, superseded by MergeToast.jsx
+│   └── ui/                  # Shadcn/ui components (Button, Dropdown, AlertDialog, UserDropdown, etc.)
 ├── hooks/
 │   ├── useNotes.js          # Core CRUD operations + DB initialization + empty-note management
 │   ├── useTags.js           # Extract and aggregate tags from notes — has its OWN regex, see Known Issues
@@ -75,14 +72,11 @@ src/
 
 - **Don't add another tag-matching regex** — `useNoteFinder`'s `handleTagClick` and search's exact-`#tag` detection already share one via `lib/tagMatch.js`; route any new "does this note have tag X" check through that instead of writing a fourth variant. This is a separate concern from the extraction split-brain in Known Issues below (parsing tag names OUT of raw text) — don't conflate the two when reconciling either.
 - **Don't assume `getNotes()`'s return order is display order** — it isn't; see Patterns above.
-- **Don't build on `Auth.js`, `LoginModal.jsx`, or `MergeDialog.jsx`** — they're unused/dead. Extend `LoginDropdown.jsx` and `MergeToast.jsx` instead, or delete the dead files if you're in that area of the code.
 
 ## Known Issues (found during 2026-07-20 audit)
 
 - **Unused `tags` column on the Supabase `notes` table (found 2026-07-27, while scoping NoteAppAndroid):** Confirmed via a live PostgREST schema probe that a `tags` column exists on `notes` (`db.js:getNotes()` reads `note.tags || []` off the Supabase row) — but no code path (`saveNote`, `updateNote`, `syncPendingNotes`, `createDefaultNotes`) ever writes to it. This directly contradicts this project's own documented principle that "tags are derived, never stored" (see `Planning/CONTEXT.md` Architectural Principles). In practice the column is presumably always null/empty and the read is a no-op, but it's dead schema surface that could confuse future work (e.g. someone "fixing" tag storage by writing to a column that was never meant to be the source of truth). Needs a decision: drop the column, or document why it exists if there's a reason not visible in the client code. Not resolved here — flagging only.
 - **Tag regex split-brain:** `useTags.js` (tag cloud) uses `/#(\w+)/g` — no hyphen support, no word-boundary requirement. `TagHighlight.js` (inline editor highlighting) uses `/(?:^|\s)(#[\w-]+)/g` — hyphens allowed, requires start-of-string or leading whitespace. These can disagree on what counts as a tag (e.g. a hyphenated tag or a `#tag` glued mid-word will be treated differently by the cloud vs. the highlighter). Needs reconciling to a single shared regex/util. `lib/tagMatch.js` does NOT fix this — it's a third, narrower regex (`#${tag}\b`) for a different job (testing an already-known tag name against note content for nav/search matching, not extracting tag names from raw text), shared between `useNoteFinder`'s tag-click and search's exact-`#tag` detection only.
-- **`package.json` lists `@testing-library/react` and `@testing-library/jest-dom` as dependencies**, but there's no `jest`, no `jest.config.js`, no test script, and no test files — likely stale/unused deps.
-- **`README.md` exists but is empty (0 bytes).**
 
 ## Testing Requirements
 
