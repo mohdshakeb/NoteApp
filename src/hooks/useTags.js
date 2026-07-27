@@ -1,14 +1,12 @@
 import { useMemo } from 'react';
+import { extractUniqueTags } from '../lib/tags';
 
 export function useTags(notes) {
   // Extract all unique tags
   const allTags = useMemo(() => {
     const tags = new Set();
     notes.forEach(note => {
-      const matches = note.content.match(/#(\w+)/g);
-      if (matches) {
-        matches.forEach(tag => tags.add(tag.slice(1)));
-      }
+      extractUniqueTags(note.content).forEach(tag => tags.add(tag));
     });
     return Array.from(tags).sort();
   }, [notes]);

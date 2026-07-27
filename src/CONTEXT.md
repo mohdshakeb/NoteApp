@@ -14,7 +14,7 @@ src/
 │   ├── NotebookFeed.jsx     # Scrollable feed of TiptapEditor instances — re-sorts ASCENDING for display (see Patterns below)
 │   ├── TiptapEditor.jsx     # Rich text editor with auto-save
 │   ├── extensions/
-│   │   └── TagHighlight.js  # ProseMirror plugin: inline #tag highlighting — has its OWN regex, see Known Issues
+│   │   └── TagHighlight.js  # ProseMirror plugin: inline #tag highlighting — extraction via `lib/tags.js`
 │   ├── TimelineRail.jsx     # Left sidebar: date-based navigation
 │   ├── TagsRail.jsx         # Right sidebar: tag cloud
 │   ├── TagNavigator.jsx     # Floating nav for tag filtering (Prev/Next) — counter doubles as "view all" trigger for NoteResultsOverlay. Tag-mode only; renders nothing for a search session OR when the tag session has only 1 match (NoteApp.js passes `tag={null}` in that case — a session still exists for the wash/highlight, there's just nothing to step through so the pill itself is suppressed).
@@ -28,7 +28,7 @@ src/
 │   └── ui/                  # Shadcn/ui components (Button, Dropdown, AlertDialog, UserDropdown, etc.)
 ├── hooks/
 │   ├── useNotes.js          # Core CRUD operations + DB initialization + empty-note management
-│   ├── useTags.js           # Extract and aggregate tags from notes — has its OWN regex, see Known Issues
+│   ├── useTags.js           # Extract and aggregate tags from notes — extraction via `lib/tags.js`
 │   ├── useNoteFinder.js     # Renamed from useTagNavigation.js — generalized to a single `session` state (`{mode: 'tag'|'search'|null, query, matches, currentIndex}`) driving BOTH tag-click nav and free-text search. `handleTagClick` ALWAYS sets `mode: 'tag'`, even for a single match — it no longer special-cases match count (that used to also suppress the wash highlight as a side effect; match-count-based pill suppression now lives in `NoteApp.js` alone, see `TagNavigator.jsx` above). `handleSearchQuery` live-filters (no auto-scroll), treats an exact `#tag` query as equivalent to `handleTagClick` via the shared helper in `lib/tagMatch.js`, and doesn't scan below 2 trimmed chars. `openSearchOverlay` is a no-op on the session if search is already active (so re-triggering ⌘K doesn't blow away typed text). `isOverlayOpen`/`openOverlay`/`closeOverlay`/`jumpToMatch` as before — `closeOverlay` additionally clears the session when `mode === 'search'` (no persistent pill to leave it dangling on, unlike tag mode)
 │   └── useMobileNav.js      # Mobile drawer state management
 ├── lib/
@@ -36,7 +36,8 @@ src/
 │   ├── supabase.js          # Supabase client initialization
 │   ├── colors.js            # Deterministic hash → 8-color palette for tag highlighting
 │   ├── snippet.js           # extractSnippet(content, query, radius) — single-line snippet centered on a query match, used by NoteResultsOverlay rows
-│   ├── tagMatch.js          # `tagTokenRegex`/`noteHasTag` (the `#${tag}\b` test) + `exactTagFromQuery` — shared by useNoteFinder's handleTagClick AND search's exact-#tag detection. NOT the same problem as useTags.js/TagHighlight.js's extraction regexes below — this only tests whether a note contains an already-known tag name, it doesn't parse tag names out of raw text.
+│   ├── tags.js              # `findTagMatches`/`extractUniqueTags` — single canonical "#tag" extraction from raw note text, consumed by TagHighlight.js, useTags.js, and TagsRail.jsx
+│   ├── tagMatch.js          # `tagTokenRegex`/`noteHasTag` (the `#${tag}\b` test) + `exactTagFromQuery` — shared by useNoteFinder's handleTagClick AND search's exact-#tag detection. NOT the same problem as lib/tags.js's extraction above — this only tests whether a note contains an already-known tag name, it doesn't parse tag names out of raw text.
 │   └── utils.js             # Utility functions (cn, date formatting)
 └── contexts/
     └── AuthContext.js       # Authentication state (guest + Supabase)
@@ -70,13 +71,13 @@ src/
 
 ## Patterns to Avoid
 
-- **Don't add another tag-matching regex** — `useNoteFinder`'s `handleTagClick` and search's exact-`#tag` detection already share one via `lib/tagMatch.js`; route any new "does this note have tag X" check through that instead of writing a fourth variant. This is a separate concern from the extraction split-brain in Known Issues below (parsing tag names OUT of raw text) — don't conflate the two when reconciling either.
+- **Don't add another tag-matching regex** — `useNoteFinder`'s `handleTagClick` and search's exact-`#tag` detection already share one via `lib/tagMatch.js`; route any new "does this note have tag X" check through that instead of writing a fourth variant. This is a separate concern from tag *extraction* (parsing tag names OUT of raw text), which is canonically handled by `lib/tags.js` — don't conflate the two, and don't add a fourth extraction regex either.
 - **Don't assume `getNotes()`'s return order is display order** — it isn't; see Patterns above.
 
 ## Known Issues (found during 2026-07-20 audit)
 
 - **Unused `tags` column on the Supabase `notes` table (found 2026-07-27, while scoping NoteAppAndroid):** Confirmed via a live PostgREST schema probe that a `tags` column exists on `notes` (`db.js:getNotes()` reads `note.tags || []` off the Supabase row) — but no code path (`saveNote`, `updateNote`, `syncPendingNotes`, `createDefaultNotes`) ever writes to it. This directly contradicts this project's own documented principle that "tags are derived, never stored" (see `Planning/CONTEXT.md` Architectural Principles). In practice the column is presumably always null/empty and the read is a no-op, but it's dead schema surface that could confuse future work (e.g. someone "fixing" tag storage by writing to a column that was never meant to be the source of truth). Needs a decision: drop the column, or document why it exists if there's a reason not visible in the client code. Not resolved here — flagging only.
-- **Tag regex split-brain:** `useTags.js` (tag cloud) uses `/#(\w+)/g` — no hyphen support, no word-boundary requirement. `TagHighlight.js` (inline editor highlighting) uses `/(?:^|\s)(#[\w-]+)/g` — hyphens allowed, requires start-of-string or leading whitespace. These can disagree on what counts as a tag (e.g. a hyphenated tag or a `#tag` glued mid-word will be treated differently by the cloud vs. the highlighter). Needs reconciling to a single shared regex/util. `lib/tagMatch.js` does NOT fix this — it's a third, narrower regex (`#${tag}\b`) for a different job (testing an already-known tag name against note content for nav/search matching, not extracting tag names from raw text), shared between `useNoteFinder`'s tag-click and search's exact-`#tag` detection only.
+- **Tag-extraction regex split-brain — resolved 2026-07-27** via `lib/tags.js` (canonical rule = `TagHighlight.js`'s original regex: `#` + word chars/hyphens, anchored to start-of-text or preceding whitespace). Two accepted, intentional behavior deltas versus the old `useTags.js`/`TagsRail.jsx` regex — not regressions: (1) a `#tag` glued mid-word with no leading space (`foo#bar`) no longer appears in the tag cloud (it never highlighted inline either way); (2) hyphenated tags (`#to-do`) now appear in the tag cloud (they already highlighted inline and in the rail).
 
 ## Testing Requirements
 
@@ -88,7 +89,7 @@ npm install --save-dev jest @testing-library/react @testing-library/jest-dom
 
 Create `jest.config.js` and test files in `__tests__/` or colocated with components. Priority areas if/when tests are added:
 - **Sync merge logic** (`db.js:getNotes`, `syncPendingNotes`) — highest risk of silent data loss
-- **Tag extraction** — once the regex split-brain above is resolved, lock the single regex down with tests
+- **Tag extraction** (`lib/tags.js`'s `findTagMatches`/`extractUniqueTags`) — lock the canonical regex down with tests
 - **Guest-to-user migration** (`migrateGuestData`)
 
 ## Key Libraries
@@ -116,9 +117,7 @@ Create `jest.config.js` and test files in `__tests__/` or colocated with compone
 4. Update the local `note` shape wherever it's constructed in `useNotes.js`
 
 ### Changing Tag Extraction Behavior
-There are currently **two** regexes to update in lockstep (see Known Issues):
-- `src/hooks/useTags.js` — `/#(\w+)/g`
-- `src/components/extensions/TagHighlight.js` — `/(?:^|\s)(#[\w-]+)/g`
+There's now a single canonical extraction module, `src/lib/tags.js` (`findTagMatches`/`extractUniqueTags`), consumed by all three call sites: `TagHighlight.js` (inline highlighting), `useTags.js` (tag cloud), and `TagsRail.jsx` (active-tags rail). Update the regex there and all three stay in sync automatically.
 
 ### Adding OAuth Providers
 1. Enable the provider in Supabase Dashboard → Authentication → Providers

@@ -2,34 +2,23 @@ import { Extension } from '@tiptap/core';
 import { Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet } from 'prosemirror-view';
 import { getTagColor } from '../../lib/colors';
+import { findTagMatches } from '../../lib/tags';
 
 // Helper function to find tags
 function findTags(doc) {
     const decorations = [];
     doc.descendants((node, pos) => {
         if (node.isText) {
-            const text = node.text;
-            // Regex to match #tags
-            const regex = /(?:^|\s)(#[\w-]+)/g;
-            let match;
-            while ((match = regex.exec(text)) !== null) {
-                // Calculate correct positions
-                // match[0] might include leading space.
-                // We want to color only the #tag part.
-                const matchText = match[1];
-                const startIndex = match.index + match[0].indexOf(matchText);
-                const from = pos + startIndex;
-                const to = from + matchText.length;
-
-                const tagName = matchText.substring(1); // remove #
-                const colorClass = getTagColor(tagName);
-
+            findTagMatches(node.text).forEach(({ tag, start, end }) => {
+                const from = pos + start;
+                const to = pos + end;
+                const colorClass = getTagColor(tag);
                 decorations.push(
                     Decoration.inline(from, to, {
                         class: `rounded px-0.5 -mx-0.5 ${colorClass}`,
                     })
                 );
-            }
+            });
         }
     });
     return DecorationSet.create(doc, decorations);

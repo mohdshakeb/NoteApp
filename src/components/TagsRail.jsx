@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '../lib/utils';
 import { Button } from "./ui/button";
 import { getTagMeta } from '../lib/colors';
+import { extractUniqueTags } from '../lib/tags';
 
 export const TagsRail = ({ notes, activeNoteId, tags = [], onTagClick }) => {
     // Get active tags for the current note
@@ -10,11 +11,7 @@ export const TagsRail = ({ notes, activeNoteId, tags = [], onTagClick }) => {
         const note = notes.find(n => n.id === activeNoteId);
         if (!note) return new Set();
 
-        // Extract tags from note content (naive regex or pre-parsed?)
-        // Assuming tags are hashtags like #tag
-        const found = note.content.match(/#[\w-]+/g) || [];
-        // Clean them (remove #)
-        return new Set(found.map(t => t.slice(1)));
+        return new Set(extractUniqueTags(note.content));
     }, [activeNoteId, notes]);
 
     // Sort tags alphabetically? Or by frequency?
