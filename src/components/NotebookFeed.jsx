@@ -65,6 +65,10 @@ export const NotebookFeed = ({
 
                 if (bestCandidate) {
                     const noteId = bestCandidate.getAttribute('data-note-id');
+                    // Intentional loose `==`: noteId comes from a DOM data-note-id attribute
+                    // (always a string), while note.id may be a JS Number for Supabase-
+                    // authenticated notes (bigint) vs. a UUID string for guest notes. Do not
+                    // "fix" to `===` without first normalizing ID types everywhere.
                     const note = notes.find(n => n.id == noteId);
                     if (note) {
                         onFocusBox(note);
