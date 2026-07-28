@@ -137,7 +137,6 @@ export async function getNotes(db, userId) {
       content: note.content,
       userId: note.user_id,
       syncStatus: 'synced',
-      tags: note.tags || [],
       createdAt: new Date(note.created_at),
       updatedAt: new Date(note.updated_at)
     }));
