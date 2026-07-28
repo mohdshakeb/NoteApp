@@ -4,6 +4,7 @@ import { TagHighlight } from './extensions/TagHighlight';
 import Placeholder from '@tiptap/extension-placeholder'; // [NEW]
 import { useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
 import { Button } from './ui/button';
+import { NOTE_PLACEHOLDER_TEXT } from '../lib/constants';
 
 export const TiptapEditor = forwardRef(({
     note,
@@ -13,7 +14,8 @@ export const TiptapEditor = forwardRef(({
     onFocus,
     onBlur,
     autoFocus = false,
-    isLast = false
+    isLast = false,
+    initialSelectionOffset
 }, ref) => {
     // Use refs to keep handlers fresh without re-initializing editor
     const onSaveRef = useRef(onSave);
@@ -21,6 +23,9 @@ export const TiptapEditor = forwardRef(({
     const onInputRef = useRef(onInput);
     const onFocusRef = useRef(onFocus);
     const onBlurRef = useRef(onBlur);
+    // Captured once, not resynced like the handler refs above — this must
+    // fire exactly once per mount (click-to-edit activation), not on every render.
+    const initialSelectionOffsetRef = useRef(initialSelectionOffset);
 
     useEffect(() => {
         onSaveRef.current = onSave;
@@ -36,7 +41,7 @@ export const TiptapEditor = forwardRef(({
             StarterKit,
             TagHighlight,
             Placeholder.configure({
-                placeholder: 'Start writing... Use #tags to organize.',
+                placeholder: NOTE_PLACEHOLDER_TEXT,
                 emptyEditorClass: 'is-editor-empty',
                 emptyNodeClass: 'is-empty',
                 showOnlyCurrent: false,
@@ -90,8 +95,13 @@ export const TiptapEditor = forwardRef(({
 
     // Expose focus method to parent
     useImperativeHandle(ref, () => ({
+        // scrollIntoView: false — Tiptap's own focus-driven scroll (which only
+        // nudges the cursor minimally into view) otherwise fires a frame after
+        // this and overrides whatever explicit scrollIntoView the caller just
+        // did (e.g. NotebookFeed's "jump to latest" pill, which aligns the
+        // note to the 25vh scroll-margin target) — always losing that race.
         focus: () => {
-            editor?.commands.focus('end');
+            editor?.commands.focus('end', { scrollIntoView: false });
         }
     }));
 
@@ -104,6 +114,23 @@ export const TiptapEditor = forwardRef(({
             });
         }
     }, [autoFocus, editor]);
+
+    // Click-to-edit activation from a StaticNotePreview: focus at the
+    // character offset the user actually clicked, instead of always landing
+    // at the end. Mutually exclusive with autoFocus by construction —
+    // autoFocus only applies to the bootstrap `note.isNew` note, this only
+    // applies to activating an existing note.
+    useEffect(() => {
+        if (editor && initialSelectionOffsetRef.current != null) {
+            const offset = initialSelectionOffsetRef.current;
+            initialSelectionOffsetRef.current = null;
+            requestAnimationFrame(() => {
+                const size = editor.state.doc.content.size;
+                const pos = Math.min(Math.max(1, 1 + offset), Math.max(1, size - 1));
+                editor.chain().focus().setTextSelection(pos).run();
+            });
+        }
+    }, [editor]);
 
     // Handle Delete button logic (replicated from EntryBlock)
     const clearContent = () => {

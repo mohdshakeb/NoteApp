@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { cn } from '../lib/utils';
 import { JumpToLatestPill } from './JumpToLatestPill';
+import { StaticNotePreview } from './StaticNotePreview';
 
 // Lazy load the editor to reduce initial bundle size to improve performance
 const TiptapEditor = dynamic(() => import('./TiptapEditor').then(mod => mod.TiptapEditor), {
@@ -24,6 +25,17 @@ export const NotebookFeed = ({
     const feedRef = useRef(null);
     const bottomRef = useRef(null);
     const lastNoteRef = useRef(null);
+
+    // Which non-last note (if any) is rendered as a live TiptapEditor instead
+    // of a StaticNotePreview. Deliberately separate from the scroll-driven
+    // activeNoteId (owned by a sibling component) — that changes continuously
+    // while scrolling and would thrash editor mount/unmount if reused here.
+    const [editingNoteId, setEditingNoteId] = useState(null);
+    const pendingActivationRef = useRef(null); // { noteId, offset } | null
+    const handleActivateNote = useCallback((noteId, offset) => {
+        pendingActivationRef.current = { noteId, offset };
+        setEditingNoteId(noteId);
+    }, []);
 
     // Sort notes: Oldest -> Newest for "Notebook" feel
     const sortedNotes = React.useMemo(() => {
@@ -137,6 +149,30 @@ export const NotebookFeed = ({
         }
     }, [sortedNotes.length]);
 
+    // Guards against double-creating the perpetual blank note when a blur
+    // (see the last note's onSave below) and an explicit click (gutter/
+    // spacer/jump pill, both routed through focusOrCreateLastNote) land in
+    // the same tick — onCreateNote is async, so sortedNotes won't reflect
+    // the new note until this ref-guarded window closes.
+    const blankNoteInFlightRef = useRef(false);
+    useEffect(() => {
+        const lastNote = sortedNotes[sortedNotes.length - 1];
+        if (blankNoteInFlightRef.current && lastNote && !lastNote.content.trim()) {
+            blankNoteInFlightRef.current = false;
+        }
+    }, [sortedNotes]);
+
+    // `scroll`: true for explicit user-driven creation (gutter/spacer/jump
+    // pill click — the user wants to land on the new note); false for the
+    // silent auto-create on blur below, where jumping the viewport would
+    // fight whatever the user just clicked away to (e.g. a tag in TagsRail).
+    const createBlankLastNote = useCallback((scroll) => {
+        if (blankNoteInFlightRef.current) return;
+        blankNoteInFlightRef.current = true;
+        if (scroll) pendingScrollRef.current = true;
+        onCreateNote('');
+    }, [onCreateNote]);
+
     // Shared by the gutter click, the trailing spacer click, and the jump
     // pill: focus the existing blank note if one's waiting, otherwise create
     // a fresh one.
@@ -145,8 +181,7 @@ export const NotebookFeed = ({
         if (lastNote && !lastNote.content.trim()) {
             lastNoteRef.current?.focus();
         } else {
-            pendingScrollRef.current = true;
-            onCreateNote('');
+            createBlankLastNote(true);
         }
     };
 
@@ -176,6 +211,7 @@ export const NotebookFeed = ({
                 <div className="flex flex-col gap-12">
                     {sortedNotes.map((note, index) => {
                         const isLast = index === sortedNotes.length - 1;
+                        const isLive = isLast || note.id === editingNoteId;
                         return (
                             <div
                                 key={note.id}
@@ -186,35 +222,60 @@ export const NotebookFeed = ({
                                 )}
                                 data-note-id={note.id}
                             >
-                                <TiptapEditor
-                                    ref={isLast ? lastNoteRef : null}
-                                    note={note}
-                                    onAutoSave={(id, content) => {
-                                        // Auto-save always UPDATES, never deletes.
-                                        // This ensures typing is saved safely.
-                                        onUpdateNote(note, content);
-                                    }}
-                                    onSave={(id, content) => {
-                                        // Only delete if empty AND not the only note (on Blur)
-                                        if ((!content || !content.trim()) && sortedNotes.length > 1) {
-                                            onDeleteNote(note.id);
-                                        } else {
+                                {isLive ? (
+                                    <TiptapEditor
+                                        ref={isLast ? lastNoteRef : null}
+                                        note={note}
+                                        onAutoSave={(id, content) => {
+                                            // Auto-save always UPDATES, never deletes.
+                                            // This ensures typing is saved safely.
                                             onUpdateNote(note, content);
+                                        }}
+                                        onSave={(id, content) => {
+                                            const isEmpty = !content || !content.trim();
+                                            // Delete if empty, UNLESS it's the only note or the
+                                            // perpetual last note — that one is auto-managed and
+                                            // must never disappear just because it's blank (see
+                                            // Planning/CONTEXT.md's "one perpetual blank note"
+                                            // architectural principle).
+                                            if (isEmpty && !isLast && sortedNotes.length > 1) {
+                                                onDeleteNote(note.id);
+                                            } else {
+                                                onUpdateNote(note, content);
+                                                // Leaving the last note with content in it
+                                                // (blurring to click another note, a rail,
+                                                // anywhere) should always leave a fresh blank one
+                                                // ready at the bottom, not just on explicit
+                                                // gutter/spacer clicks or a full page reload.
+                                                if (isLast && !isEmpty) {
+                                                    createBlankLastNote(false);
+                                                }
+                                            }
+                                        }}
+                                        onInput={(id, content) => {
+                                            // Optional: live update state?
+                                        }}
+                                        onFocus={() => {
+                                            if (onEditorFocus) onEditorFocus();
+                                        }}
+                                        onBlur={(e) => {
+                                            if (onEditorBlur) onEditorBlur();
+                                            // Downgrade back to static once focus leaves — the last
+                                            // note always stays live regardless (isLive's `isLast ||`).
+                                            setEditingNoteId(prev => (prev === note.id ? null : prev));
+                                        }}
+                                        // Disable auto-focus on mobile to keep Nav Pill visible
+                                        autoFocus={note.isNew && (typeof window !== 'undefined' ? window.innerWidth >= 640 : true)}
+                                        isLast={isLast}
+                                        initialSelectionOffset={
+                                            pendingActivationRef.current?.noteId === note.id
+                                                ? pendingActivationRef.current.offset
+                                                : undefined
                                         }
-                                    }}
-                                    onInput={(id, content) => {
-                                        // Optional: live update state?
-                                    }}
-                                    onFocus={() => {
-                                        if (onEditorFocus) onEditorFocus();
-                                    }}
-                                    onBlur={(e) => {
-                                        if (onEditorBlur) onEditorBlur();
-                                    }}
-                                    // Disable auto-focus on mobile to keep Nav Pill visible
-                                    autoFocus={note.isNew && (typeof window !== 'undefined' ? window.innerWidth >= 640 : true)}
-                                    isLast={isLast}
-                                />
+                                    />
+                                ) : (
+                                    <StaticNotePreview note={note} onActivate={handleActivateNote} />
+                                )}
                             </div>
                         );
                     })}
