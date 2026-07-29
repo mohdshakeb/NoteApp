@@ -12,6 +12,7 @@ const TiptapEditor = dynamic(() => import('./TiptapEditor').then(mod => mod.Tipt
 
 export const NotebookFeed = ({
     notes,
+    getSuggestions,
     onUpdateNote,
     onCreateNote,
     onDeleteNote,
@@ -226,6 +227,7 @@ export const NotebookFeed = ({
                                     <TiptapEditor
                                         ref={isLast ? lastNoteRef : null}
                                         note={note}
+                                        getSuggestions={getSuggestions}
                                         onAutoSave={(id, content) => {
                                             // Auto-save always UPDATES, never deletes.
                                             // This ensures typing is saved safely.

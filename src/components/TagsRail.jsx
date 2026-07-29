@@ -3,6 +3,7 @@ import { cn } from '../lib/utils';
 import { Button } from "./ui/button";
 import { getTagMeta } from '../lib/colors';
 import { extractUniqueTags } from '../lib/tags';
+import { getSlidingWindow } from '../lib/slidingWindow';
 
 export const TagsRail = ({ notes, activeNoteId, tags = [], onTagClick }) => {
     // Get active tags for the current note
@@ -20,33 +21,14 @@ export const TagsRail = ({ notes, activeNoteId, tags = [], onTagClick }) => {
         return [...tags].sort();
     }, [tags]);
 
-    // Sliding Window Logic for Tags
+    // Sliding window (25 items, centered on active tag) — shared with TimelineRail via lib/slidingWindow.js
     const windowedTags = React.useMemo(() => {
-        if (!activeTags.size || tags.length <= 25) return sortedTags;
-
-        // Find the index of the first active tag in the sorted list
-        // This acts as our "center of gravity"
+        if (!activeTags.size) return sortedTags;
+        // Find the index of the first active tag in the sorted list — acts as our "center of gravity"
         const firstActiveTag = sortedTags.find(t => activeTags.has(t));
         const activeIndex = sortedTags.indexOf(firstActiveTag);
-
-        if (activeIndex === -1) return sortedTags.slice(0, 25);
-
-        // Center (~12th item)
-        let start = activeIndex - 12;
-        let end = activeIndex + 13;
-
-        // Clamp
-        if (start < 0) {
-            start = 0;
-            end = 25;
-        }
-        if (end > sortedTags.length) {
-            end = sortedTags.length;
-            start = Math.max(0, end - 25);
-        }
-
-        return sortedTags.slice(start, end);
-    }, [sortedTags, activeTags, tags.length]);
+        return getSlidingWindow(sortedTags, activeIndex);
+    }, [sortedTags, activeTags]);
 
     if (!tags || tags.length === 0) return null;
 

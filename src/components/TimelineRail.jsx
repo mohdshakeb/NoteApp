@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../lib/utils';
+import { getSlidingWindow } from '../lib/slidingWindow';
 
 // Helper to find the first note ID for a given date
 const getNoteIdForDate = (notes, year, month, day) => {
@@ -52,28 +53,11 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick }) => {
         return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     }, [activeNoteId, notes]);
 
-    // Calculate Sliding Window (Limit to 25 items, centered on active date)
+    // Sliding window (25 items, centered on active date) — shared with TagsRail via lib/slidingWindow.js
     const windowedDates = React.useMemo(() => {
-        if (!activeDateKey || allDates.length <= 25) return allDates;
-
+        if (!activeDateKey) return allDates;
         const activeIndex = allDates.findIndex(d => d.key === activeDateKey);
-        if (activeIndex === -1) return allDates.slice(0, 25); // Fallback to start
-
-        // Center the window: activeIndex is in the middle (~12th item)
-        let start = activeIndex - 12;
-        let end = activeIndex + 13; // Total 25
-
-        // Clamp bounds
-        if (start < 0) {
-            start = 0;
-            end = 25;
-        }
-        if (end > allDates.length) {
-            end = allDates.length;
-            start = Math.max(0, end - 25);
-        }
-
-        return allDates.slice(start, end);
+        return getSlidingWindow(allDates, activeIndex);
     }, [allDates, activeDateKey]);
 
 

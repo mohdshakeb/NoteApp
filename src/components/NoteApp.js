@@ -44,7 +44,7 @@ const NoteApp = ({ user }) => {
   // For now, let's rely on the fact that modifying DB and triggering state update might be enough, 
   // or we can force a reload.
   const { notes, isLoading, db, addNote, editNote, removeNote, refreshNotes } = useNotes(user);
-  const { allTags } = useTags(notes);
+  const { allTags, getSuggestions } = useTags(notes);
 
   // Active Note State
   const [activeNoteId, setActiveNoteId] = useState(null);
@@ -280,6 +280,7 @@ const NoteApp = ({ user }) => {
 
         <NotebookFeed
           notes={notes}
+          getSuggestions={getSuggestions}
           onUpdateNote={(note, content) => editNote(note, content)}
           onCreateNote={(content) => addNote(content)}
           onDeleteNote={(id) => removeNote(id)}

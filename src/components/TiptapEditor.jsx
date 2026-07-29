@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { TagHighlight } from './extensions/TagHighlight';
+import { TagSuggestion } from './extensions/TagSuggestion';
 import Placeholder from '@tiptap/extension-placeholder'; // [NEW]
 import { useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
 import { Button } from './ui/button';
@@ -8,6 +9,7 @@ import { NOTE_PLACEHOLDER_TEXT } from '../lib/constants';
 
 export const TiptapEditor = forwardRef(({
     note,
+    getSuggestions,
     onSave,
     onAutoSave, // [NEW]
     onInput,
@@ -23,6 +25,10 @@ export const TiptapEditor = forwardRef(({
     const onInputRef = useRef(onInput);
     const onFocusRef = useRef(onFocus);
     const onBlurRef = useRef(onBlur);
+    // Same "stay fresh without re-initializing the editor" pattern — the
+    // TagSuggestion extension's items() closes over this ref, not the prop
+    // directly, since extensions are captured once at mount (see useEditor below).
+    const getSuggestionsRef = useRef(getSuggestions);
     // Captured once, not resynced like the handler refs above — this must
     // fire exactly once per mount (click-to-edit activation), not on every render.
     const initialSelectionOffsetRef = useRef(initialSelectionOffset);
@@ -33,13 +39,17 @@ export const TiptapEditor = forwardRef(({
         onInputRef.current = onInput;
         onFocusRef.current = onFocus;
         onBlurRef.current = onBlur;
-    }, [onSave, onAutoSave, onInput, onFocus, onBlur]);
+        getSuggestionsRef.current = getSuggestions;
+    }, [onSave, onAutoSave, onInput, onFocus, onBlur, getSuggestions]);
 
     const editor = useEditor({
         immediatelyRender: false,
         extensions: [
             StarterKit,
             TagHighlight,
+            TagSuggestion.configure({
+                getSuggestions: (query) => getSuggestionsRef.current?.(query) ?? [],
+            }),
             Placeholder.configure({
                 placeholder: NOTE_PLACEHOLDER_TEXT,
                 emptyEditorClass: 'is-editor-empty',
