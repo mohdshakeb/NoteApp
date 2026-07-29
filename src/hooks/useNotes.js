@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { initDB, getNotes, saveNote, updateNote, deleteNote, syncPendingNotes, createDefaultNotes } from '../lib/db';
+import { initDB, getNotes, saveNote, updateNote, deleteNote, syncPendingNotes, syncPendingDeletes, createDefaultNotes } from '../lib/db';
 
 export function useNotes(user) {
   const [notes, setNotes] = useState([]);
@@ -69,6 +69,7 @@ export function useNotes(user) {
     const handleOnline = () => {
       if (db && user) {
         syncPendingNotes(db, user.id);
+        syncPendingDeletes(db, user.id);
       }
     };
 
@@ -131,14 +132,14 @@ export function useNotes(user) {
     if (!db) return;
     const currentUserId = user ? user.id : 'guest';
 
+    // Optimistic: remove from UI immediately. deleteNote no longer throws
+    // for the offline case (it queues a pending-delete instead), so this
+    // catch only covers genuinely unexpected failures.
+    setNotes(prev => prev.filter(n => n.id !== noteId));
     try {
-      setIsLoading(true);
       await deleteNote(db, currentUserId, noteId);
-      setNotes(prev => prev.filter(n => n.id !== noteId));
-      setIsLoading(false);
     } catch (error) {
       console.error('Error deleting note:', error);
-      setIsLoading(false);
       throw error;
     }
   }, [db, user]);

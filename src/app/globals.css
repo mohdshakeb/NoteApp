@@ -107,6 +107,42 @@
 .entry-block {
   scroll-margin-top: 25vh;
   /* Aligns with the 25% Active Zone Target */
+  /* Covers both directions this row can animate: entrance for a freshly
+     created note (.note-enter + @starting-style, below) and exit while a
+     delete is in flight (data-state="closed", NotebookFeed's `deletingNote`
+     shadow row). Neither ever competes with a Tailwind `transition-*`
+     utility on this element — keep it that way, or the utilities layer
+     silently wins and cancels this. */
+  transition: background-color var(--duration-base) ease, opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out);
+}
+
+/* Entrance: only applied to notes created after the feed's initial mount
+   (see NotebookFeed.jsx's `seenNoteIdsRef`) — @starting-style fires once,
+   at the DOM node's first insertion, so this never re-triggers on later
+   re-renders and never needs cleanup. */
+.entry-block.note-enter {
+  @starting-style {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Exit: set by NotebookFeed while a confirmed delete is animating out. */
+.entry-block[data-state="closed"] {
+  opacity: 0;
+  transform: scale(0.96);
+  pointer-events: none;
+}
+
+/* Small state-indication pop for an icon that swaps to confirm an action
+   (e.g. Copy -> Check). Each swapped-in icon is a fresh DOM node, so
+   @starting-style covers the "just appeared" entrance with no JS. */
+.icon-pop > svg {
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.7);
+  }
 }
 
 /* --- Floating overlay animations (TagNavigator, MergeToast) --- */
@@ -136,6 +172,30 @@
   }
   .anim-backdrop[data-state="closed"] {
     transition: opacity var(--duration-base) var(--ease-in-out);
+    opacity: 0;
+  }
+
+  /* Inline reveal (not fixed-positioned) — NoteActionsRow, which sits in
+     normal document flow below a note. A plain opacity/transform fade isn't
+     enough here: the row's box would still claim its full height the
+     instant it mounts, so the next note jumps down in one frame regardless
+     of how the icons themselves fade in. `grid-template-rows: 0fr -> 1fr`
+     animates the actual intrinsic height with no JS measurement — the grid
+     item wrapping the real content needs `overflow: hidden` (see
+     NoteActionsRow.jsx) so it can be clipped down to a 0-height track.
+     Deliberate exception to "only animate transform/opacity": this is a
+     single small element toggling occasionally, not a long/frequent list,
+     so the extra layout cost is negligible next to how much better a real
+     height reveal reads over a fade-in-place. */
+  .anim-reveal[data-state="open"] {
+    transition: grid-template-rows var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
+    grid-template-rows: 1fr;
+    opacity: 1;
+    @starting-style { grid-template-rows: 0fr; opacity: 0; }
+  }
+  .anim-reveal[data-state="closed"] {
+    transition: grid-template-rows var(--duration-fast) var(--ease-in-out), opacity var(--duration-fast) var(--ease-in-out);
+    grid-template-rows: 0fr;
     opacity: 0;
   }
 
@@ -185,7 +245,10 @@
   .anim-backdrop[data-state],
   .anim-sheet[data-state],
   .anim-panel[data-state],
-  .anim-panel-top[data-state] {
+  .anim-panel-top[data-state],
+  .anim-reveal[data-state],
+  .entry-block,
+  .icon-pop > svg {
     transition-duration: var(--duration-fast) !important;
   }
 
@@ -204,7 +267,24 @@
   .anim-panel[data-state="open"],
   .anim-panel[data-state="closed"],
   .anim-panel-top[data-state="open"],
-  .anim-panel-top[data-state="closed"] {
+  .anim-panel-top[data-state="closed"],
+  .entry-block[data-state="closed"] {
     transform: none !important;
+  }
+
+  /* grid-template-rows is a layout dimension, not a transform, so it needs
+     its own override: drop it from the transitioned properties entirely
+     (snaps open/closed instantly) while still letting opacity fade. */
+  .anim-reveal[data-state="open"],
+  .anim-reveal[data-state="closed"] {
+    transition: opacity var(--duration-fast) ease !important;
+  }
+
+  .entry-block.note-enter {
+    @starting-style { transform: none !important; }
+  }
+
+  .icon-pop > svg {
+    @starting-style { transform: none !important; }
   }
 }

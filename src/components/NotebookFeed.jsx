@@ -3,6 +3,19 @@ import dynamic from 'next/dynamic';
 import { cn } from '../lib/utils';
 import { JumpToLatestPill } from './JumpToLatestPill';
 import { StaticNotePreview } from './StaticNotePreview';
+import { NoteActionsRow } from './NoteActionsRow';
+import { NoteActionsSheet } from './NoteActionsSheet';
+import { useLongPress } from '../hooks/useLongPress';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from './ui/alert-dialog';
 
 // Lazy load the editor to reduce initial bundle size to improve performance
 const TiptapEditor = dynamic(() => import('./TiptapEditor').then(mod => mod.TiptapEditor), {
@@ -42,6 +55,96 @@ export const NotebookFeed = ({
     const sortedNotes = React.useMemo(() => {
         return [...notes].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     }, [notes]);
+
+    // Which note ids were already present before this render — anything NOT
+    // in this set gets the `.note-enter` entrance treatment (see the
+    // `.entry-block.note-enter` @starting-style rule in globals.css). Seeded
+    // synchronously on the very first render so the initial batch (possibly
+    // hundreds of notes) never animates in; only notes created during the
+    // session (blur-created blank note, jump-to-latest, gutter click) do.
+    // Updated in an effect (after paint), so during render it still reflects
+    // the PREVIOUS commit — exactly the notes that should be excluded.
+    const seenNoteIdsRef = useRef(null);
+    if (seenNoteIdsRef.current === null) {
+        seenNoteIdsRef.current = new Set(sortedNotes.map(n => n.id));
+    }
+    useEffect(() => {
+        sortedNotes.forEach(n => seenNoteIdsRef.current.add(n.id));
+    }, [sortedNotes]);
+
+    // Copy / delete actions — desktop hover row (NoteActionsRow) and mobile
+    // long-press sheet (NoteActionsSheet) both funnel through these.
+    const handleCopy = useCallback(async (note) => {
+        try {
+            await navigator.clipboard.writeText(note.content);
+            return true;
+        } catch (error) {
+            console.error('Copy failed:', error);
+            return false;
+        }
+    }, []);
+
+    const [pendingDeleteNote, setPendingDeleteNote] = useState(null);
+    const requestDelete = useCallback((note) => setPendingDeleteNote(note), []);
+
+    // `removeNote` filters the note out of `notes` synchronously (optimistic
+    // update), which would normally unmount its row the instant we call
+    // onDeleteNote — no chance for an exit transition. Keeping a snapshot
+    // here lets `displayNotes` (below) re-insert it at its original position
+    // for exactly as long as the shrink-and-fade takes.
+    const [deletingNote, setDeletingNote] = useState(null);
+    const handleDeleteExitEnd = useCallback((noteId, e) => {
+        if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
+        setDeletingNote(prev => (prev?.id === noteId ? null : prev));
+    }, []);
+
+    const confirmDelete = useCallback(async () => {
+        const note = pendingDeleteNote;
+        setPendingDeleteNote(null);
+        if (!note) return;
+        // Don't leave editingNoteId/TiptapEditor pointed at a note that's
+        // about to be removed from `notes` — its row is unmounting, and
+        // TiptapEditor's onBlur (which normally clears this) isn't
+        // guaranteed to fire across an unmount.
+        setEditingNoteId(prev => (prev === note.id ? null : prev));
+        setDeletingNote(note);
+        try {
+            await onDeleteNote(note.id);
+        } catch (error) {
+            console.error('Error deleting note:', error);
+            alert('Failed to delete note. Please try again.');
+        }
+    }, [pendingDeleteNote, onDeleteNote]);
+
+    // Real data (sortedNotes) usually loses the deleted note before its exit
+    // transition finishes — re-insert the snapshot at its original sorted
+    // position for the duration of that transition. isLast/isLive checks
+    // below key off `sortedNotes`, not this list, so a fading-out shadow can
+    // never be mistaken for the perpetual last note.
+    const displayNotes = React.useMemo(() => {
+        if (!deletingNote || sortedNotes.some(n => n.id === deletingNote.id)) return sortedNotes;
+        return [...sortedNotes, deletingNote].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }, [sortedNotes, deletingNote]);
+
+    const [actionsSheet, setActionsSheet] = useState({ isOpen: false, note: null });
+    const closeActionsSheet = useCallback(() => {
+        setActionsSheet(prev => ({ ...prev, isOpen: false }));
+    }, []);
+    const longPressHandlers = useLongPress(
+        useCallback((el) => {
+            const domId = el?.getAttribute('data-note-id');
+            if (domId == null) return;
+            // Intentional loose `==`: domId is always a DOM string, while
+            // note.id may be a JS Number (Supabase notes) or a UUID string
+            // (guest notes) — same convention as the IntersectionObserver
+            // lookup below. Don't "fix" to `===`.
+            const note = notes.find(n => n.id == domId);
+            const last = sortedNotes[sortedNotes.length - 1];
+            if (!note || note.id === last?.id) return; // no sheet for the perpetual blank note
+            if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+            setActionsSheet({ isOpen: true, note });
+        }, [notes, sortedNotes])
+    );
 
     // Intersection Observer to track scroll position
     const intersectingNotesRef = useRef(new Set());
@@ -210,18 +313,23 @@ export const NotebookFeed = ({
                 }}
             >
                 <div className="flex flex-col gap-12">
-                    {sortedNotes.map((note, index) => {
-                        const isLast = index === sortedNotes.length - 1;
-                        const isLive = isLast || note.id === editingNoteId;
+                    {displayNotes.map((note) => {
+                        const isLast = sortedNotes.length > 0 && note.id === sortedNotes[sortedNotes.length - 1].id;
+                        const isDeleting = deletingNote?.id === note.id;
+                        const isLive = !isDeleting && (isLast || note.id === editingNoteId);
                         return (
                             <div
                                 key={note.id}
                                 id={note.id}
                                 className={cn(
-                                    "entry-block -mx-6 px-6 rounded-xl transition-colors duration-150",
+                                    "entry-block -mx-6 px-6 rounded-xl",
+                                    !seenNoteIdsRef.current.has(note.id) && "note-enter",
                                     activeMatchIds?.has(note.id) && matchWashClass
                                 )}
                                 data-note-id={note.id}
+                                data-state={isDeleting ? 'closed' : undefined}
+                                onTransitionEnd={isDeleting ? (e) => handleDeleteExitEnd(note.id, e) : undefined}
+                                {...(isLast || isDeleting ? {} : longPressHandlers)}
                             >
                                 {isLive ? (
                                     <TiptapEditor
@@ -278,6 +386,13 @@ export const NotebookFeed = ({
                                 ) : (
                                     <StaticNotePreview note={note} onActivate={handleActivateNote} />
                                 )}
+                                {!isLast && !isDeleting && (
+                                    <NoteActionsRow
+                                        isOpen={note.id === editingNoteId}
+                                        onCopy={() => handleCopy(note)}
+                                        onRequestDelete={() => requestDelete(note)}
+                                    />
+                                )}
                             </div>
                         );
                     })}
@@ -294,6 +409,39 @@ export const NotebookFeed = ({
                 visible={!isNearBottom && !isTagNavActive}
                 onClick={handleJumpToLatest}
             />
+
+            <NoteActionsSheet
+                isOpen={actionsSheet.isOpen}
+                note={actionsSheet.note}
+                onClose={closeActionsSheet}
+                onCopy={handleCopy}
+                onRequestDelete={requestDelete}
+            />
+
+            <AlertDialog
+                open={!!pendingDeleteNote}
+                onOpenChange={(open) => { if (!open) setPendingDeleteNote(null); }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this note?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This note will be permanently deleted.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPendingDeleteNote(null)}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

@@ -283,7 +283,10 @@ const NoteApp = ({ user }) => {
           getSuggestions={getSuggestions}
           onUpdateNote={(note, content) => editNote(note, content)}
           onCreateNote={(content) => addNote(content)}
-          onDeleteNote={(id) => removeNote(id)}
+          onDeleteNote={(id) => {
+            setActiveNoteId(prev => (prev === id ? null : prev));
+            return removeNote(id);
+          }}
           onFocusBox={(note) => {
             if (note) setActiveNoteId(note.id);
           }}

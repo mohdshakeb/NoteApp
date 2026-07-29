@@ -33,6 +33,7 @@ TBD — this project was retrofitted onto the CONTEXT.md scaffold after already 
 4. **Guest mode + merge-on-login** — guest notes prompt a merge/discard dialog when the user signs in
 5. **Auth** — Google OAuth + magic-link email via Supabase Auth (no GitHub, despite what older docs claimed)
 6. **Mobile layout** — bottom nav pill + drawers replacing the desktop two-rail layout
+7. **Note delete & copy** — desktop: copy/delete icons below a note while it's being edited; mobile: long-press opens a bottom sheet with the same actions. Delete is confirmed via `AlertDialog` and has an offline pending-delete queue (see [[src-context]])
 
 ## User Flow
 
@@ -53,6 +54,10 @@ Guest lands on app
 _None captured yet — add here as new features are scoped._
 
 ## Architecture Decisions
+
+### 2026-07-29 — Note delete & copy actions
+**Decision:** Desktop shows a copy/delete icon row below a note only while it's the actively-edited one (`editingNoteId`, not the scroll-driven `activeNoteId`); mobile uses a long-press bottom sheet instead. The perpetual last note never gets an action row. Delete always requires an `AlertDialog` confirmation and now has a real offline fallback — a `pending-delete` queue in `db.js`, retried on `window.online`, mirroring the existing pending-save mechanism — instead of the previous silent `throw`.
+**Rationale:** Delete previously only happened implicitly (auto-delete on empty blur); making it a deliberate, one-tap user action meant its lack of an offline path (a pre-existing gap, tolerable when unreachable) would become a frequently-hit failure mode. Explicitly scoped out: cross-device tombstone reconciliation — a note hard-deleted online by one device can still be resurrected on another device that was offline at delete time and held a stale local copy. That's a pre-existing gap in `getNotes()`'s merge logic, not solved by this feature; would need a durable server-side tombstone (e.g. a `deleted_notes` table) to fix properly.
 
 ### 2026-07-28 — Lazy-hydrated editors for NotebookFeed scale (1000+ notes, ahead of NoteAppAndroid)
 **Decision:** Instead of virtualizing the note list (unmounting off-screen rows entirely, à la react-virtuoso/react-window), keep every note's outer row permanently mounted and only swap what renders *inside* it: a live `TiptapEditor` for the last note plus at most one other (`editingNoteId`, set on click), a cheap read-only `StaticNotePreview` for everything else. See [[src-context]]'s "Lazy-hydrated editors" pattern entry for the mechanism.

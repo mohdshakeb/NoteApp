@@ -151,7 +151,12 @@ export async function getNotes(db, userId) {
     // We trust Local for 'pending' notes. For 'synced', we can trust Remote or Local (usually same).
     // To solve "Missing Note": If it's in Local but not Remote, we ADD it.
     localNotes.forEach(note => {
-      if (note.syncStatus === 'pending') {
+      if (note.syncStatus === 'pending-delete') {
+        // Deleted locally while offline, not yet confirmed against Supabase
+        // (syncPendingDeletes retries this) — don't let it get resurrected
+        // by the "missing from remote" fallback below.
+        noteMap.delete(note.id);
+      } else if (note.syncStatus === 'pending') {
         noteMap.set(note.id, note);
       } else if (!noteMap.has(note.id)) {
         // If local says synced but remote doesn't have it (e.g. sync failed but marked synced? unlikely)
@@ -183,16 +188,25 @@ export async function getNotes(db, userId) {
 
 // Delete note
 export async function deleteNote(db, userId, noteId) {
-  try {
-    // console.log(`[db] deleteNote ${noteId} for ${userId}`);
-    // GUEST MODE
-    if (userId === 'guest') {
-      await db.delete(STORE_NAME, noteId);
-      return true;
-    }
+  // GUEST MODE
+  if (userId === 'guest') {
+    await db.delete(STORE_NAME, noteId);
+    return true;
+  }
 
-    // AUTHENTICATED MODE
-    // Delete from Supabase
+  // AUTHENTICATED MODE
+  const existing = await db.get(STORE_NAME, noteId);
+
+  // A temp UUID id means this note was created offline and never made it to
+  // Supabase (still syncStatus: 'pending', see saveNote's offline fallback).
+  // Nothing remote to delete, and letting syncPendingNotes later "sync" it
+  // would resurrect a row the user already deleted. Just purge locally.
+  if (existing && typeof existing.id === 'string') {
+    await db.delete(STORE_NAME, noteId);
+    return true;
+  }
+
+  try {
     const { error: deleteError } = await supabase
       .from('notes')
       .delete()
@@ -201,18 +215,59 @@ export async function deleteNote(db, userId, noteId) {
 
     if (deleteError) throw deleteError;
 
-    // Delete from IndexedDB if it exists
-    const note = await db.get(STORE_NAME, noteId);
-    if (note) {
-      await db.delete(STORE_NAME, noteId);
-    }
-
+    await db.delete(STORE_NAME, noteId);
     return true;
   } catch (error) {
-    console.error('Error deleting note:', error);
-    // Optimistic delete from IDB if offline? 
-    // For now, let's keep it simple and assume online for delete or handle error upstream
-    throw error;
+    console.error('Supabase delete failed, queueing pending-delete:', error);
+    // Offline (or Supabase otherwise unreachable): keep the note removed from
+    // the UI (caller already did the optimistic local removal) but retain a
+    // local tombstone so syncPendingDeletes can retry the remote delete once
+    // back online, instead of silently losing the delete request.
+    if (existing) {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      await tx.store.put({ ...existing, syncStatus: 'pending-delete', pendingDeleteAt: new Date() });
+      await tx.done;
+    }
+    return true;
+  }
+}
+
+// Retry Supabase deletes for notes that were removed locally while offline
+// (syncStatus: 'pending-delete', set by deleteNote's catch branch above).
+// Mirrors syncPendingNotes's shape/invocation site.
+export async function syncPendingDeletes(db, userId) {
+  if (userId === 'guest') return;
+
+  try {
+    let pending = [];
+    {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      pending = await tx.store.index('syncStatus').getAll('pending-delete');
+      await tx.done;
+    }
+
+    if (pending.length === 0) return;
+
+    await Promise.all(pending.map(async (note) => {
+      try {
+        const { error } = await supabase
+          .from('notes')
+          .delete()
+          .eq('id', note.id)
+          .eq('user_id', userId);
+
+        if (error) throw error;
+
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        await tx.store.delete(note.id);
+        await tx.done;
+      } catch (error) {
+        console.error('Error syncing pending delete:', error);
+        // Stays 'pending-delete' — retried on the next 'online' event.
+      }
+    }));
+  } catch (error) {
+    console.error('Error in syncPendingDeletes:', error);
   }
 }
 
