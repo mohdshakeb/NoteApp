@@ -322,7 +322,7 @@ const NoteApp = ({ user }) => {
           user={user}
           onSignOut={handleSignOut}
           onDeleteAccount={handleDeleteAccount}
-          isVisible={!isEditorFocused && !mobileDrawer.isOpen}
+          isVisible={!isEditorFocused && !mobileDrawer.isOpen && !(session.mode === 'tag' && session.matches.length > 1)}
           onDateClick={handleMobileDateClick}
           onTagsClick={handleMobileTagsClick}
         />

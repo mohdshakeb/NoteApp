@@ -12,17 +12,20 @@ export function MergeToast({ isOpen, guestNoteCount, onMerge, onDiscard }) {
         <div
             data-state={isOpen ? 'open' : 'closed'}
             onTransitionEnd={handleTransitionEnd}
-            className="anim-pill fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-max max-w-[90vw]"
+            className="anim-pill fixed bottom-24 sm:bottom-8 inset-x-0 mx-auto z-[100] w-max max-w-[90vw]"
         >
-            <div className="flex items-center gap-3 px-4 h-[54px] bg-background/80 backdrop-blur-md border border-border/50 text-foreground rounded-full shadow-xl">
-                <div className="flex items-center gap-2 pr-3 border-r border-border/50">
-                    <AlertCircle className="w-5 h-5 text-yellow-500" />
-                    <span className="text-sm font-medium whitespace-nowrap">
+            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 h-[54px] bg-background/80 backdrop-blur-md border border-border/50 text-foreground rounded-full shadow-xl">
+                <div className="flex items-center gap-2 pr-2 sm:pr-3 border-r border-border/50 min-w-0">
+                    <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0" />
+                    <span className="text-sm font-medium truncate min-w-0 sm:hidden">
+                        {guestNoteCount} notes to sync
+                    </span>
+                    <span className="text-sm font-medium whitespace-nowrap hidden sm:inline">
                         Found {guestNoteCount} existing notes
                     </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                     <Button
                         size="sm"
                         onClick={onMerge}

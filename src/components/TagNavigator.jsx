@@ -32,7 +32,7 @@ export const TagNavigator = ({
         <div
             data-state={tag ? 'open' : 'closed'}
             onTransitionEnd={handleTransitionEnd}
-            className="anim-pill fixed bottom-24 right-4 sm:bottom-8 sm:right-8 z-[60]"
+            className="anim-pill fixed bottom-6 inset-x-0 mx-auto w-max max-w-[90vw] sm:inset-x-auto sm:right-8 sm:bottom-8 z-[60]"
         >
             <div className="flex items-center gap-2 px-4 h-[54px] bg-background/80 backdrop-blur-md border border-border/50 rounded-full shadow-lg">
                 <div className="flex items-center gap-2 pl-1 pr-3 border-r relative group">
