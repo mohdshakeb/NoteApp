@@ -94,14 +94,74 @@
   caret-color: hsl(var(--foreground));
 }
 
-/* Tiptap Placeholder - Only on first line */
-.ProseMirror p.is-editor-empty:first-child::before,
-.ProseMirror p.is-empty:first-child::before {
+/* Tiptap Placeholder - Only on first line.
+   `>` (direct child) matters now that lists exist: an empty list item's
+   inner <p> is also `:first-child` of *its* <li>, and without the direct
+   -child restriction this would incorrectly show the note's placeholder
+   text inside any empty bullet, not just an empty note. */
+.ProseMirror > p.is-editor-empty:first-child::before,
+.ProseMirror > p.is-empty:first-child::before {
   color: hsl(var(--muted-foreground));
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* Bullet lists — one shared recipe, used identically by both the live
+   editor (TiptapEditor's FlatBulletList/FlatListItem renderHTML overrides,
+   below) and StaticNotePreview's React-rendered markup. Same class names in
+   both places, same rules here — there is exactly one bullet-drawing
+   mechanism, reused twice, not two independent approximations of the same
+   look (which is how the live view previously got a CSS ::before marker
+   while the static view got a literal "•" character substituted into text
+   — two different mechanisms that could, and did, drift out of sync).
+   A flex marker-slot + content-slot layout (rather than list-style +
+   text-indent) means wrapped continuation lines align under the text for
+   free, with no font-metric-dependent hanging-indent math. */
+.note-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.note-list-item {
+  display: flex;
+  align-items: baseline;
+}
+
+.note-list-marker {
+  flex: 0 0 2ch;
+  user-select: none;
+}
+
+.note-list-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-list-content p {
+  margin: 0;
+}
+
+/* Block spacing — this is a rendering choice, separate from the "one \n ==
+   one paragraph break" storage convention (lib/noteContent.js). Blocks get
+   a baseline gap by default, same as Notion/every document editor; a
+   literal blank line in note.content still adds visibly more space on top
+   of this (an empty paragraph's own line-height stacks with this margin),
+   it's just no longer required to get *any* breathing room at all. Scoped
+   to `.ProseMirror` (not `p`/`ul` globally) since both TiptapEditor's real
+   editor root and StaticNotePreview's wrapper carry that class — one rule,
+   applies identically to both, so they can't drift.
+   `>` restricts this to top-level blocks — a list's own items get their
+   own smaller rule below, not this one (a bulletList itself only ever
+   needs a top margin against whatever came before it). */
+.ProseMirror > * + * {
+  margin-top: 0.75em;
+}
+
+.note-list-item + .note-list-item {
+  margin-top: 0.25em;
 }
 
 .entry-block {
