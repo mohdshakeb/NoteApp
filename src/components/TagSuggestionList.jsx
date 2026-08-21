@@ -52,7 +52,7 @@ export const TagSuggestionList = forwardRef(({ items, command }, ref) => {
                         onMouseEnter={() => setSelectedIndex(index)}
                         onClick={() => selectItem(index)}
                         className={cn(
-                            "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm font-mono transition-colors",
+                            "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm font-sans transition-colors",
                             isSelected ? "bg-accent text-accent-foreground" : "text-foreground"
                         )}
                     >

@@ -217,7 +217,7 @@ export const StaticNotePreview = React.memo(function StaticNotePreview({ note, o
         >
             <div
                 ref={contentRef}
-                className="ProseMirror prose prose-sm w-full max-w-none focus:outline-none min-h-[1.5em] text-sm font-mono text-foreground whitespace-pre-wrap leading-relaxed"
+                className="ProseMirror prose prose-sm w-full max-w-none focus:outline-none min-h-[1.5em] text-sm font-sans text-foreground whitespace-pre-wrap leading-relaxed"
             >
                 {isEmpty ? (
                     <p

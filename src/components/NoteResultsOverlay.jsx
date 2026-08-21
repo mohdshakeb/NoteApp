@@ -143,7 +143,7 @@ export const NoteResultsOverlay = ({
 
 const TagHeader = ({ tag, count, meta, onClose }) => (
     <div className="flex items-center justify-between p-4 border-b shrink-0">
-        <h2 className="text-sm font-semibold font-mono flex items-center gap-2">
+        <h2 className="text-sm font-semibold font-sans flex items-center gap-2">
             <span className={cn("w-2 h-2 rounded-full", meta.tick)} />
             <span className={meta.text}>#{tag}</span>
             <span className="text-muted-foreground font-normal">— {count} notes</span>
@@ -192,7 +192,7 @@ const SearchHeader = ({ query, rows, showCount, onQueryChange, onEnter, onClose,
                 className="flex-1 min-w-0 bg-transparent text-sm font-medium placeholder:text-muted-foreground placeholder:font-normal outline-none"
             />
             {showCount && (
-                <span className="text-xs text-muted-foreground font-mono shrink-0">{rows.length} notes</span>
+                <span className="text-xs text-muted-foreground font-sans shrink-0">{rows.length} notes</span>
             )}
             <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7 rounded-full shrink-0">
                 <X className="h-4 w-4" />
@@ -217,7 +217,7 @@ const ResultRow = ({ note, snippetQuery, meta, onClick }) => {
         >
             <div className="flex items-center gap-2">
                 {meta && <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", meta.tick)} />}
-                <span className="text-xs text-muted-foreground font-mono">{formatDate(note.createdAt)}</span>
+                <span className="text-xs text-muted-foreground font-sans">{formatDate(note.createdAt)}</span>
             </div>
             <p className="text-sm text-foreground/90 line-clamp-1 pl-3.5">{snippet}</p>
         </button>

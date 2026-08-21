@@ -94,7 +94,7 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick, onSelectNo
 
                                 {/* Date Label (Appears on Right of tick) */}
                                 <span className={cn(
-                                    "text-[11px] font-mono tracking-wide transition-[transform,opacity,color] duration-150 ease-out whitespace-nowrap group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-foreground",
+                                    "text-[11px] font-sans tracking-wide transition-[transform,opacity,color] duration-150 ease-out whitespace-nowrap group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-foreground",
                                     isSameDate
                                         ? "opacity-100 text-foreground translate-x-0"
                                         : "opacity-0 text-muted-foreground -translate-x-4"

@@ -109,7 +109,13 @@ const NoteApp = ({ user }) => {
       if (exactTag) return getTagMeta(exactTag).wash;
       if (trimmed.length >= 2) return 'bg-accent/15 dark:bg-accent/25';
     }
-    if (session.mode === 'select') return 'bg-foreground/5 dark:bg-foreground/10';
+    // Neutral wash for date/search jumps with no tag color to key off of.
+    // Deliberately near-opaque (not a low-alpha tint like the tag/accent
+    // washes above) — `muted` is already so close to `background` that
+    // diluting it further washes it out to nothing. Matches the sibling
+    // Android app's identical neutralWash() (TagColors.kt), which ported
+    // this same reasoning from the `--secondary`/`--muted` token pair.
+    if (session.mode === 'select') return 'bg-muted/90';
     return '';
   }, [session.mode, session.query]);
 

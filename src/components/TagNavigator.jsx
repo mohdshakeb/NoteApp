@@ -43,7 +43,7 @@ export const TagNavigator = ({
                     </span>
                     <button
                         onClick={onOpenOverlay}
-                        className="text-xs text-muted-foreground font-mono ml-1 rounded can-hover:hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-95"
+                        className="text-xs text-muted-foreground font-sans ml-1 rounded can-hover:hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-95"
                         title="View all matches"
                     >
                         {display.currentIndex + 1} / {display.totalMatches}

@@ -49,7 +49,7 @@ export const TagsRail = ({ notes, activeNoteId, tags = [], onTagClick }) => {
                             >
                                 {/* Tag Label (Appears on LEFT of tick for Right Rail) */}
                                 <span className={cn(
-                                    "text-[11px] font-mono tracking-wide transition-[transform,opacity,color] duration-150 ease-out whitespace-nowrap",
+                                    "text-[11px] font-sans tracking-wide transition-[transform,opacity,color] duration-150 ease-out whitespace-nowrap",
                                     isActive
                                         ? `opacity-100 translate-x-0 ${meta.text}`
                                         : "opacity-0 text-muted-foreground translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-foreground"

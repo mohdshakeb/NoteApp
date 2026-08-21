@@ -176,7 +176,7 @@ export const TiptapEditor = forwardRef(({
         content: contentToDoc(note.content),
         editorProps: {
             attributes: {
-                class: 'prose prose-sm w-full max-w-none focus:outline-none min-h-[1.5em] text-sm font-mono text-foreground whitespace-pre-wrap leading-relaxed',
+                class: 'prose prose-sm w-full max-w-none focus:outline-none min-h-[1.5em] text-sm font-sans text-foreground whitespace-pre-wrap leading-relaxed',
             },
             handlePaste: (view, event) => {
                 const text = event.clipboardData?.getData('text/plain');

@@ -47,7 +47,7 @@ export const MobileDrawers = ({
 
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-lg font-semibold font-mono">
+                    <h2 className="text-lg font-semibold font-sans">
                         {displayType === 'date' ? 'Timeline' : 'Tags'}
                     </h2>
                     <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
@@ -89,7 +89,7 @@ const DateList = ({ notes, activeNoteId, onSelect }) => {
                     <button
                         key={key}
                         onClick={() => onSelect(d)}
-                        className="p-3 text-left rounded-lg can-hover:hover:bg-muted text-sm font-mono border border-transparent can-hover:hover:border-border transition-colors"
+                        className="p-3 text-left rounded-lg can-hover:hover:bg-muted text-sm font-sans border border-transparent can-hover:hover:border-border transition-colors"
                     >
                         {label}
                     </button>

@@ -64,7 +64,7 @@ export function NoteActionsSheet({ isOpen, note, onClose, onCopy, onRequestDelet
                 <div className="p-2 flex flex-col gap-1">
                     <button
                         onClick={handleCopy}
-                        className="flex items-center gap-3 p-4 text-left rounded-lg text-sm font-mono active:bg-muted transition-colors"
+                        className="flex items-center gap-3 p-4 text-left rounded-lg text-sm font-sans active:bg-muted transition-colors"
                     >
                         <span className="icon-pop inline-flex">
                             {justCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -73,7 +73,7 @@ export function NoteActionsSheet({ isOpen, note, onClose, onCopy, onRequestDelet
                     </button>
                     <button
                         onClick={handleDelete}
-                        className="flex items-center gap-3 p-4 text-left rounded-lg text-sm font-mono text-destructive active:bg-destructive/10 transition-colors"
+                        className="flex items-center gap-3 p-4 text-left rounded-lg text-sm font-sans text-destructive active:bg-destructive/10 transition-colors"
                     >
                         <Trash2 className="h-4 w-4" />
                         Delete note
