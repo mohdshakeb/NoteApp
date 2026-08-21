@@ -11,7 +11,7 @@ const getNoteIdForDate = (notes, year, month, day) => {
     return note ? note.id : null;
 };
 
-export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick }) => {
+export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick, onSelectNote }) => {
     // Group notes by sorted keys to render in order
     // But we don't display the group headers anymore.
     // Flatten dates into a sorted array for the sliding window
@@ -73,12 +73,7 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick }) => {
                         const isSameDate = activeDateKey === key;
                         const handleDateClick = () => {
                             const noteId = getNoteIdForDate(notes, parseInt(year), parseInt(month), day);
-                            if (noteId) {
-                                const element = document.getElementById(noteId);
-                                if (element) {
-                                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                }
-                            }
+                            if (noteId) onSelectNote(noteId);
                         };
 
                         return (

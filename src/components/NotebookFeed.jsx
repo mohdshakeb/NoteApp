@@ -34,7 +34,8 @@ export const NotebookFeed = ({
     onEditorBlur,
     activeMatchIds,
     matchWashClass,
-    isTagNavActive
+    isTagNavActive,
+    onNoteInteract
 }) => {
     const feedRef = useRef(null);
     const bottomRef = useRef(null);
@@ -49,7 +50,8 @@ export const NotebookFeed = ({
     const handleActivateNote = useCallback((noteId, offset) => {
         pendingActivationRef.current = { noteId, offset };
         setEditingNoteId(noteId);
-    }, []);
+        onNoteInteract?.(noteId);
+    }, [onNoteInteract]);
 
     // Sort notes: Oldest -> Newest for "Notebook" feel
     const sortedNotes = React.useMemo(() => {
@@ -367,6 +369,7 @@ export const NotebookFeed = ({
                                         }}
                                         onFocus={() => {
                                             if (onEditorFocus) onEditorFocus();
+                                            onNoteInteract?.(note.id);
                                         }}
                                         onBlur={(e) => {
                                             if (onEditorBlur) onEditorBlur();

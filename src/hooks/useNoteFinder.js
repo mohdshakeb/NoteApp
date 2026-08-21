@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { exactTagFromQuery, noteHasTag } from '../lib/tagMatch';
 
-// mode: 'tag' | 'search' | null
+// mode: 'tag' | 'search' | 'select' | null
 const EMPTY_SESSION = { mode: null, query: '', matches: [], currentIndex: 0 };
 
 export function useNoteFinder(notes, setActiveNoteId) {
@@ -54,6 +54,29 @@ export function useNoteFinder(notes, setActiveNoteId) {
         setSession({ mode: 'search', query: text, matches, currentIndex: 0 });
     }, [notes]);
 
+    // Single-note "you navigated here" wash — date-rail clicks and (via
+    // jumpToMatch below) search-result clicks. A full setSession replace, so
+    // it automatically exits any active tag/search session, and is exited by
+    // any of them in turn — no manual cross-clearing needed.
+    const handleSelectNote = useCallback((noteId) => {
+        setSession({ mode: 'select', query: '', matches: [noteId], currentIndex: 0 });
+        // Close any overlay left open behind this click (e.g. search panel
+        // open, user clicks a TimelineRail date behind it) — otherwise
+        // NoteResultsOverlay's TagHeader would try to render 'select' mode
+        // and crash on a null tag meta.
+        setIsOverlayOpen(false);
+        scrollToNote(noteId);
+    }, [scrollToNote]);
+
+    // Clears the single-note wash the moment the user activates/focuses a
+    // DIFFERENT note than the one currently washed. Scoped strictly to
+    // 'select' mode — tag-mode sessions have no auto-clear-on-note-click
+    // behavior today (TagNavigator's X is the only dismiss) and that stays
+    // untouched.
+    const handleNoteInteract = useCallback((noteId) => {
+        setSession(prev => (prev.mode === 'select' && !prev.matches.includes(noteId) ? EMPTY_SESSION : prev));
+    }, []);
+
     const handleNavNext = useCallback(() => {
         if (session.matches.length === 0) return;
 
@@ -103,16 +126,28 @@ export function useNoteFinder(notes, setActiveNoteId) {
     // coherently from wherever the user jumped to.
     const jumpToMatch = useCallback((index) => {
         if (index < 0 || index >= session.matches.length) return;
+        const noteId = session.matches[index];
 
-        setSession(prev => ({ ...prev, currentIndex: index }));
+        // A search-result click narrows from the live multi-match accent
+        // wash down to a single-note gray wash (requirement: clicking a
+        // specific result replaces the broad "still typing" highlight).
+        // Tag-mode overlay clicks (opened via TagNavigator's expand button)
+        // keep today's behavior — step within the tag session, pill stays up.
+        if (session.mode === 'search') {
+            setSession({ mode: 'select', query: '', matches: [noteId], currentIndex: 0 });
+        } else {
+            setSession(prev => ({ ...prev, currentIndex: index }));
+        }
         setIsOverlayOpen(false);
-        scrollToNote(session.matches[index]);
+        scrollToNote(noteId);
     }, [session, scrollToNote]);
 
     return {
         session,
         handleTagClick,
         handleSearchQuery,
+        handleSelectNote,
+        handleNoteInteract,
         handleNavNext,
         handleNavPrev,
         handleNavClose,

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export function useMobileNav(notes, setActiveNoteId, handleTagClick) {
+export function useMobileNav(notes, handleTagClick, handleSelectNote) {
     const [mobileDrawer, setMobileDrawer] = useState({
         isOpen: false,
         type: null // 'date' | 'tags'
@@ -30,13 +30,9 @@ export function useMobileNav(notes, setActiveNoteId, handleTagClick) {
                 d.getDate() === date.getDate();
         });
 
-        if (target) {
-            const el = document.getElementById(target.id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            setActiveNoteId(target.id);
-        }
+        if (target) handleSelectNote(target.id);
         closeMobileDrawer();
-    }, [notes, setActiveNoteId, closeMobileDrawer]);
+    }, [notes, handleSelectNote, closeMobileDrawer]);
 
     const handleMobileTagSelect = useCallback((tag) => {
         handleTagClick(tag);

@@ -84,6 +84,8 @@ const NoteApp = ({ user }) => {
     session,
     handleTagClick,
     handleSearchQuery,
+    handleSelectNote,
+    handleNoteInteract,
     handleNavNext,
     handleNavPrev,
     handleNavClose,
@@ -107,6 +109,7 @@ const NoteApp = ({ user }) => {
       if (exactTag) return getTagMeta(exactTag).wash;
       if (trimmed.length >= 2) return 'bg-accent/15 dark:bg-accent/25';
     }
+    if (session.mode === 'select') return 'bg-foreground/5 dark:bg-foreground/10';
     return '';
   }, [session.mode, session.query]);
 
@@ -134,7 +137,7 @@ const NoteApp = ({ user }) => {
     closeMobileDrawer,
     handleMobileDateSelect,
     handleMobileTagSelect
-  } = useMobileNav(notes, setActiveNoteId, handleTagClick);
+  } = useMobileNav(notes, handleTagClick, handleSelectNote);
 
   // Initialize active note to the last one (newest) on load
   useEffect(() => {
@@ -269,6 +272,7 @@ const NoteApp = ({ user }) => {
           activeNoteId={activeNoteId}
           tags={allTags}
           onTagClick={handleTagClick}
+          onSelectNote={handleSelectNote}
         />
 
         <TagsRail
@@ -295,6 +299,7 @@ const NoteApp = ({ user }) => {
           activeMatchIds={activeMatchIds}
           matchWashClass={matchWashClass}
           isTagNavActive={session.mode === 'tag'}
+          onNoteInteract={handleNoteInteract}
         />
 
         <TagNavigator
