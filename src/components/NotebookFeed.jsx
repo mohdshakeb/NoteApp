@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { cn } from '../lib/utils';
 import { JumpToLatestPill } from './JumpToLatestPill';
 import { StaticNotePreview } from './StaticNotePreview';
 import { NoteActionsRow } from './NoteActionsRow';
 import { NoteActionsSheet } from './NoteActionsSheet';
+import { DaveIllustration } from './DaveIllustration';
 import { useLongPress } from '../hooks/useLongPress';
 import {
     AlertDialog,
@@ -20,8 +21,81 @@ import {
 // Lazy load the editor to reduce initial bundle size to improve performance
 const TiptapEditor = dynamic(() => import('./TiptapEditor').then(mod => mod.TiptapEditor), {
     ssr: false,
-    loading: () => <div className="h-24 w-full animate-pulse bg-muted/20 rounded-lg" />
+    // h-14 (56px) matches a real blank editor's rendered height (~55px) —
+    // h-24 previously left a ~41px gap that snapped shut the instant the
+    // chunk resolved, shifting the feed's scrollHeight mid-glide (see the
+    // scroll glide's comment below).
+    loading: () => <div className="h-14 w-full animate-pulse bg-muted/20 rounded-lg" />
 });
+
+// Initial-load scroll glide (Planning/CONTEXT.md, 2026-08-22) — a fixed
+// distance/duration, never proportional to note count, mirroring the Android
+// app's glideToTarget/SCROLL_GLIDE_DISTANCE pattern for the same problem.
+const INITIAL_SCROLL_GLIDE_DISTANCE_PX = 240;
+const INITIAL_SCROLL_GLIDE_DURATION_MS = 450;
+
+// Small hand-rolled cubic-bezier evaluator — mirrors globals.css's
+// --ease-out (cubic-bezier(0.23, 1, 0.32, 1)) so the JS-driven scroll glide
+// below uses the same curve as every other animated element in the app.
+// Duplicated here (not read from the CSS custom property) because there's no
+// browser API that exposes a WAAPI/CSS easing curve's eased output as a
+// queryable number — this binary search is the standard way to hand-roll a
+// bezier-eased value in JS. Keep in sync with globals.css if --ease-out
+// ever changes.
+const EASE_OUT_BEZIER = [0.23, 1, 0.32, 1];
+function makeCubicBezierEase([x1, y1, x2, y2]) {
+    const bezierPoint = (t, a, b) => 3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t ** 2 * b + t ** 3;
+    return (targetX) => {
+        let lo = 0, hi = 1, t = targetX;
+        for (let i = 0; i < 20; i++) {
+            const x = bezierPoint(t, x1, x2);
+            if (Math.abs(x - targetX) < 1e-4) break;
+            if (x < targetX) lo = t; else hi = t;
+            t = (lo + hi) / 2;
+        }
+        return bezierPoint(t, y1, y2);
+    };
+}
+const easeOutProgress = makeCubicBezierEase(EASE_OUT_BEZIER);
+
+// Permanent leading item above the oldest note (Planning/CONTEXT.md, 2026-08-22)
+// — illustration plus a fixed four-line tagline, ported from the Android app's
+// NoteFeedHeader. Sits inside the same `flex flex-col gap-12` list as the notes
+// below so it shares their inter-item rhythm, and needs no separate horizontal
+// padding — it inherits the feed container's own inset. Unlike Android, this
+// doesn't fade on scroll: that fade exists there to smooth keyboard-avoidance
+// auto-scrolls, which web's feed doesn't do (see Planning/CONTEXT.md).
+const TAGLINE_LINES = ["HALF SENTENCE", "INCOMPLETE THOUGHT", "A THING TO NOT FORGET", "AN IDEA"];
+
+// Stagger gaps in ms (emil-design-eng: 30-80ms between items). Illustration
+// leads at 0, each line follows 40ms after the previous, the perpetual
+// blank note picks up 60ms after the last line starts — enough to read as
+// "following the cascade" rather than overlapping it.
+const STAGGER_GAP_MS = 40;
+const NOTE_STAGGER_DELAY_MS = STAGGER_GAP_MS * TAGLINE_LINES.length + 60;
+
+// animateIn only ever arrives `true` on this element's actual first paint
+// (see NotebookFeed's `playEmptyEntrance` — FeedHeader isn't rendered at
+// all until that's decided), so @starting-style below fires as real
+// insertion, not a class toggled onto an already-mounted node.
+const FeedHeader = ({ animateIn }) => (
+    <div className="flex flex-col">
+        <DaveIllustration
+            className={cn("w-40 sm:w-52 h-auto", animateIn && "feed-stagger-item")}
+        />
+        <p className="mt-4 text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
+            {TAGLINE_LINES.map((line, i) => (
+                <span
+                    key={line}
+                    className={cn("block", animateIn && "feed-stagger-item")}
+                    style={animateIn ? { transitionDelay: `${(i + 1) * STAGGER_GAP_MS}ms` } : undefined}
+                >
+                    {line}
+                </span>
+            ))}
+        </p>
+    </div>
+);
 
 export const NotebookFeed = ({
     notes,
@@ -73,6 +147,20 @@ export const NotebookFeed = ({
     useEffect(() => {
         sortedNotes.forEach(n => seenNoteIdsRef.current.add(n.id));
     }, [sortedNotes]);
+
+    // True-empty-state entrance gate: locks in, the first time real data is
+    // present (notes starts as [] while useNotes' IndexedDB fetch is still
+    // in flight — checking sortedNotes.length === 1 on THAT transient render
+    // would misfire for every user), whether this session's genuine first
+    // load was the true empty state (just the perpetual blank note). Once
+    // decided it never flips back, but that's harmless: FeedHeader and the
+    // blank note are never unmounted, so the @starting-style entrance below
+    // only ever fires once, at their real first insertion.
+    const emptyEntranceRef = useRef(undefined);
+    if (emptyEntranceRef.current === undefined && sortedNotes.length >= 1) {
+        emptyEntranceRef.current = sortedNotes.length === 1;
+    }
+    const playEmptyEntrance = emptyEntranceRef.current === true;
 
     // Copy / delete actions — desktop hover row (NoteActionsRow) and mobile
     // long-press sheet (NoteActionsSheet) both funnel through these.
@@ -207,20 +295,77 @@ export const NotebookFeed = ({
         return () => observer.disconnect();
     }, [notes, onFocusBox, sortedNotes]);
 
-    // Initial Scroll to Bottom (Newest Note)
+    // Initial-load scroll to the blank note, as a short visible glide (not a
+    // proportional-to-length one) — see the constants/easing helper above.
+    // useLayoutEffect (not useEffect) is required, not just tidier: it runs
+    // before the browser paints, so the glide below is the first thing the
+    // user sees at that position rather than a flash of the fully-scrolled
+    // state followed by a jump back.
     const hasInitialScrolled = useRef(false);
-    useEffect(() => {
-        if (!hasInitialScrolled.current && sortedNotes.length > 0) {
-            // Find the last entry block
-            const blocks = document.querySelectorAll('.entry-block');
-            const lastBlock = blocks[blocks.length - 1];
+    useLayoutEffect(() => {
+        // length > 1, not > 0: with only the perpetual blank note present
+        // (the true empty state), there's nothing above the fold to reveal —
+        // scrolling there would imply hidden content that doesn't exist.
+        if (hasInitialScrolled.current || sortedNotes.length <= 1) return;
+        const container = feedRef.current;
+        if (!container) return;
 
-            if (lastBlock) {
-                // 'start' aligns with scroll-margin-top (25vh) -> Perfect Position
-                lastBlock.scrollIntoView({ block: 'start' });
-                hasInitialScrolled.current = true;
+        const blocks = container.querySelectorAll('.entry-block');
+        const lastBlock = blocks[blocks.length - 1];
+        if (!lastBlock) return;
+        hasInitialScrolled.current = true;
+
+        // Land at the exact final position first (instant) — this correctly
+        // honors .entry-block's scroll-margin-top: 25vh via the browser's
+        // own scrollIntoView handling, instead of re-deriving that offset by
+        // hand. An explicit `behavior` here overrides the container's own
+        // `scroll-smooth` (scroll-behavior: smooth) class, which would
+        // otherwise animate the FULL distance from wherever scrollTop
+        // started — unbounded for a notebook with hundreds of notes.
+        lastBlock.scrollIntoView({ behavior: 'instant', block: 'start' });
+        const finalTop = container.scrollTop;
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        // Back off a small FIXED distance (never past the top) and animate
+        // only that short return, so the visible glide never scales with
+        // note count.
+        const backOff = Math.min(INITIAL_SCROLL_GLIDE_DISTANCE_PX, finalTop);
+        if (backOff <= 0) return;
+        const startTop = finalTop - backOff;
+
+        // The container's `scroll-smooth` class (scroll-behavior: smooth)
+        // doesn't only affect scrollTo()/scrollIntoView() — Chromium applies
+        // it to plain `scrollTop =` assignments too, unless `behavior` is
+        // explicitly overridden. Left alone, the back-off jump below and
+        // every rAF tick's scrollTop write each get intercepted into their
+        // own competing native smooth-scroll, retargeting on top of each
+        // other every ~16ms — that's what caused the visible stutter
+        // (confirmed with a scrollTop trace: identical JS produced chaotic
+        // direction-reversals without this line, a clean monotonic glide
+        // with it). Restored once the glide finishes so `scroll-smooth`
+        // still governs the deliberate smooth scrolls elsewhere in this
+        // file (pendingScrollRef, handleJumpToLatest).
+        container.style.scrollBehavior = 'auto';
+        container.scrollTop = startTop;
+
+        let rafId;
+        const startTime = performance.now();
+        const tick = (now) => {
+            const progress = Math.min((now - startTime) / INITIAL_SCROLL_GLIDE_DURATION_MS, 1);
+            container.scrollTop = startTop + backOff * easeOutProgress(progress);
+            if (progress < 1) {
+                rafId = requestAnimationFrame(tick);
+            } else {
+                container.style.scrollBehavior = '';
             }
-        }
+        };
+        rafId = requestAnimationFrame(tick);
+
+        return () => {
+            if (rafId) cancelAnimationFrame(rafId);
+            container.style.scrollBehavior = '';
+        };
     }, [sortedNotes]);
 
     // Tracks whether the trailing spacer (right after the newest note) is in
@@ -304,9 +449,19 @@ export const NotebookFeed = ({
 
     return (
         <div className="flex-1 h-full overflow-y-auto bg-background scroll-smooth" ref={feedRef}>
-            {/* Adjusted padding: px-4 for mobile, sm:px-8 for tablet/desktop */}
+            {/* Adjusted padding: px-4 for mobile, sm:px-8 for tablet/desktop.
+                pt-[15vh] only in the true empty state (FeedHeader + the sole
+                blank note, nothing else below) — pulls that whole stack up
+                as a unit, since padding-top isn't per-item, so the gap
+                between FeedHeader and the note is untouched. Every other
+                state keeps pt-[25vh], which populated feeds and the
+                date/tag-click scroll landing (`.entry-block`'s
+                scroll-margin-top: 25vh) both depend on. */}
             <div
-                className="min-h-full w-full max-w-4xl mx-auto px-8 pt-[25vh] pb-12 sm:px-8 sm:pl-32 sm:pr-32 flex flex-col cursor-text"
+                className={cn(
+                    "min-h-full w-full max-w-4xl mx-auto px-8 pb-12 sm:px-8 sm:pl-32 sm:pr-32 flex flex-col cursor-text",
+                    sortedNotes.length === 1 ? "pt-[15vh]" : "pt-[25vh]"
+                )}
                 onClick={(e) => {
                     // Only trigger if clicking the container itself (gutters), not children
                     if (e.target === e.currentTarget) {
@@ -315,19 +470,30 @@ export const NotebookFeed = ({
                 }}
             >
                 <div className="flex flex-col gap-12">
+                    {/* Held back until real data has loaded (not the
+                        transient notes=[] pre-fetch render) — @starting-style
+                        only fires at true DOM insertion, so FeedHeader can't
+                        exist yet on a render where we don't know `animateIn`. */}
+                    {sortedNotes.length >= 1 && <FeedHeader animateIn={playEmptyEntrance} />}
                     {displayNotes.map((note) => {
                         const isLast = sortedNotes.length > 0 && note.id === sortedNotes[sortedNotes.length - 1].id;
                         const isDeleting = deletingNote?.id === note.id;
                         const isLive = !isDeleting && (isLast || note.id === editingNoteId);
+                        // The sole note in a genuine empty state: follows the
+                        // FeedHeader cascade in on the same stagger clock,
+                        // rather than seenNoteIdsRef's usual "already on
+                        // screen, don't animate" treatment.
+                        const isEmptyStateNote = playEmptyEntrance && isLast && sortedNotes.length === 1;
                         return (
                             <div
                                 key={note.id}
                                 id={note.id}
                                 className={cn(
-                                    "entry-block -mx-6 px-6 rounded-xl",
-                                    !seenNoteIdsRef.current.has(note.id) && "note-enter",
+                                    "entry-block -mx-6 px-6 rounded-md",
+                                    (!seenNoteIdsRef.current.has(note.id) || isEmptyStateNote) && "note-enter",
                                     activeMatchIds?.has(note.id) && matchWashClass
                                 )}
+                                style={isEmptyStateNote ? { transitionDelay: `${NOTE_STAGGER_DELAY_MS}ms` } : undefined}
                                 data-note-id={note.id}
                                 data-state={isDeleting ? 'closed' : undefined}
                                 onTransitionEnd={isDeleting ? (e) => handleDeleteExitEnd(note.id, e) : undefined}
@@ -380,6 +546,7 @@ export const NotebookFeed = ({
                                         // Disable auto-focus on mobile to keep Nav Pill visible
                                         autoFocus={note.isNew && (typeof window !== 'undefined' ? window.innerWidth >= 640 : true)}
                                         isLast={isLast}
+                                        isOnlyNote={sortedNotes.length === 1}
                                         initialSelectionOffset={
                                             pendingActivationRef.current?.noteId === note.id
                                                 ? pendingActivationRef.current.offset

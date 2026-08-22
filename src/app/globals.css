@@ -32,7 +32,14 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
-    --radius: 0rem;
+
+    /* Real radius scale — `--radius: 0rem` (the old single value here) was a
+       confirmed-accidental CSS calc() clamp artifact, not a design choice
+       (see .interface-design/system.md "Shape"). Matches the sibling Android
+       app's Shape.kt tiers exactly: 8/12/16px for small/medium/large. */
+    --radius-sm: 0.5rem;  /* 8px — inputs, chips, small buttons */
+    --radius-md: 0.75rem; /* 12px — cards, note action sheets, dialogs */
+    --radius-lg: 1rem;    /* 16px — bottom sheets (top corners), larger panels */
 
     /* Animation tokens — single source of truth for motion across the app */
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -42,6 +49,15 @@
     --duration-fast: 150ms;
     --duration-base: 200ms;
     --duration-drawer: 300ms;
+
+    /* Feed header illustration (DaveIllustration.jsx) — three fills ported
+       directly from references/dave.svg / dave_dark.svg, not derived from the
+       --background/--foreground/--secondary tokens above: the dark variant is
+       a hand-recolored asset (mirroring the Android app's ic_dave_dark.xml),
+       not a mechanical inversion, so it needs its own dedicated tokens. */
+    --illustration-line: #18181B;
+    --illustration-fill: #F4F4F5;
+    --illustration-highlight: #FAFAFA;
   }
 }
 
@@ -66,6 +82,16 @@
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 240 4.9% 83.9%;
+
+  /* references/dave_dark.svg's hand-recolored fills — see :root's comment.
+     Verified per-path against dave.svg/dave_dark.svg (all 46 paths, not just
+     the 3 unique colors): light's outline (#18181B) becomes near-white here,
+     and light's highlight (#FAFAFA) becomes near-black — a true inversion of
+     those two roles, not a same-role recolor. Mixing that up once already
+     (2026-08-22) produced a dark illustration with inverted contrast. */
+  --illustration-line: #FAFAFA;
+  --illustration-fill: #27272A;
+  --illustration-highlight: #09090B;
 }
 
 /* Hide scrollbar */
@@ -181,6 +207,26 @@
    at the DOM node's first insertion, so this never re-triggers on later
    re-renders and never needs cleanup. */
 .entry-block.note-enter {
+  @starting-style {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Empty-state entrance cascade (NotebookFeed.jsx's `playEmptyEntrance`) —
+   the illustration and each tagline line each get this class, with a
+   per-element `transitionDelay` set inline (staggered 40ms apart, emil-
+   design-eng's 30-80ms guidance), so they read as one cascading sequence
+   rather than a single block fading in. The perpetual blank note picks up
+   the same clock via .note-enter's @starting-style + its own inline delay.
+   FeedHeader itself is only ever rendered once `playEmptyEntrance` is
+   decided (see NotebookFeed.jsx), so this class is present at the DOM
+   node's true first insertion — required for @starting-style to fire at
+   all; toggling the class onto an already-mounted node would not. */
+.feed-stagger-item {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out);
   @starting-style {
     opacity: 0;
     transform: translateY(8px);
@@ -308,8 +354,20 @@
   .anim-panel-top[data-state],
   .anim-reveal[data-state],
   .entry-block,
+  .feed-stagger-item,
   .icon-pop > svg {
     transition-duration: var(--duration-fast) !important;
+  }
+
+  /* Stagger is a timing embellishment, not essential motion — collapse it
+     so the whole empty-state cascade (FeedHeader's per-line delays, the
+     blank note's inline delay) settles together instead of visibly
+     lagging. `!important` is required here specifically because these
+     delays are inline styles (React `style={{transitionDelay}}`), which
+     normally beat stylesheet rules on specificity alone. */
+  .feed-stagger-item,
+  .entry-block.note-enter {
+    transition-delay: 0ms !important;
   }
 
   .animate-in,
@@ -340,7 +398,8 @@
     transition: opacity var(--duration-fast) ease !important;
   }
 
-  .entry-block.note-enter {
+  .entry-block.note-enter,
+  .feed-stagger-item {
     @starting-style { transform: none !important; }
   }
 

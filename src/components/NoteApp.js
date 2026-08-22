@@ -264,7 +264,7 @@ const NoteApp = ({ user }) => {
           />
         ) : (
           <LoginDropdown>
-            <Button className="rounded-full shadow-lg">
+            <Button className="rounded-md shadow-lg">
               Login
             </Button>
           </LoginDropdown>

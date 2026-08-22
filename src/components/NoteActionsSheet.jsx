@@ -57,7 +57,7 @@ export function NoteActionsSheet({ isOpen, note, onClose, onCopy, onRequestDelet
             <div
                 data-state={state}
                 onTransitionEnd={handleSheetTransitionEnd}
-                className="anim-sheet absolute bottom-0 left-0 right-0 bg-background border-t rounded-t-3xl shadow-2xl flex flex-col pb-[env(safe-area-inset-bottom)]"
+                className="anim-sheet absolute bottom-0 left-0 right-0 bg-background border-t rounded-t-lg shadow-2xl flex flex-col pb-[env(safe-area-inset-bottom)]"
             >
                 <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-muted" />
 

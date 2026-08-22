@@ -42,7 +42,12 @@ docs:
 shadcn/ui Zinc neutrals (`globals.css` `:root`/`.dark` HSL custom properties) — deliberately
 near-monochrome so the 8-color tag palette (`src/lib/colors.js`) is the only source of color in the
 app. Color always means "this is a tag," never decoration. Same palette Android ported (verified
-exact), same rule: don't add a second accent color.
+exact), same rule: don't add a second accent color. One exception, added 2026-08-22:
+`--illustration-line/fill/highlight` (`globals.css`) for `DaveIllustration.jsx` — three more neutral
+tones (zinc-900/100/50 in light, zinc-950/800/50 in dark), not derived from
+`--foreground`/`--background`/`--secondary` because the dark variant is a hand-recolored asset rather
+than a mechanical inversion of those tokens. Still monochrome, still not a second accent — just can't
+be expressed as aliases of the existing semantic tokens.
 
 ## Depth
 
@@ -70,9 +75,13 @@ a lighter dark surface that doesn't exist in web's source.
 
 ## Typography
 
-Poppins (`next/font/google`, weights 400/500/600/700 — `src/app/layout.js`), applied via `font-sans`
-everywhere; `font-mono` no longer appears anywhere in `src/`. Real scale in actual use (verified via
-grep, 2026-08-21 — only roles with real call sites are listed, nothing speculative):
+Poppins (`next/font/google`, weights 400/500/600 — `src/app/layout.js`), applied via `font-sans`
+everywhere; `font-mono` no longer appears anywhere in `src/`. Weight set trimmed to exactly what's
+used (verified via grep, 2026-08-22) — 700/Bold is *not* bundled here even though Android's `Type.kt`
+reserves it "for any future call site"; that's a real, deliberate difference in shipped weights
+between the two apps, not an oversight. Add 700 if a web component ever actually needs it. Real scale
+in actual use (verified via grep, 2026-08-21 — only roles with real call sites are listed, nothing
+speculative):
 
 - `text-xs` (12px) — meta/counter text: result counts, date labels, tag-navigator's "i / N".
 - `text-sm` (14px) — the base UI/chrome size, and the note body itself (`TiptapEditor`/
@@ -81,21 +90,36 @@ grep, 2026-08-21 — only roles with real call sites are listed, nothing specula
   header). Not used for anything smaller/incidental — don't reach for this role for a dropdown or
   inline header, see Android's `Type.kt` `titleMedium` comment for the same "genuine full sheet
   titles only" boundary it drew for the same role.
+- `text-2xl sm:text-3xl font-semibold` (24px/30px) — added 2026-08-22 for `NotebookFeed.jsx`'s
+  `FeedHeader`, the permanent tagline above the oldest note (ported from Android's `displayMedium`
+  role on the same element). One call site, deliberately: a genuine hero moment, not a reusable
+  heading style — don't reach for this size for section headers or anything else that isn't this
+  specific one-off.
 
-No `text-base`/`text-xl`+ roles exist yet in either app's real usage — don't invent them speculatively
-(same "don't spec what isn't built" principle Android's Shape/Motion sections already state).
+No `text-base`+ role exists yet beyond the two above — don't invent further sizes speculatively (same
+"don't spec what isn't built" principle Android's Shape/Motion sections already state).
 
 ## Shape
 
-`--radius: 0rem` (`globals.css`). Android's system.md independently confirmed this was accidental (a
-`calc()` clamp artifact, not a decision) and deliberately did not port it, building a real 8/12/16dp
-scale instead. Web has not yet made the same call — `rounded-md`/`rounded-lg`/`rounded-sm` utilities
-(`--radius`-driven) currently render as flat/sharp everywhere they're used, while `rounded-full`
-(pills, unaffected by the variable) and the handful of hardcoded `rounded-xl`/`rounded-2xl`/
-`rounded-t-3xl` usages (entry rows, the search panel, bottom sheets — not wired to `--radius` at all)
-render their real curvature. This is a live, undecided divergence, not resolved by this pass — flag
-before touching radius broadly; it's a visual-identity call of similar weight to the typography one
-above, not a mechanical fix.
+Resolved 2026-08-22 — web now has a real, non-zero scale, matching Android's tiers exactly:
+`--radius-sm: 0.5rem` (8px — inputs, chips, small buttons), `--radius-md: 0.75rem` (12px — cards,
+note action sheets, dialogs), `--radius-lg: 1rem` (16px — bottom sheets' top corners, larger panels)
+in `globals.css`, wired into `tailwind.config.js`'s `borderRadius.sm/md/lg`. No sharp/flat corners
+anywhere on web now — the old single `--radius: 0rem` (a confirmed-accidental `calc()` clamp
+artifact) is gone, along with the hardcoded `rounded-xl`/`rounded-2xl`/`rounded-t-3xl` utilities that
+used to bypass it (`NotebookFeed`'s entry rows, the search panel, all three bottom sheets) — those now
+read off the real `rounded-md`/`rounded-lg` tiers per the tier guide above, so their curvature
+actually means something instead of being an arbitrary Tailwind stock value.
+
+**Pill shape is reserved for full-round elements, never text-label buttons.** Circular icon buttons
+(equal width/height — copy/delete/close controls), decorative dots/ticks, and floating chrome shells
+(`JumpToLatestPill`, `TagNavigator`, `MobileNavPill`, `MergeToast`'s outer capsule, tag chips) keep
+`rounded-full` — matches Android's own explicit choice ("full-round elements... still use CircleShape,
+matching web's `rounded-full` usage — that part web already gets right," `Shape.kt`). But a
+text-labeled `<Button>` rendered as an oblong capsule reads as a pill, not a button — those three
+call sites (`MergeToast`'s Merge/Discard, the Login button in `NoteApp.js`) were moved to `rounded-md`.
+The distinguishing test: is it a circle (equal w/h) or container shell, or is it a rectangle-with-text
+stretched into a capsule? Only the latter un-pills.
 
 ## Motion
 

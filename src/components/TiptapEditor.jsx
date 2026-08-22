@@ -10,7 +10,7 @@ import { TagSuggestion } from './extensions/TagSuggestion';
 import Placeholder from '@tiptap/extension-placeholder'; // [NEW]
 import { useEffect, useImperativeHandle, forwardRef, useRef, useState, useMemo } from 'react';
 import { Button } from './ui/button';
-import { NOTE_PLACEHOLDER_TEXT } from '../lib/constants';
+import { NOTE_PLACEHOLDER_TEXT, NOTE_PLACEHOLDER_TEXT_ONLY_NOTE } from '../lib/constants';
 import { contentToDoc, docToText } from '../lib/noteContent';
 import { findLinkMatches } from '../lib/links';
 import { LinkCard } from './LinkCard';
@@ -102,6 +102,7 @@ export const TiptapEditor = forwardRef(({
     onBlur,
     autoFocus = false,
     isLast = false,
+    isOnlyNote = false,
     initialSelectionOffset
 }, ref) => {
     // Use refs to keep handlers fresh without re-initializing editor
@@ -114,6 +115,10 @@ export const TiptapEditor = forwardRef(({
     // TagSuggestion extension's items() closes over this ref, not the prop
     // directly, since extensions are captured once at mount (see useEditor below).
     const getSuggestionsRef = useRef(getSuggestions);
+    // Same reasoning — Placeholder.configure's `placeholder` below is a
+    // function so it can read this live rather than freeze whatever
+    // `isOnlyNote` was at editor-init time.
+    const isOnlyNoteRef = useRef(isOnlyNote);
     // Captured once, not resynced like the handler refs above — this must
     // fire exactly once per mount (click-to-edit activation), not on every render.
     const initialSelectionOffsetRef = useRef(initialSelectionOffset);
@@ -133,7 +138,8 @@ export const TiptapEditor = forwardRef(({
         onFocusRef.current = onFocus;
         onBlurRef.current = onBlur;
         getSuggestionsRef.current = getSuggestions;
-    }, [onSave, onAutoSave, onInput, onFocus, onBlur, getSuggestions]);
+        isOnlyNoteRef.current = isOnlyNote;
+    }, [onSave, onAutoSave, onInput, onFocus, onBlur, getSuggestions, isOnlyNote]);
 
     const editor = useEditor({
         immediatelyRender: false,
@@ -167,7 +173,10 @@ export const TiptapEditor = forwardRef(({
                 getSuggestions: (query) => getSuggestionsRef.current?.(query) ?? [],
             }),
             Placeholder.configure({
-                placeholder: NOTE_PLACEHOLDER_TEXT,
+                // Function, not a fixed string — extensions are captured
+                // once at useEditor init, so this reads isOnlyNoteRef live
+                // instead of freezing whatever it was at mount.
+                placeholder: () => (isOnlyNoteRef.current ? NOTE_PLACEHOLDER_TEXT_ONLY_NOTE : NOTE_PLACEHOLDER_TEXT),
                 emptyEditorClass: 'is-editor-empty',
                 emptyNodeClass: 'is-empty',
                 showOnlyCurrent: false,
@@ -241,12 +250,16 @@ export const TiptapEditor = forwardRef(({
         }
     }));
 
-    // Auto-focus logic
+    // Auto-focus logic. scrollIntoView: false for the same reason the
+    // imperative focus() above uses it — ProseMirror's own default
+    // focus-driven scroll otherwise fires a frame later and overrides
+    // NotebookFeed's own initial-load scroll glide (which this note, as the
+    // bootstrap `isNew` note, is a candidate for on first launch).
     useEffect(() => {
         if (autoFocus && editor) {
             // Small delay to ensure editor is ready
             requestAnimationFrame(() => {
-                editor?.commands.focus('end');
+                editor?.commands.focus('end', { scrollIntoView: false });
             });
         }
     }, [autoFocus, editor]);

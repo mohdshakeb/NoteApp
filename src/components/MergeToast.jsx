@@ -29,7 +29,7 @@ export function MergeToast({ isOpen, guestNoteCount, onMerge, onDiscard }) {
                     <Button
                         size="sm"
                         onClick={onMerge}
-                        className="h-7 px-3 text-xs font-semibold rounded-full active:scale-95 transition-transform"
+                        className="h-7 px-3 text-xs font-semibold rounded-md active:scale-95 transition-transform"
                     >
                         Merge
                     </Button>
@@ -37,7 +37,7 @@ export function MergeToast({ isOpen, guestNoteCount, onMerge, onDiscard }) {
                         size="sm"
                         variant="ghost"
                         onClick={onDiscard}
-                        className="h-7 px-3 text-xs text-muted-foreground can-hover:hover:text-destructive can-hover:hover:bg-destructive/10 rounded-full active:scale-95 transition-transform"
+                        className="h-7 px-3 text-xs text-muted-foreground can-hover:hover:text-destructive can-hover:hover:bg-destructive/10 rounded-md active:scale-95 transition-transform"
                     >
                         Discard
                     </Button>
