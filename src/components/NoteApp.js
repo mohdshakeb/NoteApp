@@ -211,47 +211,48 @@ const NoteApp = ({ user }) => {
         onDiscard={handleDiscardGuestData}
       />
 
-      {/* Logo: Top Left - Aligned with Pill (left-4) */}
-      <div className="fixed top-8 left-4 z-50 pointer-events-none select-none bg-background/60 backdrop-blur-md rounded-full px-4 py-2 border border-border/20 support-backdrop-blur:bg-background/60">
-        <img
-          src={logo.src}
-          alt="Notes"
-          className="w-24 h-5 [filter:invert(0)_sepia(0)_saturate(1)_hue-rotate(0deg)_brightness(0.96)] dark:[filter:invert(1)_sepia(0)_saturate(1)_hue-rotate(0deg)_brightness(1)] text-accent-foreground"
-        />
-      </div>
-
-      {/* Top Right Stack: Search / Theme Toggle - aligned with logo - shown on all breakpoints */}
-      <div className="fixed top-8 right-4 sm:right-8 z-50 flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={openSearchOverlay}
-          title="Search (⌘K)"
-          className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-md border border-border/50 can-hover:hover:bg-muted active:scale-95 transition-transform"
-        >
-          <Search className="h-4 w-4" />
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          title={theme === 'light' ? 'Dark mode' : 'Light mode'}
-          className="relative h-10 w-10 rounded-full bg-background/80 backdrop-blur-md border border-border/50 can-hover:hover:bg-muted active:scale-95 transition-transform"
-        >
-          <SunIcon
-            className={cn(
-              "h-4 w-4 absolute transition-[transform,opacity] duration-200 ease-out",
-              theme === 'light' ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"
-            )}
+      {/* Top Bar: Logo (left) + Search / Theme Toggle (right), centered against each other */}
+      <div className="fixed top-8 left-4 right-4 sm:right-8 z-50 flex items-center justify-between pointer-events-none">
+        <div className="select-none bg-background/60 backdrop-blur-md rounded-full px-4 support-backdrop-blur:bg-background/60">
+          <img
+            src={logo.src}
+            alt="Notes"
+            className="h-[72px] w-[76px] [filter:invert(0)_sepia(0)_saturate(1)_hue-rotate(0deg)_brightness(0.96)] dark:[filter:invert(1)_sepia(0)_saturate(1)_hue-rotate(0deg)_brightness(1)] text-accent-foreground"
           />
-          <MoonIcon
-            className={cn(
-              "h-4 w-4 absolute transition-[transform,opacity] duration-200 ease-out",
-              theme === 'dark' ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 rotate-90"
-            )}
-          />
-        </Button>
+        </div>
+
+        <div className="flex items-center gap-3 pointer-events-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openSearchOverlay}
+            title="Search (⌘K)"
+            className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-md border border-border/50 can-hover:hover:bg-muted active:scale-95 transition-transform"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+            className="relative h-10 w-10 rounded-full bg-background/80 backdrop-blur-md border border-border/50 can-hover:hover:bg-muted active:scale-95 transition-transform"
+          >
+            <SunIcon
+              className={cn(
+                "h-4 w-4 absolute transition-[transform,opacity] duration-200 ease-out",
+                theme === 'light' ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"
+              )}
+            />
+            <MoonIcon
+              className={cn(
+                "h-4 w-4 absolute transition-[transform,opacity] duration-200 ease-out",
+                theme === 'dark' ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 rotate-90"
+              )}
+            />
+          </Button>
+        </div>
       </div>
 
       {/* Bottom Left: Login / User Dropdown - HIDDEN ON MOBILE */}
