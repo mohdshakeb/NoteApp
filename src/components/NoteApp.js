@@ -29,7 +29,7 @@ import { supabase } from '../lib/supabase';
 import { getTagMeta } from '../lib/colors';
 import { exactTagFromQuery } from '../lib/tagMatch';
 import { cn } from '../lib/utils';
-import logo from '../assets/logo.svg';
+import { Logo } from './Logo';
 
 const NoteApp = ({ user }) => {
   const { theme, setTheme } = useTheme();
@@ -212,14 +212,8 @@ const NoteApp = ({ user }) => {
       />
 
       {/* Top Bar: Logo (left) + Search / Theme Toggle (right), centered against each other */}
-      <div className="fixed top-8 left-4 right-4 sm:right-8 z-50 flex items-center justify-between pointer-events-none">
-        <div className="select-none bg-background/60 backdrop-blur-md rounded-full px-4 support-backdrop-blur:bg-background/60">
-          <img
-            src={logo.src}
-            alt="Notes"
-            className="h-[72px] w-[76px] [filter:invert(0)_sepia(0)_saturate(1)_hue-rotate(0deg)_brightness(0.96)] dark:[filter:invert(1)_sepia(0)_saturate(1)_hue-rotate(0deg)_brightness(1)] text-accent-foreground"
-          />
-        </div>
+      <header className="fixed top-8 left-8 right-4 sm:right-8 z-50 flex items-center justify-between pointer-events-none">
+        <Logo className="h-14 sm:h-[72px] w-auto shrink-0 select-none" />
 
         <div className="flex items-center gap-3 pointer-events-auto">
           <Button
@@ -253,7 +247,7 @@ const NoteApp = ({ user }) => {
             />
           </Button>
         </div>
-      </div>
+      </header>
 
       {/* Bottom Left: Login / User Dropdown - HIDDEN ON MOBILE */}
       <div className="fixed bottom-8 left-8 z-50 hidden sm:block">
