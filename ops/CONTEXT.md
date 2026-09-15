@@ -3,7 +3,7 @@
 ## Infrastructure
 
 - **Platform:** Vercel (Next.js Node.js runtime — static export is NOT used, so this only works if/when server-side routes are added; currently the app is 100% client components, but the runtime choice keeps that door open)
-- **Backend:** Supabase — Postgres (`notes` table) + Auth (Google OAuth, magic-link email). Row Level Security (RLS) enforced at the database level: users can only access rows where `user_id` matches their own id.
+- **Backend:** Supabase — Postgres (`notes` table) + Auth (Google OAuth, magic-link email). Row Level Security (RLS) enforced at the database level: users can only access rows where `user_id` matches their own id. Versioned policy definitions: `supabase/notes_rls_policies.sql` — the source of truth going forward; diff it against the live Supabase dashboard policies before assuming it's authoritative, and keep it in sync when policies change (it was authored from this doc, not by reading the live database, since no Supabase credentials were available).
 - **Build system:** Next.js built-in build (`next build`), no custom webpack/turbopack config
 - **CI/CD:** None configured currently — deploys are presumably manual via Vercel's git integration or `vercel` CLI (not verified in-repo; `vercel.json` exists but contains no CI pipeline definition)
 - **Signing:** N/A (web app, not native)

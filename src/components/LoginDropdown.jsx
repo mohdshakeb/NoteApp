@@ -130,7 +130,7 @@ export function LoginDropdown({ children }) {
                     </form>
 
                     <div className="text-[10px] text-center text-muted-foreground leading-tight">
-                        By continuing you agree to Terms & Privacy.
+                        By continuing you agree to Terms &amp; <a href="/privacy" className="underline">Privacy</a>.
                     </div>
                 </div>
             </DropdownMenuContent>
