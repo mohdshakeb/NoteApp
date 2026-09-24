@@ -5,14 +5,16 @@ export const metadata = {
 
 export default function PrivacyPolicy() {
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16 text-foreground">
+    <main className="h-dvh overflow-y-auto">
+      <div className="max-w-2xl mx-auto px-6 py-16 text-foreground">
       <h1 className="text-2xl font-semibold mb-1">Privacy Policy for Bits & Bobs</h1>
-      <p className="text-sm text-muted-foreground mb-10">Last updated: September 14, 2026</p>
+      <p className="text-sm text-muted-foreground mb-10">Last updated: September 15, 2026</p>
 
       <p className="mb-8">
-        Bits &amp; Bobs (&quot;the app&quot;, &quot;we&quot;, &quot;our&quot;) is a note-taking app.
-        This policy explains what information the app collects, how it&apos;s used, how it&apos;s
-        protected, and how you can control or delete it.
+        Bits &amp; Bobs (&quot;the app&quot;, &quot;we&quot;, &quot;our&quot;) is a note-taking app,
+        available as an Android app and as a companion web app. Both share the same account and
+        data, so this policy covers both. It explains what information is collected, how
+        it&apos;s used, how it&apos;s protected, and how you can control or delete it.
       </p>
 
       <Section title="Information We Collect">
@@ -66,6 +68,11 @@ export default function PrivacyPolicy() {
             controls (Row Level Security) restrict every request to the signed-in user making it,
             so other people using the app or website cannot read or modify your notes.
           </li>
+          <li>
+            <strong>If something goes wrong.</strong> If we become aware of a security incident
+            affecting your data, we will take reasonable steps to address it and notify affected
+            users as required by applicable law.
+          </li>
         </ul>
       </Section>
 
@@ -118,6 +125,7 @@ export default function PrivacyPolicy() {
           <a href="mailto:reachshakeb@gmail.com" className="underline">reachshakeb@gmail.com</a>
         </p>
       </Section>
+      </div>
     </main>
   );
 }
