@@ -100,7 +100,13 @@ export default function PrivacyPolicy() {
           <li><strong>Access and correct your notes.</strong> Your notes are always visible and editable directly in the app.</li>
           <li><strong>Sign out.</strong> You can sign out at any time from within the app.</li>
           <li><strong>Delete individual notes.</strong> Long-press any note to delete it.</li>
-          <li><strong>Delete your account.</strong> You can permanently delete your account and all associated notes from within the app (Account menu → Delete Account). This removes your notes from our servers and cannot be undone.</li>
+          <li>
+            <strong>Delete your account.</strong> You can permanently delete your account and all
+            associated notes from within the Android app or the web app at{' '}
+            <a href="https://bnb.mostlyuseful.in" className="underline">bnb.mostlyuseful.in</a>{' '}
+            (Account menu → Delete Account) — no reinstall required. This removes your notes from
+            our servers and cannot be undone.
+          </li>
           <li><strong>Request a copy of your data.</strong> The app doesn&apos;t currently have a self-serve export/download button. If you&apos;d like a copy of your account data, email us at the address below and we&apos;ll provide it.</li>
         </ul>
       </Section>
