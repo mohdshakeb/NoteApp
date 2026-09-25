@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
     <main className="h-dvh overflow-y-auto">
       <div className="max-w-2xl mx-auto px-6 py-16 text-foreground">
       <h1 className="text-2xl font-semibold mb-1">Privacy Policy for Bits & Bobs</h1>
-      <p className="text-sm text-muted-foreground mb-10">Last updated: September 15, 2026</p>
+      <p className="text-sm text-muted-foreground mb-10">Last updated: September 24, 2026</p>
 
       <p className="mb-8">
         Bits &amp; Bobs (&quot;the app&quot;, &quot;we&quot;, &quot;our&quot;) is a note-taking app,
@@ -122,7 +122,7 @@ export default function PrivacyPolicy() {
       <Section title="Contact">
         <p>
           For privacy questions, data requests, or anything else related to this policy:{' '}
-          <a href="mailto:reachshakeb@gmail.com" className="underline">reachshakeb@gmail.com</a>
+          <a href="mailto:support@mostlyuseful.in" className="underline">support@mostlyuseful.in</a>
         </p>
       </Section>
       </div>
