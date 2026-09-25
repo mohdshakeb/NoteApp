@@ -10,7 +10,7 @@ import {
 } from "./dropdown"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./alert-dialog"
 
-export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
+export function UserDropdown({ user, onSignOut, onDeleteAccount, onManageData }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [alertOpen, setAlertOpen] = useState(false)
   const [imageError, setImageError] = useState(false); // [NEW] Track broken images
@@ -74,8 +74,19 @@ export function UserDropdown({ user, onSignOut, onDeleteAccount }) {
           >
             Sign out
           </DropdownMenuItem>
+          <DropdownMenuItem asChild className="text-muted-foreground focus:text-muted-foreground cursor-pointer">
+            <a href="/privacy">Privacy Policy</a>
+          </DropdownMenuItem>
           <DropdownMenuItem
-            className="text-destructive focus:text-destructive cursor-pointer"
+            onClick={() => { setDropdownOpen(false); onManageData?.() }}
+            className="text-muted-foreground focus:text-muted-foreground cursor-pointer"
+          >
+            Manage Data
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            className="mt-1 justify-center bg-destructive/10 py-2 font-medium text-destructive focus:bg-destructive/20 focus:text-destructive cursor-pointer"
             onSelect={(e) => {
               e.preventDefault()
               handleDeleteClick()

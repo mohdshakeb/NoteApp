@@ -10,6 +10,7 @@ import { MobileNavPill } from './MobileNavPill';
 import { MobileDrawers } from './MobileDrawers';
 import { NotebookFeed } from './NotebookFeed';
 import { UserDropdown } from './ui/UserDropdown';
+import { ManageDataDialog } from './ManageDataDialog';
 import { Button } from "./ui/button";
 import { useTheme } from "./ThemeProvider";
 import { LoginDropdown } from './LoginDropdown';
@@ -38,6 +39,9 @@ const NoteApp = ({ user }) => {
   // Merge Dialog State
   const [showMergeDialog, setShowMergeDialog] = useState(false);
   const [guestNoteCount, setGuestNoteCount] = useState(0);
+
+  // Manage Data Dialog State
+  const [manageDataOpen, setManageDataOpen] = useState(false);
 
   // Core Data Hooks
   // We need to trigger a re-fetch after merge, so we might need a manual trigger from useNotes
@@ -211,6 +215,18 @@ const NoteApp = ({ user }) => {
         onDiscard={handleDiscardGuestData}
       />
 
+      {user && (
+        <ManageDataDialog
+          open={manageDataOpen}
+          onOpenChange={setManageDataOpen}
+          notes={notes}
+          db={db}
+          user={user}
+          refreshNotes={refreshNotes}
+          allTags={allTags}
+        />
+      )}
+
       {/* Top Bar: Logo (left) + Search / Theme Toggle (right), centered against each other */}
       <header className="fixed top-8 left-8 right-4 sm:right-8 z-50 flex items-center justify-between pointer-events-none">
         <Logo className="h-14 sm:h-[72px] w-auto shrink-0 select-none" />
@@ -256,6 +272,7 @@ const NoteApp = ({ user }) => {
             user={user}
             onSignOut={handleSignOut}
             onDeleteAccount={handleDeleteAccount}
+            onManageData={() => setManageDataOpen(true)}
           />
         ) : (
           <LoginDropdown>
@@ -328,6 +345,7 @@ const NoteApp = ({ user }) => {
           user={user}
           onSignOut={handleSignOut}
           onDeleteAccount={handleDeleteAccount}
+          onManageData={() => setManageDataOpen(true)}
           isVisible={!isEditorFocused && !mobileDrawer.isOpen && !(session.mode === 'tag' && session.matches.length > 1)}
           onDateClick={handleMobileDateClick}
           onTagsClick={handleMobileTagsClick}

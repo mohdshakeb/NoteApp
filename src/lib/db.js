@@ -611,6 +611,61 @@ async function clearExistingNotes(db, userId) {
     .eq('user_id', userId);
 }
 
+// Bulk delete ALL notes for a user (Manage Data → Delete All), independent of
+// account deletion. Fail-fast: the Supabase call is a single atomic DELETE, so
+// unlike deleteNote()'s pending-delete tombstone (built for routine, always-
+// optimistic single-note edits), there's no partial-success state to queue or
+// retry — if it errors, nothing is touched locally and the caller surfaces
+// the error. Reuses the same IndexedDB cursor-delete shape as deleteAccount
+// below and clearExistingNotes().
+export async function deleteAllNotes(db, userId) {
+  const { error } = await supabase
+    .from('notes')
+    .delete()
+    .eq('user_id', userId);
+
+  if (error) throw error;
+
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  await tx.store.index('userId').openCursor(userId).then(function deleteCursor(cursor) {
+    if (!cursor) return;
+    cursor.delete();
+    return cursor.continue().then(deleteCursor);
+  });
+  await tx.done;
+  return true;
+}
+
+// Bulk delete a tag-scoped subset (Manage Data → Delete by tag). Takes
+// already-filtered note objects rather than a tag string — tag matching is
+// the caller's job via lib/tagMatch.js's noteHasTag, so this stays the single
+// canonical "does note X have tag Y" check (see src/CONTEXT.md: don't add
+// another tag-matching regex). Same fail-fast contract as deleteAllNotes.
+export async function deleteNotesByTag(db, userId, matchingNotes) {
+  if (matchingNotes.length === 0) return true;
+
+  // A temp UUID id means the note was created offline and never synced to
+  // Supabase (same distinction deleteNote() makes above) — nothing remote to
+  // delete for those.
+  const remoteIds = matchingNotes.filter(n => typeof n.id !== 'string').map(n => n.id);
+  const localOnlyIds = matchingNotes.filter(n => typeof n.id === 'string').map(n => n.id);
+
+  if (remoteIds.length > 0) {
+    const { error } = await supabase
+      .from('notes')
+      .delete()
+      .eq('user_id', userId)
+      .in('id', remoteIds);
+
+    if (error) throw error;
+  }
+
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  await Promise.all([...remoteIds, ...localOnlyIds].map(id => tx.store.delete(id)));
+  await tx.done;
+  return true;
+}
+
 export async function deleteAccount(db, userId) {
   // ... (Same as before)
   // Delete all notes from Supabase

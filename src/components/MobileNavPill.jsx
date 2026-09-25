@@ -12,6 +12,7 @@ export const MobileNavPill = ({
     user,
     onSignOut,
     onDeleteAccount,
+    onManageData,
     onDateClick,
     onTagsClick,
     // onLoginClick removed as Dropdown handles it
@@ -76,6 +77,7 @@ export const MobileNavPill = ({
                                 user={user}
                                 onSignOut={onSignOut}
                                 onDeleteAccount={onDeleteAccount}
+                                onManageData={onManageData}
                                 align="end"
                             />
                         ) : (
