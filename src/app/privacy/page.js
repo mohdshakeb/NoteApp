@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
     <main className="h-dvh overflow-y-auto">
       <div className="max-w-2xl mx-auto px-6 py-16 text-foreground">
       <h1 className="text-2xl font-semibold mb-1">Privacy Policy for Bits & Bobs</h1>
-      <p className="text-sm text-muted-foreground mb-10">Last updated: September 24, 2026</p>
+      <p className="text-sm text-muted-foreground mb-10">Last updated: October 16, 2026</p>
 
       <p className="mb-8">
         Bits &amp; Bobs (&quot;the app&quot;, &quot;we&quot;, &quot;our&quot;) is a note-taking app,
@@ -19,10 +19,13 @@ export default function PrivacyPolicy() {
 
       <Section title="Information We Collect">
         <p>
-          <strong>Account information.</strong> If you choose to sign in, we collect the email
-          address associated with your Google account (via Google Sign-In) or the email address
-          you provide directly (via magic-link email sign-in). We use this solely to identify
-          your account and to send you the magic-link sign-in email when you request one.
+          <strong>Account information.</strong> If you choose to sign in, we collect your email
+          address: either the one you enter for magic-link email sign-in, or the one linked to
+          your Google account. If you sign in with Google, Google also shares your name and
+          profile picture with us, and they&apos;re stored with your account. We use your email
+          to identify your account and to send you a magic-link sign-in email when you ask for
+          one. We use your name and profile picture only to show who&apos;s signed in, for
+          example in the account menu.
         </p>
         <p>
           <strong>Your notes.</strong> The content you write in the app. If you use the app
@@ -31,7 +34,8 @@ export default function PrivacyPolicy() {
           can sync across your devices and the Bits &amp; Bobs web app.
         </p>
         <p>
-          <strong>We do not collect:</strong> location data, contacts, photos, device identifiers
+          <strong>We do not collect:</strong> location data, contacts, photos or files from your
+          device, device identifiers
           for advertising, analytics/usage data, or any information beyond what&apos;s described
           above.
         </p>
@@ -40,6 +44,7 @@ export default function PrivacyPolicy() {
       <Section title="How We Use Your Information">
         <ul className="list-disc pl-5 space-y-1.5">
           <li>Your email is used only for authentication and identifying which notes belong to your account.</li>
+          <li>If you sign in with Google, your name and profile picture are used only to show who&apos;s signed in.</li>
           <li>Your notes are stored and synced so you can access them across devices when signed in.</li>
           <li>We do not sell, rent, or share your information with third parties for advertising or marketing purposes.</li>
           <li>We do not use your data to train any AI/ML models.</li>
@@ -82,8 +87,9 @@ export default function PrivacyPolicy() {
           your data with anyone beyond what&apos;s needed for them to provide these services:
         </p>
         <ul className="list-disc pl-5 space-y-1.5">
-          <li><strong>Supabase</strong> — hosts our database and handles authentication. Processes your email address and note content to provide storage, sync, and sign-in.</li>
-          <li><strong>Google</strong> — if you sign in with Google, Google processes that sign-in under its own privacy policy; we only receive your email address from that flow.</li>
+          <li><strong>Supabase</strong> — hosts our database and handles authentication. Processes your account information (your email address, plus your name and profile picture if you sign in with Google) and your note content to provide storage, sync, and sign-in.</li>
+          <li><strong>Google</strong> — if you sign in with Google, Google handles that sign-in under its own privacy policy and shares your email address, name, and profile picture with us. In the web app, your profile picture is loaded from Google&apos;s servers.</li>
+          <li><strong>Link preview icons</strong> — when a note contains a web link, the app shows a small preview with that website&apos;s icon. To get the icon, the Android app asks the linked website directly, and the web app asks Google&apos;s favicon service. The request includes the website&apos;s domain name (for example, example.com) but never your note&apos;s content. Like any web request, it also shows your IP address to that website or to Google.</li>
         </ul>
       </Section>
 
