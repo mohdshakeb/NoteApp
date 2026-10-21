@@ -40,7 +40,7 @@ export const TagSuggestionList = forwardRef(({ items, command }, ref) => {
     if (!items.length) return null;
 
     return (
-        <div className="z-50 min-w-[10rem] max-w-[16rem] origin-top-left overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="z-50 min-w-[10rem] max-w-[16rem] origin-top-left overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-95 duration-150">
             {items.map((tag, index) => {
                 const meta = getTagMeta(tag);
                 const isSelected = index === selectedIndex;

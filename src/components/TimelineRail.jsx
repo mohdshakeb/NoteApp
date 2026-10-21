@@ -11,7 +11,18 @@ const getNoteIdForDate = (notes, year, month, day) => {
     return note ? note.id : null;
 };
 
-export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick, onSelectNote }) => {
+const getNewestNoteId = (notes) => notes.reduce(
+    (newest, n) => (!newest || new Date(n.createdAt) > new Date(newest.createdAt) ? n : newest),
+    null
+)?.id ?? null;
+
+const toDateKey = (d) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+export const TimelineRail = ({ notes, activeNoteId, isAtBottom, tags, onTagClick, onSelectNote }) => {
+    // Recomputed every render (cheap) so the rail rolls over at midnight on
+    // the next re-render instead of staying pinned to the day the memo ran.
+    const todayKey = toDateKey(new Date());
+
     // Group notes by sorted keys to render in order
     // But we don't display the group headers anymore.
     // Flatten dates into a sorted array for the sliding window
@@ -22,9 +33,12 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick, onSelectNo
         const flat = [];
 
         // 1. Extract unique dates
-        notes.forEach(note => {
-            const d = new Date(note.createdAt);
-            const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        // Today is always on the rail, even with no note dated today: the
+        // bottom of the feed is where today's writing happens (the perpetual
+        // blank note keeps whatever day it was created), and the rail pins
+        // there when scrolled to the end — same as Android's NoteFeedScreen.
+        [...notes.map(note => new Date(note.createdAt)), new Date()].forEach(d => {
+            const key = toDateKey(d);
             if (!uniqueDates.has(key)) {
                 uniqueDates.add(key);
                 flat.push({
@@ -42,16 +56,18 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick, onSelectNo
             const dateB = new Date(b.year, b.month, b.day);
             return dateA - dateB;
         });
-    }, [notes]);
+    }, [notes, todayKey]);
 
-    // Added activeDateKey back for window calculation
+    // Scrolled to the end of a chronological feed means "today", regardless of
+    // which note the reading-line observer lands on — a short last note can
+    // never reach that line, which left the rail stuck on an older date.
     const activeDateKey = React.useMemo(() => {
+        if (isAtBottom) return todayKey;
         if (!activeNoteId) return null;
         const note = notes.find(n => n.id === activeNoteId);
         if (!note) return null;
-        const d = new Date(note.createdAt);
-        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    }, [activeNoteId, notes]);
+        return toDateKey(new Date(note.createdAt));
+    }, [isAtBottom, todayKey, activeNoteId, notes]);
 
     // Sliding window (25 items, centered on active date) — shared with TagsRail via lib/slidingWindow.js
     const windowedDates = React.useMemo(() => {
@@ -72,7 +88,9 @@ export const TimelineRail = ({ notes, activeNoteId, tags, onTagClick, onSelectNo
                     {windowedDates.map(({ year, month, day, key }) => {
                         const isSameDate = activeDateKey === key;
                         const handleDateClick = () => {
-                            const noteId = getNoteIdForDate(notes, parseInt(year), parseInt(month), day);
+                            // Today with no note of its own → the newest note, i.e. the bottom of the feed
+                            const noteId = getNoteIdForDate(notes, parseInt(year), parseInt(month), day)
+                                ?? (key === todayKey ? getNewestNoteId(notes) : null);
                             if (noteId) onSelectNote(noteId);
                         };
 

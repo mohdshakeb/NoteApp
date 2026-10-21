@@ -8,6 +8,7 @@ import { LoginDropdown } from './LoginDropdown'; // [NEW]
 export const MobileNavPill = ({
     notes,
     activeNoteId,
+    isAtBottom,
     isVisible = true,
     user,
     onSignOut,
@@ -18,13 +19,15 @@ export const MobileNavPill = ({
     // onLoginClick removed as Dropdown handles it
 }) => {
     // ... (memo hooks same as before) ...
-    // Derive active date from activeNoteId
+    // Derive active date from activeNoteId — or today at the bottom of the
+    // feed, same rule as TimelineRail
     const activeDate = useMemo(() => {
+        if (isAtBottom) return new Date();
         if (!activeNoteId) return null;
         const note = notes.find(n => n.id === activeNoteId);
         if (!note) return null;
         return new Date(note.createdAt);
-    }, [activeNoteId, notes]);
+    }, [isAtBottom, activeNoteId, notes]);
 
     // Format date using shared utility (handles Year logic)
     const dateLabel = useMemo(() => {

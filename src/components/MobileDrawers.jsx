@@ -42,7 +42,7 @@ export const MobileDrawers = ({
             <div
                 data-state={state}
                 onTransitionEnd={handleTransitionEnd}
-                className="anim-sheet absolute bottom-0 left-0 right-0 bg-background border-t rounded-t-lg shadow-2xl max-h-[80vh] flex flex-col"
+                className="anim-sheet absolute bottom-0 left-0 right-0 bg-background border-t rounded-t-lg shadow-lg max-h-[80vh] flex flex-col"
             >
 
                 {/* Header */}

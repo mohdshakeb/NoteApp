@@ -109,7 +109,8 @@ export const NotebookFeed = ({
     activeMatchIds,
     matchWashClass,
     isTagNavActive,
-    onNoteInteract
+    onNoteInteract,
+    onNearBottomChange
 }) => {
     const feedRef = useRef(null);
     const bottomRef = useRef(null);
@@ -385,6 +386,12 @@ export const NotebookFeed = ({
         observer.observe(target);
         return () => observer.disconnect();
     }, []);
+
+    // Also lifted to NoteApp so the date UIs (TimelineRail, MobileNavPill)
+    // can pin to today at the bottom of the feed — see TimelineRail.
+    useEffect(() => {
+        onNearBottomChange?.(isNearBottom);
+    }, [isNearBottom, onNearBottomChange]);
 
     // If focusOrCreateLastNote (below) has to create a brand-new note, the
     // DOM node doesn't exist yet at click time — wait for it to render, then

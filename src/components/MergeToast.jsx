@@ -14,7 +14,7 @@ export function MergeToast({ isOpen, guestNoteCount, onMerge, onDiscard }) {
             onTransitionEnd={handleTransitionEnd}
             className="anim-pill fixed bottom-24 sm:bottom-8 inset-x-0 mx-auto z-[100] w-max max-w-[90vw]"
         >
-            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 h-[54px] bg-background/80 backdrop-blur-md border border-border/50 text-foreground rounded-full shadow-xl">
+            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 h-[54px] bg-background/80 backdrop-blur-md border border-border/50 text-foreground rounded-full shadow-lg">
                 <div className="flex items-center gap-2 pr-2 sm:pr-3 border-r border-border/50 min-w-0">
                     <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0" />
                     <span className="text-sm font-medium truncate min-w-0 sm:hidden">

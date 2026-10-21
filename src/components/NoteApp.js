@@ -31,6 +31,7 @@ import { getTagMeta } from '../lib/colors';
 import { exactTagFromQuery } from '../lib/tagMatch';
 import { cn } from '../lib/utils';
 import { Logo } from './Logo';
+import { GetAppButton } from './GetAppButton';
 
 const NoteApp = ({ user }) => {
   const { theme, setTheme } = useTheme();
@@ -52,6 +53,7 @@ const NoteApp = ({ user }) => {
 
   // Active Note State
   const [activeNoteId, setActiveNoteId] = useState(null);
+  const [isFeedAtBottom, setIsFeedAtBottom] = useState(true);
 
   // Check for guest notes on login
   useEffect(() => {
@@ -227,7 +229,7 @@ const NoteApp = ({ user }) => {
         />
       )}
 
-      {/* Top Bar: Logo (left) + Search / Theme Toggle (right), centered against each other */}
+      {/* Top Bar: Logo (left) + Search / Theme Toggle / Get app (right), centered against each other */}
       <header className="fixed top-8 left-8 right-4 sm:right-8 z-50 flex items-center justify-between pointer-events-none">
         <Logo className="h-14 sm:h-[72px] w-auto shrink-0 select-none" />
 
@@ -262,6 +264,8 @@ const NoteApp = ({ user }) => {
               )}
             />
           </Button>
+
+          <GetAppButton isSignedIn={!!user} />
         </div>
       </header>
 
@@ -288,6 +292,7 @@ const NoteApp = ({ user }) => {
         <TimelineRail
           notes={notes}
           activeNoteId={activeNoteId}
+          isAtBottom={isFeedAtBottom}
           tags={allTags}
           onTagClick={handleTagClick}
           onSelectNote={handleSelectNote}
@@ -318,6 +323,7 @@ const NoteApp = ({ user }) => {
           matchWashClass={matchWashClass}
           isTagNavActive={session.mode === 'tag'}
           onNoteInteract={handleNoteInteract}
+          onNearBottomChange={setIsFeedAtBottom}
         />
 
         <TagNavigator
@@ -342,6 +348,7 @@ const NoteApp = ({ user }) => {
         <MobileNavPill
           notes={notes}
           activeNoteId={activeNoteId}
+          isAtBottom={isFeedAtBottom}
           user={user}
           onSignOut={handleSignOut}
           onDeleteAccount={handleDeleteAccount}

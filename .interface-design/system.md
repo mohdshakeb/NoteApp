@@ -59,8 +59,15 @@ Two distinct treatments, not one uniform strategy:
   "borders-only" framing.
 - **Floating chrome** (anything that sits *above* the content plane — sheets, the search/tag panel,
   pills, dropdowns, dialogs): a consistent four-part recipe — `bg-background/80` (or `/95` for the
-  denser search panel) + `backdrop-blur-md` + `border border-border/50` + a shadow scaled to how
-  "lifted" the element is (`shadow-lg` for pills/panels, `shadow-2xl` for full-height bottom sheets).
+  denser search panel) + `backdrop-blur-md` + `border border-border/50` + `shadow-lg`. **One shadow
+  for all floating panels (2026-10-20)** — it used to be graduated (`shadow-md` dropdowns,
+  `shadow-xl` merge toast, `shadow-2xl` bottom sheets), which read as inconsistent side by side; the
+  user standardized every panel, sheet, dropdown (via the shared `ui/dropdown.jsx`), toast and pill
+  on `shadow-lg`. Don't reintroduce per-element shadow sizes. **Exception — the top-right header
+  buttons (Search/theme/Get app) stay flat, no shadow, by explicit user choice**: they sit at rest in
+  the page frame rather than lifting over content, so don't "fix" them to match the panels. Shadows
+  on controls *inside* a floating surface (`ui/button.jsx` variants, inputs) are not elevation and
+  are out of scope for this rule.
   This is the one deliberate glass-like elevation system in the app — see `TagNavigator.jsx`,
   `JumpToLatestPill.jsx`, `MobileNavPill.jsx`, `MergeToast.jsx`, `NoteResultsOverlay.jsx` for the
   reference implementations. Open item: Android's `FloatingChip.kt` currently ports the border half
@@ -120,6 +127,12 @@ text-labeled `<Button>` rendered as an oblong capsule reads as a pill, not a but
 call sites (`MergeToast`'s Merge/Discard, the Login button in `NoteApp.js`) were moved to `rounded-md`.
 The distinguishing test: is it a circle (equal w/h) or container shell, or is it a rectangle-with-text
 stretched into a capsule? Only the latter un-pills.
+
+**One deliberate exception (2026-10-20):** the header's "Get app" button (`GetAppButton.jsx`) is a
+text-labeled capsule that keeps `rounded-full`, by explicit user choice — it sits in the same
+top-right cluster as the circular Search/theme buttons, and matching their shape keeps the cluster
+reading as one family. This doesn't loosen the rule elsewhere; a text button outside that cluster
+still un-pills.
 
 ## Motion
 
